@@ -1,0 +1,84 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Sheet } from '../../components/Sheet';
+import { FormRow, FormSection } from '../../components/ui';
+import { currencySymbol, householdCurrency } from '../../lib/format';
+import type { ShoppingTrip } from '../../logic/ShoppingTrip';
+import type { Household, TripTotal } from '../../models/entities';
+import { useAccount, useRuntime } from '../../runtime/RuntimeProvider';
+import { useTheme } from '../../theme/theme';
+
+/** What the total sheet needs to know about a trip, whether it's brand new or being edited from Activity. */
+export interface TripTotalTarget {
+  tripKey: string;
+  householdID: string;
+  endedAt: Date;
+  /** Identifies this trip as it stands now: skipping hides the banner until more items are ticked off. */
+  skipKey: string;
+  /** "6 items · Milk, Eggs, Bread and 3 more", when known. */
+  summary: string | null;
+  existing: TripTotal | null;
+}
+
+export const targetForTrip = (trip: ShoppingTrip, skipKey: string): TripTotalTarget => ({
+  tripKey: trip.id, householdID: trip.householdID, endedAt: trip.end, skipKey, summary: trip.body(), existing: null,
+});
+export const targetForTotal = (total: TripTotal): TripTotalTarget => ({
+  tripKey: total.tripKey, householdID: total.householdID, endedAt: total.tripEndedAt, skipKey: total.tripKey, summary: null, existing: total,
+});
+
+/** A slim banner above the add bar, shown once this person's shopping has gone quiet: "Done shopping? Add what it cost." */
+export function TripTotalBanner({ onAdd, onSkip }: { onAdd: () => void; onSkip: () => void }) {
+  const t = useTheme();
+  return (
+    <View style={[s.banner, { backgroundColor: t.isDark ? 'rgba(44,44,46,0.95)' : 'rgba(255,255,255,0.95)' }]}>
+      <Ionicons name="cart-outline" size={20} color={t.accent} />
+      <Text style={{ fontSize: 15, fontWeight: '600', color: t.label, flex: 1 }}>Done shopping?</Text>
+      <Pressable onPress={onAdd} style={[s.add, { backgroundColor: t.accent }]}><Text style={{ fontSize: 15, fontWeight: '600', color: '#fff' }}>Add total</Text></Pressable>
+      <Pressable onPress={onSkip} accessibilityLabel="Skip" hitSlop={8}><Ionicons name="close" size={16} color={t.secondaryLabel} /></Pressable>
+    </View>
+  );
+}
+
+/** "How much was this shop?": the total and, optionally, the store. */
+export function TripTotalSheet({ target, household, onSkip, onClose }: {
+  target: TripTotalTarget; household: Household; onSkip: () => void; onClose: () => void;
+}) {
+  const t = useTheme();
+  const runtime = useRuntime();
+  const account = useAccount();
+  const [amount, setAmount] = useState(target.existing ? String(target.existing.amount) : '');
+  const [store, setStore] = useState(target.existing?.storeName ?? '');
+  const value = Number(amount.replace(',', '.'));
+  // An existing total keeps the currency it was paid in.
+  const currency = target.existing?.currencyCode ?? householdCurrency(household.currencyCode);
+
+  const save = () => {
+    if (!(value > 0)) return;
+    runtime.households.saveTripTotal({
+      tripKey: target.tripKey, householdID: target.householdID, endedAt: target.endedAt, amount: value,
+      currencyCode: currency, storeName: store, by: account.userRecordName,
+    });
+    onClose();
+  };
+
+  return (
+    <Sheet visible title={target.existing ? 'Edit total' : 'Shopping total'} cancelTitle={target.existing ? 'Cancel' : 'Skip'}
+      onCancel={() => { if (!target.existing) onSkip(); onClose(); }} onSave={save} saveDisabled={!(value > 0)}>
+      <FormSection header="How much was this shop?" footer={`${target.summary ? `${target.summary}\n` : ''}Amounts are in ${currency}. Change the currency in Household settings.`}>
+        <FormRow style={{ gap: 8 }}>
+          <Text style={{ fontSize: 22, color: t.secondaryLabel }}>{currencySymbol(currency)}</Text>
+          <TextInput autoFocus value={amount} onChangeText={setAmount} keyboardType="decimal-pad" placeholder="0.00" placeholderTextColor={t.tertiaryLabel}
+            style={{ flex: 1, fontSize: 22, fontWeight: '600', color: t.label }} />
+        </FormRow>
+        <FormRow last><TextInput value={store} onChangeText={setStore} placeholder="Store (optional)" placeholderTextColor={t.tertiaryLabel} style={{ flex: 1, fontSize: 17, color: t.label }} /></FormRow>
+      </FormSection>
+    </Sheet>
+  );
+}
+
+const s = StyleSheet.create({
+  banner: { flexDirection: 'row', alignItems: 'center', gap: 10, marginHorizontal: 16, marginBottom: 8, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999 },
+  add: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 },
+});

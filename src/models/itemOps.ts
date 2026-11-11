@@ -1,4 +1,4 @@
-import { describeQuantity, isHouseRoom, isItemCategory, isMeasurementUnit, type MeasurementUnit } from './enums';
+import { describeQuantity, plainQuantity, isHouseRoom, isItemCategory, isMeasurementUnit, type MeasurementUnit } from './enums';
 import { builtIn, custom, type CategoryChoice, type RoomChoice } from './choices';
 import type { AutocompleteCandidate } from '../logic/AutocompleteRanker';
 import type { PurchaseHistory } from '../logic/SuggestionEngine';
@@ -102,3 +102,6 @@ export const purchaseUnit = (p: PurchaseRecord): MeasurementUnit | null => (isMe
 export const purchaseQuantityText = (p: PurchaseRecord) => describeQuantity(p.quantity, purchaseUnit(p));
 export const purchaseItemName = (p: PurchaseRecord) => p.item?.name ?? 'an item';
 export const purchaseMemberName = (p: PurchaseRecord) => p.member?.name ?? 'Someone';
+
+/** Quantity as plain text for editing ("1.5", "2"). */
+export const plainQty = (q: number): string => plainQuantity(q);
