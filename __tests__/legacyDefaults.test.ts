@@ -1,4 +1,4 @@
-import { LEGACY_APPLIED_KEY, applyLegacyDefaults, type PrefsWriter } from '../src/migration/legacyDefaults';
+import { HAD_LEGACY_APP_KEY, LEGACY_APPLIED_KEY, applyLegacyDefaults, type PrefsWriter } from '../src/migration/legacyDefaults';
 import { StorageKeys } from '../src/services/storageKeys';
 
 function prefs() {
@@ -19,9 +19,10 @@ describe('applyLegacyDefaults', () => {
     profile: '{"name":"Ada","emoji":"👩🏾","colorHex":"#0A84FF"}', notifyPurchases: false, announcedTrips: { 't': 3 },
   };
 
-  test('carries identity, profile and settings over once', () => {
+  test('carries identity, profile and settings over once, and remembers this phone had the old app', () => {
     const p = prefs();
     expect(applyLegacyDefaults(p, old)).toBe(true);
+    expect(p.m.get(HAD_LEGACY_APP_KEY)).toBe('1');
     expect(p.m.get(StorageKeys.userRecordName)).toBe('_owner123');
     expect(p.m.get(StorageKeys.hasSeenWelcome)).toBe(true);
     expect(p.m.get(StorageKeys.profile)).toEqual({ name: 'Ada', emoji: '👩🏾', colorHex: '#0A84FF' });
@@ -44,6 +45,7 @@ describe('applyLegacyDefaults', () => {
     expect(applyLegacyDefaults(p, {})).toBe(false);
     expect(p.m.get(LEGACY_APPLIED_KEY)).toBe('1');
     expect(p.m.has(StorageKeys.userRecordName)).toBe(false);
+    expect(p.m.has(HAD_LEGACY_APP_KEY)).toBe(false); // nobody who never had the old app sees the import option
   });
 
   test('a corrupt profile is ignored rather than crashing', () => {

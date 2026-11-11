@@ -11,6 +11,8 @@ export interface PrefsWriter {
 }
 
 export const LEGACY_APPLIED_KEY = 'shopzy.legacyDefaultsApplied';
+/** Set (and kept) on phones that had the original Swift app, so only they are offered "Import from the old Shopzy app". */
+export const HAD_LEGACY_APP_KEY = 'shopzy.hadLegacyApp';
 
 /**
  * Carries the old app's settings into the new app's preferences, exactly once (the first launch
@@ -23,6 +25,7 @@ export function applyLegacyDefaults(prefs: PrefsWriter, d: LegacyDefaults): bool
   prefs.setString(LEGACY_APPLIED_KEY, '1');
   if (!d.userRecordName) return false; // the old app was never set up on this phone
 
+  prefs.setString(HAD_LEGACY_APP_KEY, '1');
   prefs.setString(StorageKeys.userRecordName, d.userRecordName);
   // They already went through the old welcome screen.
   prefs.setBool(StorageKeys.hasSeenWelcome, d.hasSeenWelcome ?? true);

@@ -1,3 +1,5 @@
+import { locale, t } from '../i18n';
+
 /**
  * "2 hours ago", "yesterday", "in 3 days": SwiftUI's `.relative(presentation: .named)` style.
  */
@@ -5,19 +7,26 @@ export function relativeTime(date: Date, now: Date = new Date()): string {
   const diff = (date.getTime() - now.getTime()) / 1000; // seconds, negative = past
   const abs = Math.abs(diff);
   const past = diff < 0;
-  const wrap = (n: number, unit: string) => {
-    const label = `${n} ${unit}${n === 1 ? '' : 's'}`;
-    return past ? `${label} ago` : `in ${label}`;
+  const wrap = (n: number, unit: 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year') => {
+    try {
+      return new Intl.RelativeTimeFormat(locale(), { numeric: 'always' }).format(past ? -n : n, unit);
+    } catch {
+      const label = `${n} ${unit}${n === 1 ? '' : 's'}`; // Intl is always present on Hermes; this is only a safety net.
+      return past ? `${label} ago` : `in ${label}`;
+    }
   };
-  if (abs < 45) return 'now';
+  const named = (n: -1 | 1, unit: 'day') => {
+    try { return new Intl.RelativeTimeFormat(locale(), { numeric: 'auto' }).format(n, unit); } catch { return n === -1 ? 'yesterday' : 'tomorrow'; }
+  };
+  if (abs < 45) return t('now');
   if (abs < 90 * 60) return wrap(Math.max(1, Math.round(abs / 60)), 'minute');
   if (abs < 22 * 3600) return wrap(Math.round(abs / 3600), 'hour');
 
   const startOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
   const days = Math.round((startOf(date) - startOf(now)) / 86_400_000);
   if (days === 0) return wrap(Math.max(1, Math.round(abs / 3600)), 'hour');
-  if (days === -1) return 'yesterday';
-  if (days === 1) return 'tomorrow';
+  if (days === -1) return named(-1, 'day');
+  if (days === 1) return named(1, 'day');
   const n = Math.abs(days);
   if (n < 14) return wrap(n, 'day');
   if (n < 60) return wrap(Math.round(n / 7), 'week');
@@ -28,7 +37,7 @@ export function relativeTime(date: Date, now: Date = new Date()): string {
 /** Formats an amount in an ISO 4217 currency, e.g. "€42.50". Falls back to "42.50 EUR". */
 export function formatCurrency(amount: number, code: string): string {
   try {
-    return new Intl.NumberFormat(undefined, { style: 'currency', currency: code }).format(amount);
+    return new Intl.NumberFormat(locale(), { style: 'currency', currency: code }).format(amount);
   } catch {
     return `${amount.toFixed(2)} ${code}`;
   }
@@ -37,7 +46,7 @@ export function formatCurrency(amount: number, code: string): string {
 /** The narrow symbol for a currency ("€", "$", "£"), or the code when unknown. */
 export function currencySymbol(code: string): string {
   try {
-    const parts = new Intl.NumberFormat(undefined, { style: 'currency', currency: code, currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).formatToParts(0);
+    const parts = new Intl.NumberFormat(locale(), { style: 'currency', currency: code, currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).formatToParts(0);
     return parts.find((p) => p.type === 'currency')?.value ?? code;
   } catch {
     return code;

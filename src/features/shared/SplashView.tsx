@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { t } from '../../i18n';
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 import { LogoAnimation } from '../../components/LogoAnimation';
 import { Brand } from '../../theme/theme';
@@ -27,15 +28,15 @@ export function SplashView({ onFinish }: { onFinish?: () => void }) {
   const tagY = tagline.interpolate({ inputRange: [0, 1], outputRange: [10, 0] });
 
   return (
-    <View style={[StyleSheet.absoluteFill, s.root]} accessible accessibilityLabel={`${Brand.appName} by ${Brand.maker}. ${Brand.tagline}`}>
+    <View style={[StyleSheet.absoluteFill, s.root]} accessible accessibilityLabel={t('{app} by {maker}. {tagline}', { app: Brand.appName, maker: Brand.maker, tagline: t(Brand.tagline) })}>
       <View style={s.center}>
         <View style={s.logo}><LogoAnimation size={LOGO_SIZE} mode="intro-then-loop" onFinish={onFinish} /></View>
         <Animated.View style={[s.titles, { opacity: wordmark, transform: [{ translateY: wordmarkY }] }]}>
           <Text style={s.name}>{Brand.appName}</Text>
-          <Text style={s.maker}>by {Brand.maker}</Text>
+          <Text style={s.maker}>{t('by {maker}', { maker: Brand.maker })}</Text>
         </Animated.View>
       </View>
-      <Animated.Text style={[s.tagline, { opacity: Animated.multiply(tagline, 0.9), transform: [{ translateY: tagY }] }]}>{Brand.tagline}</Animated.Text>
+      <Animated.Text style={[s.tagline, { opacity: Animated.multiply(tagline, 0.9), transform: [{ translateY: tagY }] }]}>{t(Brand.tagline)}</Animated.Text>
     </View>
   );
 }

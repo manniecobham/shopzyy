@@ -4,12 +4,13 @@ import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import { Observable } from '../lib/observable';
+import { tx } from '../i18n';
 import { uuid } from '../lib/uuid';
 
 export type LogLevel = 'info' | 'warning' | 'error';
 export type LogArea = 'sync' | 'sharing' | 'household' | 'list' | 'account' | 'storage';
 export const LOG_AREA_TITLE: Record<LogArea, string> = {
-  sync: 'Syncing', sharing: 'Invites', household: 'Household', list: 'Shopping list', account: 'Account', storage: 'Saving',
+  sync: tx('Syncing'), sharing: tx('Invites'), household: tx('Household'), list: tx('Shopping list'), account: tx('Account'), storage: tx('Saving'),
 };
 
 /** One error or warning the app ran into. Technical details only: never names, list items, household names, emails or other personal data. */

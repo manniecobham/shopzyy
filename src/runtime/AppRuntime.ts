@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 import { DataStore } from '../data/DataStore';
 import { FirestoreSync, type SyncStatus } from '../data/sync/FirestoreSync';
 import { Observable } from '../lib/observable';
@@ -9,13 +10,14 @@ import type { ServiceEnv } from '../services/ports';
 import { router } from 'expo-router';
 import { AppState, Platform } from 'react-native';
 import { ShopzyLegacy } from '../../modules/shopzy-legacy';
-import { applyLegacyDefaults } from '../migration/legacyDefaults';
+import { HAD_LEGACY_APP_KEY, applyLegacyDefaults } from '../migration/legacyDefaults';
 import { firebaseMigrationDeps } from '../migration/firebaseDeps';
 import { MigrationService, type MigrationResult } from '../migration/MigrationService';
 import { AppLog } from '../services/AppLog';
 import { scanForRemotePurchases } from '../services/ActivityMonitor';
 import { NotificationService } from '../services/NotificationService';
 import { PushRegistration } from '../services/PushRegistration';
+import { isDemo, seedDemo } from '../demo/demo';
 import { AppConfigService, appVersion } from '../services/AppConfig';
 import { doc, getFirestore, setDoc } from '@react-native-firebase/firestore';
 import { getFunctions, httpsCallable } from '@react-native-firebase/functions';
@@ -59,6 +61,16 @@ export class AppRuntime extends Observable {
   /** Loads preferences, then starts watching the sign-in state. */
   async start(): Promise<void> {
     await this.prefs.load();
+    if (isDemo) {
+      // In memory only: no sign-in, sync, migration, push or remote config.
+      this.migration = { state: 'done', message: null, progress: null };
+      this.initialSyncDone = true;
+      this.prefs.currentHouseholdID = seedDemo(this.env);
+      this.account.start();
+      this.ready = true;
+      this.changed();
+      return;
+    }
     await AppLog.load();
     // First launch after updating from the original iOS app: adopt who they were and their settings,
     // so they skip the welcome and profile screens and only need to sign in.
@@ -175,7 +187,7 @@ export class AppRuntime extends Observable {
     if (!code) return;
     this.prefs.remove(StorageKeys.pendingInvite);
     void this.joinHousehold(code).then((error) => {
-      if (error) AppNotice.show("Couldn't join the household", error);
+      if (error) AppNotice.show(t("Couldn't join the household"), error);
     });
   }
 
@@ -185,6 +197,7 @@ export class AppRuntime extends Observable {
 
   /** Sync starts as soon as someone is signed in, before the profile is set, so a person setting up a new device sees their households arrive. */
   private onAccountChanged(): void {
+    if (isDemo) { this.changed(); return; }
     const { phase, uid } = this.account;
     if (this.migrationUID !== uid) {
       this.migrationUID = uid;
@@ -237,6 +250,7 @@ export class AppRuntime extends Observable {
       }, options);
       // Keep the identity the data is filed under (the old CloudKit user key).
       if (result.userRecordName && result.userRecordName !== this.account.userRecordName) this.account.setUserRecordName(result.userRecordName);
+      if (result.state === 'done' && result.households > 0) this.prefs.setString(HAD_LEGACY_APP_KEY, '1');
       // Remember only results we can trust: a "nothing to move" from a build without the reader must be re-checked next launch.
       if (result.state !== 'none' || result.reliable) this.prefs.setString(marker, '1');
       this.migration = { state: 'done', message: null, progress: null };
@@ -282,8 +296,8 @@ export class AppRuntime extends Observable {
     const sync = new FirestoreSync(this.store, uid, {
       onStatus: (s) => { this.syncStatus = s; if (s.state === 'offline' || s.state === 'failed') this.markInitialSyncDone(); this.changed(); },
       onHouseholdRemoved: (name) => AppNotice.show(
-        `${name || 'This household'} is no longer available`,
-        "It was deleted by its owner or you were removed from it, so it's been removed from this phone.",
+        name ? t('{name} is no longer available', { name }) : t('This household is no longer available'),
+        t("It was deleted by its owner or you were removed from it, so it's been removed from this phone."),
       ),
       onRemoteChange: () => {
         // Handled here, not in a screen: when the app is woken in the background no screen exists.

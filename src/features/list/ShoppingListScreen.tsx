@@ -1,8 +1,8 @@
 import { Glyph, type SymbolName } from '../../components/Glyph';
+import { t as tr } from '../../i18n';
 import { useEffect, useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, SectionList, StyleSheet, Text, View } from 'react-native';
-import { ActionMenu } from '../../components/Sheet';
-import { ScreenOptions, useHeaderInset } from '../../components/NativeHeader';
+import { ScreenOptions } from '../../components/NativeHeader';
 import { SuggestionEngine } from '../../logic/SuggestionEngine';
 import { ShoppingTrip } from '../../logic/ShoppingTrip';
 import { makeSections } from '../../logic/listGrouping';
@@ -12,7 +12,7 @@ import type { GroceryItem, Household } from '../../models/entities';
 import { itemHistory, purchaseItemName, purchaseMemberName } from '../../models/itemOps';
 import { useAccount, useAppState, useStoreVersion } from '../../runtime/RuntimeProvider';
 import { SkippedTrips } from '../../services/SkippedTrips';
-import { useTheme } from '../../theme/theme';
+import { isIOS26, useTheme } from '../../theme/theme';
 import { ListBackdrop, ListSectionHeader } from '../household/HouseholdBackground';
 import { HouseholdSwitcher } from '../household/HouseholdSwitcher';
 import { ProfileMenu } from '../shared/ProfileMenu';
@@ -33,10 +33,8 @@ export function ShoppingListScreen({ household }: { household: Household }) {
   useStoreVersion();
   const { store, prefs, households } = runtime;
   const list = runtime.list(household.id);
-  const inset = useHeaderInset();
 
   const [editing, setEditing] = useState<GroceryItem | null>(null);
-  const [groupMenu, setGroupMenu] = useState(false);
   const [reordering, setReordering] = useState(false);
   const [tripTarget, setTripTarget] = useState<TripTotalTarget | null>(null);
   const [now, setNow] = useState(() => new Date());
@@ -93,11 +91,14 @@ export function ShoppingListScreen({ household }: { household: Household }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: t.groupedBackground }}>
-      <ScreenOptions title="List" left={<HouseholdSwitcher />}
-        right={<View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-          <Glyph name="line.3.horizontal.decrease.circle" size={26} color={t.accent} onPress={() => setGroupMenu(true)} accessibilityLabel="Group and order the list" />
-          <ProfileMenu member={currentMember} />
-        </View>} />
+      <ScreenOptions title={tr('List')} left={<HouseholdSwitcher />} right={<ProfileMenu member={currentMember} />}
+        menu={{
+          icon: 'line.3.horizontal.decrease.circle', label: tr('Group and order the list'), title: tr('Group by'),
+          groups: [
+            { title: tr('Group by'), items: LIST_GROUPINGS.map((g) => ({ title: groupingTitle(g), icon: groupingIcon(g), checked: household.groupingRaw === g, onPress: () => households.setGrouping(g, household) })) },
+            { items: [{ title: tr('Reorder sections…'), icon: 'arrow.up.arrow.down', disabled: sections.length < 2, onPress: () => setReordering(true) }] },
+          ],
+        }} />
       <View style={{ flex: 1 }}>
         <ListBackdrop household={household} />
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -106,21 +107,21 @@ export function ShoppingListScreen({ household }: { household: Household }) {
             keyExtractor={(i) => i.id}
             keyboardShouldPersistTaps="handled"
             stickySectionHeadersEnabled={false}
-            contentContainerStyle={{ paddingTop: inset, paddingBottom: 16 }}
-            scrollIndicatorInsets={{ top: inset }}
+            contentInsetAdjustmentBehavior="automatic"
+            contentContainerStyle={{ paddingBottom: 16 }}
             ListHeaderComponent={<>
               <SyncStatusView />
               {runningLow.length > 0 ? (
                 <View>
-                  <ListSectionHeader title="Running low?" />
+                  <ListSectionHeader title={tr('Running low?')} />
                   <SuggestionStrip suggestions={runningLow} onAdd={(s) => list.addToList(s.itemID, currentMember)} />
                 </View>
               ) : null}
               {listItems.length === 0 ? (
                 <View style={[s.empty, { backgroundColor: t.isDark ? 'rgba(44,44,46,0.8)' : 'rgba(255,255,255,0.8)' }]}>
                   <Glyph name="cart" size={42} color={t.secondaryLabel} />
-                  <Text style={{ fontSize: 20, fontWeight: '600', color: t.label }}>Your list is empty</Text>
-                  <Text style={{ fontSize: 15, color: t.secondaryLabel, textAlign: 'center' }}>Type below to add items. Try “2 kg rice, milk x2, eggs”.</Text>
+                  <Text style={{ fontSize: 20, fontWeight: '600', color: t.label }}>{tr('Your list is empty')}</Text>
+                  <Text style={{ fontSize: 15, color: t.secondaryLabel, textAlign: 'center' }}>{tr('Type below to add items. Try “2 kg rice, milk x2, eggs”.')}</Text>
                 </View>
               ) : null}
             </>}
@@ -130,7 +131,7 @@ export function ShoppingListScreen({ household }: { household: Household }) {
                 onBought={() => list.markBought(item, currentMember)} onEdit={() => setEditing(item)} onRemove={() => list.removeFromList(item)} />
             )}
           />
-          <View>
+          <View style={{ marginBottom: isIOS26 ? 84 : 0 }}>
             {tripAwaitingTotal ? (
               <TripTotalBanner onAdd={() => setTripTarget(targetForTrip(tripAwaitingTotal, tripSkipKey(tripAwaitingTotal)))} onSkip={() => skip(tripSkipKey(tripAwaitingTotal))} />
             ) : null}
@@ -139,10 +140,6 @@ export function ShoppingListScreen({ household }: { household: Household }) {
         </KeyboardAvoidingView>
       </View>
 
-      <ActionMenu visible={groupMenu} title="Group by" onClose={() => setGroupMenu(false)} sections={[
-        LIST_GROUPINGS.map((g) => ({ title: groupingTitle(g), icon: groupingIcon(g), checked: household.groupingRaw === g, onPress: () => households.setGrouping(g, household) })),
-        [{ title: 'Reorder sections…', icon: 'arrow.up.arrow.down', disabled: sections.length < 2, onPress: () => setReordering(true) }],
-      ]} />
       {editing ? <ItemEditorView item={editing} householdID={household.id} onClose={() => setEditing(null)} /> : null}
       {reordering ? <SectionOrderSheet household={household} sections={sections} onClose={() => setReordering(false)} /> : null}
       {tripTarget ? <TripTotalSheet target={tripTarget} household={household} onSkip={() => skip(tripTarget.skipKey)} onClose={() => setTripTarget(null)} /> : null}

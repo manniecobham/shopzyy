@@ -1,4 +1,5 @@
 import { Glyph, type SymbolName } from './Glyph';
+import { t as tr } from '../i18n';
 import { useState as useStateLocal, type ReactNode } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,7 +7,7 @@ import { FormRow, FormSection, TextButton } from './ui';
 import { useTheme } from '../theme/theme';
 
 /** An iOS page sheet with a Cancel / title / Save bar, like a SwiftUI sheet around a NavigationStack. */
-export function Sheet({ visible, title, onCancel, onSave, saveTitle = 'Save', cancelTitle = 'Cancel', saveDisabled, children, scroll = true }: {
+export function Sheet({ visible, title, onCancel, onSave, saveTitle = tr('Save'), cancelTitle = tr('Cancel'), saveDisabled, children, scroll = true }: {
   visible: boolean; title: string; onCancel: () => void; onSave?: () => void; saveTitle?: string; cancelTitle?: string;
   saveDisabled?: boolean; children: ReactNode; scroll?: boolean;
 }) {
@@ -45,7 +46,7 @@ export function ActionMenu({ visible, title, sections, onClose }: {
   const t = useTheme();
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={s.backdrop} onPress={onClose} accessibilityLabel="Close menu" />
+      <Pressable style={s.backdrop} onPress={onClose} accessibilityLabel={tr('Close menu')} />
       <SafeAreaView edges={['bottom']} style={s.sheetWrap} pointerEvents="box-none">
         <View style={[s.menu, { backgroundColor: t.groupedBackground }]}>
           {title ? <Text style={[s.menuTitle, { color: t.secondaryLabel }]}>{title}</Text> : null}
@@ -65,7 +66,7 @@ export function ActionMenu({ visible, title, sections, onClose }: {
           </ScrollView>
           <View style={{ marginHorizontal: 16, marginTop: 14, marginBottom: 6 }}>
             <Pressable onPress={onClose} style={[s.cancel, { backgroundColor: t.cell }]}>
-              <Text style={{ fontSize: 17, fontWeight: '600', color: t.accent }}>Cancel</Text>
+              <Text style={{ fontSize: 17, fontWeight: '600', color: t.accent }}>{tr('Cancel')}</Text>
             </Pressable>
           </View>
         </View>

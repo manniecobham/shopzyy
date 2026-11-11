@@ -2,6 +2,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Icon, ProminentButton, type IconName } from '../../components/ui';
 import { Brand, useTheme } from '../../theme/theme';
+import { t as tr } from '../../i18n';
 
 /** First launch: what Shopzyy is, before signing in and setting up a profile. */
 export function WelcomeView({ onStart }: { onStart: () => void }) {
@@ -11,22 +12,22 @@ export function WelcomeView({ onStart }: { onStart: () => void }) {
       <ScrollView contentContainerStyle={s.scroll}>
         <View style={s.hero}>
           <Text style={{ fontSize: 64 }}>🛒</Text>
-          <Text style={[s.title, { color: t.label }]}>Welcome to {Brand.appName}</Text>
+          <Text style={[s.title, { color: t.label }]}>{tr('Welcome to {app}', { app: Brand.appName })}</Text>
           <Text style={[s.tagline, { color: t.accent }]}>{Brand.tagline}</Text>
           <Text style={[s.body, { color: t.secondaryLabel }]}>
-            A shared shopping list for your households. It learns what you buy and reminds everyone before you run out.
+            {tr('A shared shopping list for your households. It learns what you buy and reminds everyone before you run out.')}
           </Text>
         </View>
         <View style={s.features}>
-          <Feature icon="person.2" text="Share a list with everyone at home" />
-          <Feature icon="sparkles" text="Get reminded before things run out" />
-          <Feature icon="bell.badge" text="Know when someone has been shopping" />
+          <Feature icon="person.2" text={tr('Share a list with everyone at home')} />
+          <Feature icon="sparkles" text={tr('Get reminded before things run out')} />
+          <Feature icon="bell.badge" text={tr('Know when someone has been shopping')} />
         </View>
       </ScrollView>
       <View style={s.footer}>
-        <ProminentButton title="Get started" onPress={onStart} />
+        <ProminentButton title={tr('Get started')} onPress={onStart} />
         <Text style={[s.note, { color: t.secondaryLabel }]}>
-          Your lists are stored securely and shared only with the households you join. Sign in with Apple, Google or your email.
+          {tr('Your lists are stored securely and shared only with the households you join. Sign in with Apple, Google or your email.')}
         </Text>
       </View>
     </SafeAreaView>

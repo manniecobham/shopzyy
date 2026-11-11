@@ -1,3 +1,5 @@
+import { t, tn } from '../i18n';
+
 export interface TripPurchase {
   id: string;
   itemName: string;
@@ -53,15 +55,15 @@ export class ShoppingTrip {
 
   get promptAt(): Date { return new Date(this.end.getTime() + this.promptDelay * 1000); }
 
-  get title(): string { return `${this.buyerName} went shopping`; }
+  get title(): string { return t('{name} went shopping', { name: this.buyerName }); }
 
   /** "6 items · Milk, Eggs, Bread and 3 more", with the total after it when known. */
   body(maxNames = 3, total: string | null = null): string {
     const names = this.purchases.map((p) => p.itemName);
-    const count = names.length === 1 ? '1 item' : `${names.length} items`;
+    const count = tn('{n} item', '{n} items', names.length);
     const shown = names.slice(0, maxNames).join(', ');
     const rest = names.length - Math.min(names.length, maxNames);
-    const summary = rest > 0 ? `${count} · ${shown} and ${rest} more` : `${count} · ${shown}`;
+    const summary = rest > 0 ? t('{count} · {shown} and {rest} more', { count, shown, rest }) : `${count} · ${shown}`;
     return total ? `${summary} · ${total}` : summary;
   }
 

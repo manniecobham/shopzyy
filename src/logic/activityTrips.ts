@@ -1,4 +1,5 @@
 import type { PurchaseRecord, TripTotal } from '../models/entities';
+import { t } from '../i18n';
 import { purchaseItemName, purchaseMemberName } from '../models/itemOps';
 import { ShoppingTrip } from './ShoppingTrip';
 import { totalMatchesTrip } from './tripTotals';
@@ -31,7 +32,7 @@ export function groupActivityTrips(records: PurchaseRecord[], totals: TripTotal[
 
 export type ActivityPeriod = 'latest' | 'week' | 'month' | 'all';
 export const ACTIVITY_PERIODS: ActivityPeriod[] = ['latest', 'week', 'month', 'all'];
-export const periodTitle = (p: ActivityPeriod) => ({ latest: 'Latest trips', week: 'Past week', month: 'Past month', all: 'All time' })[p];
+export const periodTitle = (p: ActivityPeriod) => ({ latest: t('Latest trips'), week: t('Past week'), month: t('Past month'), all: t('All time') })[p];
 /** Trips shown until a wider period is chosen. */
 export const LATEST_COUNT = 3;
 

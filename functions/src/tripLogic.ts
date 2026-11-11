@@ -2,6 +2,8 @@
 // (src/logic/ShoppingTrip.ts, tripTotals.ts), kept dependency-free so it is unit-tested from the
 // app's Jest suite. If one changes, change the other.
 
+import { tripSummary, type Lang } from './messages';
+
 export interface TripPurchase { id: string; purchasedAtMs: number; itemID: string | null }
 
 export const TRIP_MAX_GAP_MS = 60 * 60 * 1000;
@@ -49,11 +51,7 @@ export function totalMatchesTrip(total: { tripKey: string; enteredBy: string | n
   return total.enteredBy === trip.buyerKey && total.tripEndedAtMs >= trip.startMs - 1000 && total.tripEndedAtMs <= trip.endMs + TRIP_MAX_GAP_MS;
 }
 
-/** "6 items · Milk, Eggs, Bread and 3 more", with the total after it when known. */
-export function tripBody(names: string[], maxNames = 3, total: string | null = null): string {
-  const count = names.length === 1 ? '1 item' : `${names.length} items`;
-  const shown = names.slice(0, maxNames).join(', ');
-  const rest = names.length - Math.min(names.length, maxNames);
-  const summary = rest > 0 ? `${count} · ${shown} and ${rest} more` : `${count} · ${shown}`;
-  return total ? `${summary} · ${total}` : summary;
+/** "6 items · Milk, Eggs, Bread and 3 more", with the total after it when known (English; see messages.ts for other languages). */
+export function tripBody(names: string[], maxNames = 3, total: string | null = null, lang: Lang = 'en'): string {
+  return tripSummary(names, maxNames, total, lang);
 }

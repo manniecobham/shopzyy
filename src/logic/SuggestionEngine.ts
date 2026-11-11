@@ -1,4 +1,7 @@
+import { t } from '../i18n';
 import { DayPhrase } from './DayPhrase';
+
+const tx = (s: string) => s;
 
 export interface PurchaseHistory {
   itemID: string;
@@ -11,14 +14,14 @@ export interface PurchaseHistory {
 export type SuggestionKind = 'overdue' | 'dueSoon' | 'longTimeNoSee';
 const KIND_RANK: Record<SuggestionKind, number> = { overdue: 0, dueSoon: 1, longTimeNoSee: 2 };
 export const KIND_TITLE: Record<SuggestionKind, string> = {
-  overdue: 'Probably running out',
-  dueSoon: 'Due about now',
-  longTimeNoSee: 'Not bought in a while',
+  overdue: tx('Probably running out'),
+  dueSoon: tx('Due about now'),
+  longTimeNoSee: tx('Not bought in a while'),
 };
 export const KIND_EXPLANATION: Record<SuggestionKind, string> = {
-  overdue: "You'd normally have bought these again by now.",
-  dueSoon: 'Based on how often your household buys them.',
-  longTimeNoSee: 'Things you used to buy. Snooze any you no longer need.',
+  overdue: tx("You'd normally have bought these again by now."),
+  dueSoon: tx('Based on how often your household buys them.'),
+  longTimeNoSee: tx('Things you used to buy. Snooze any you no longer need.'),
 };
 
 export interface Suggestion {
@@ -32,18 +35,18 @@ export interface Suggestion {
 }
 
 export function suggestionReason(s: Suggestion): string {
-  const since = `last bought ${DayPhrase.ago(s.daysSinceLastPurchase)}`;
+  const since = t('last bought {when}', { when: DayPhrase.ago(s.daysSinceLastPurchase) });
   if (s.typicalIntervalDays !== null && s.kind !== 'longTimeNoSee') {
-    return `Usually bought ${DayPhrase.cadence(s.typicalIntervalDays)}, ${since}`;
+    return t('Usually bought {cadence}, {since}', { cadence: DayPhrase.cadence(s.typicalIntervalDays), since });
   }
-  return `Haven't bought this in ${DayPhrase.span(s.daysSinceLastPurchase)}`;
+  return t("Haven't bought this in {span}", { span: DayPhrase.span(s.daysSinceLastPurchase) });
 }
 
 export function suggestionShortReason(s: Suggestion): string {
   switch (s.kind) {
-    case 'overdue': return 'Overdue';
-    case 'dueSoon': return 'Due now';
-    case 'longTimeNoSee': return `${DayPhrase.span(s.daysSinceLastPurchase)} ago`;
+    case 'overdue': return t('Overdue');
+    case 'dueSoon': return t('Due now');
+    case 'longTimeNoSee': return t('{span} ago', { span: DayPhrase.span(s.daysSinceLastPurchase) });
   }
 }
 

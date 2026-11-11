@@ -1,3 +1,4 @@
+import { locale, t } from '../i18n';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { DayPhrase } from '../logic/DayPhrase';
@@ -50,8 +51,8 @@ export class NotificationService implements Notifier {
       await Notifications.setNotificationChannelAsync('default', { name: 'Shopzyy', importance: Notifications.AndroidImportance.DEFAULT });
     }
     await Notifications.setNotificationCategoryAsync(NotificationIds.restockCategory, [
-      { identifier: NotificationIds.addToListAction, buttonTitle: 'Add to list', options: { opensAppToForeground: false } },
-      { identifier: NotificationIds.snoozeAction, buttonTitle: 'Not this week', options: { opensAppToForeground: false } },
+      { identifier: NotificationIds.addToListAction, buttonTitle: t('Add to list'), options: { opensAppToForeground: false } },
+      { identifier: NotificationIds.snoozeAction, buttonTitle: t('Not this week'), options: { opensAppToForeground: false } },
     ]);
     await Notifications.setNotificationCategoryAsync(NotificationIds.tripCategory, []);
 
@@ -87,7 +88,7 @@ export class NotificationService implements Notifier {
   async postShoppingTrip(trip: ShoppingTrip, householdName: string | null, totalText: string | null, now: Date): Promise<void> {
     if (!this.purchaseAlertsEnabled) return;
     const identifier = NotificationIds.tripPrefix + trip.id;
-    const time = trip.end.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    const time = trip.end.toLocaleTimeString(locale(), { hour: 'numeric', minute: '2-digit' });
     const waitSeconds = (trip.announceAt.getTime() - now.getTime()) / 1000;
     await Notifications.cancelScheduledNotificationAsync(identifier).catch(() => {});
     await Notifications.dismissNotificationAsync(identifier).catch(() => {});
@@ -118,8 +119,8 @@ export class NotificationService implements Notifier {
       await Notifications.scheduleNotificationAsync({
         identifier: NotificationIds.restockPrefix + f.itemID,
         content: {
-          title: `Running low on ${f.name.toLowerCase()}?`,
-          body: `Your household usually buys it ${DayPhrase.cadence(f.typicalIntervalDays)}.`,
+          title: t('Running low on {name}?', { name: f.name.toLowerCase() }),
+          body: t('Your household usually buys it {cadence}.', { cadence: DayPhrase.cadence(f.typicalIntervalDays) }),
           sound: true,
           categoryIdentifier: NotificationIds.restockCategory,
           data: { itemID: f.itemID },

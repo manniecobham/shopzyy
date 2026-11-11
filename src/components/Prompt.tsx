@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { t as tr } from '../i18n';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTheme } from '../theme/theme';
 
@@ -20,7 +21,7 @@ export function Prompt({ visible, title, message, placeholder, confirmTitle, onC
           <TextInput autoFocus value={text} onChangeText={setText} placeholder={placeholder} placeholderTextColor={t.tertiaryLabel}
             style={[s.input, { color: t.label, backgroundColor: t.fill }]} returnKeyType="done" onSubmitEditing={() => onConfirm(text)} />
           <View style={s.buttons}>
-            <Pressable style={s.btn} onPress={onCancel}><Text style={{ fontSize: 17, color: t.accent }}>Cancel</Text></Pressable>
+            <Pressable style={s.btn} onPress={onCancel}><Text style={{ fontSize: 17, color: t.accent }}>{tr('Cancel')}</Text></Pressable>
             <Pressable style={s.btn} onPress={() => onConfirm(text)}><Text style={{ fontSize: 17, fontWeight: '600', color: t.accent }}>{confirmTitle}</Text></Pressable>
           </View>
         </View>

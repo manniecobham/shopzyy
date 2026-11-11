@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 import { describeQuantity, plainQuantity, isHouseRoom, isItemCategory, isMeasurementUnit, type MeasurementUnit } from './enums';
 import { builtIn, custom, type CategoryChoice, type RoomChoice } from './choices';
 import type { AutocompleteCandidate } from '../logic/AutocompleteRanker';
@@ -100,8 +101,8 @@ export function takeOffList(i: GroceryItem): void {
 
 export const purchaseUnit = (p: PurchaseRecord): MeasurementUnit | null => (isMeasurementUnit(p.unitRaw) ? p.unitRaw : null);
 export const purchaseQuantityText = (p: PurchaseRecord) => describeQuantity(p.quantity, purchaseUnit(p));
-export const purchaseItemName = (p: PurchaseRecord) => p.item?.name ?? 'an item';
-export const purchaseMemberName = (p: PurchaseRecord) => p.member?.name ?? 'Someone';
+export const purchaseItemName = (p: PurchaseRecord) => p.item?.name ?? t('an item');
+export const purchaseMemberName = (p: PurchaseRecord) => p.member?.name ?? t('Someone');
 
 /** Quantity as plain text for editing ("1.5", "2"). */
 export const plainQty = (q: number): string => plainQuantity(q);

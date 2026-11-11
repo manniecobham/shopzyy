@@ -1,4 +1,5 @@
 import { Linking, StyleSheet, Text, View } from 'react-native';
+import { t } from '../../i18n';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ProminentButton } from '../../components/ui';
 import { useAppState } from '../../runtime/RuntimeProvider';
@@ -6,19 +7,19 @@ import { useTheme } from '../../theme/theme';
 
 /** Blocks the app when this build is older than the minimum version you set in `config/app`. */
 export function UpdateRequiredView() {
-  const t = useTheme();
+  const th = useTheme();
   const { appConfig } = useAppState();
   const url = appConfig.storeUrl;
   return (
-    <SafeAreaView style={[s.root, { backgroundColor: t.background }]}>
+    <SafeAreaView style={[s.root, { backgroundColor: th.background }]}>
       <View style={s.body}>
         <Text style={{ fontSize: 56 }}>🛒</Text>
-        <Text style={[s.title, { color: t.label }]}>Time to update</Text>
-        <Text style={[s.sub, { color: t.secondaryLabel }]}>
-          {appConfig.config.message ?? 'This version of Shopzyy is out of date. Update to the latest version to keep your lists in sync.'}
+        <Text style={[s.title, { color: th.label }]}>{t('Time to update')}</Text>
+        <Text style={[s.sub, { color: th.secondaryLabel }]}>
+          {appConfig.config.message ?? t('This version of Shopzyy is out of date. Update to the latest version to keep your lists in sync.')}
         </Text>
       </View>
-      {url ? <View style={s.footer}><ProminentButton title="Update" onPress={() => void Linking.openURL(url)} /></View> : null}
+      {url ? <View style={s.footer}><ProminentButton title={t('Update')} onPress={() => void Linking.openURL(url)} /></View> : null}
     </SafeAreaView>
   );
 }

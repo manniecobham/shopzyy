@@ -45,3 +45,21 @@ describe('push alert trip logic (server copy)', () => {
     expect(TRIP_QUIET_PERIOD_MS).toBe(5 * 60_000);
   });
 });
+
+import { MESSAGES, LANGS, normalizeLang, tripSummary, tripTitle } from '../functions/src/messages';
+
+describe('localised push text', () => {
+  test('every language defines every template', () => {
+    for (const l of LANGS) expect(Object.keys(MESSAGES[l]).sort()).toEqual(Object.keys(MESSAGES.en).sort());
+  });
+  test('falls back to English for unknown languages', () => {
+    expect(normalizeLang('fr-CA')).toBe('fr');
+    expect(normalizeLang('ja')).toBe('en');
+    expect(normalizeLang(undefined)).toBe('en');
+  });
+  test('plurals and wording per language', () => {
+    expect(tripSummary(['Leche'], 3, null, 'es')).toBe('1 artículo · Leche');
+    expect(tripSummary(['a', 'b', 'c', 'd', 'e'], 3, '5,00 €', 'de')).toBe('5 Artikel · a, b, c und 2 weitere · 5,00 €');
+    expect(tripTitle('Ada', 'nl')).toBe('Ada is boodschappen gaan doen');
+  });
+});

@@ -1,11 +1,12 @@
 import { LinearGradient } from 'expo-linear-gradient';
+import { t } from '../../i18n';
 import { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { themeColors, themeEmoji } from '../../models/enums';
 import type { Household } from '../../models/entities';
 import { colorFromHex, useTheme } from '../../theme/theme';
 
-export const householdDisplayName = (h: Household) => (h.name === '' ? 'Shared household' : h.name);
+export const householdDisplayName = (h: Household) => (h.name === '' ? t('Shared household') : h.name);
 const imageUri = (h: Household) => (h.customImage ? `data:image/jpeg;base64,${h.customImage}` : null);
 
 /** The household's chosen photo, or its mood template. */
@@ -37,10 +38,10 @@ export function FocusedImage({ uri, focusX = 0.5, focusY = 0.5 }: { uri: string;
 
 /** A mood template: gradient plus a large, softly tilted emoji. */
 export function HouseholdThemeArt({ theme, emojiSize = 44 }: { theme: Household['themeRaw']; emojiSize?: number | null }) {
-  const t = useTheme();
+  const th = useTheme();
   const colors = themeColors(theme);
   const emoji = themeEmoji(theme);
-  if (colors.length === 0) return <View style={[StyleSheet.absoluteFill, { backgroundColor: t.groupedBackground }]} />;
+  if (colors.length === 0) return <View style={[StyleSheet.absoluteFill, { backgroundColor: th.groupedBackground }]} />;
   return (
     <LinearGradient colors={colors as [string, string]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill}>
       {emojiSize && emoji ? (
@@ -52,13 +53,13 @@ export function HouseholdThemeArt({ theme, emojiSize = 44 }: { theme: Household[
 
 /** Fills the screen behind the shopping list with the household's mood or photo, softened so rows stay readable. */
 export function ListBackdrop({ household }: { household: Household }) {
-  const t = useTheme();
+  const th = useTheme();
   const washed = household.customImage !== null || household.themeRaw !== 'none';
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none" accessibilityElementsHidden>
       <HouseholdBackground household={household} emojiSize={120} />
       {washed ? (
-        <LinearGradient colors={[colorFromHex(t.groupedBackground, 0.35), colorFromHex(t.groupedBackground, 0.7)]} style={StyleSheet.absoluteFill} />
+        <LinearGradient colors={[colorFromHex(th.groupedBackground, 0.35), colorFromHex(th.groupedBackground, 0.7)]} style={StyleSheet.absoluteFill} />
       ) : null}
     </View>
   );
@@ -66,13 +67,13 @@ export function ListBackdrop({ household }: { household: Household }) {
 
 /** A list section title on a frosted pill, readable over any background. */
 export function ListSectionHeader({ title, count }: { title: string; count?: number | null }) {
-  const t = useTheme();
+  const th = useTheme();
   return (
     <View style={s.headerWrap}>
-      <View style={[s.pill, { backgroundColor: t.isDark ? 'rgba(44,44,46,0.82)' : 'rgba(255,255,255,0.82)' }]}
-        accessible accessibilityLabel={count != null ? `${title}, ${count} items` : title}>
-        <Text style={{ fontSize: 15, fontWeight: '600', color: t.label }}>{title}</Text>
-        {count != null ? <Text style={{ fontSize: 15, fontWeight: '600', color: t.secondaryLabel }}>{count}</Text> : null}
+      <View style={[s.pill, { backgroundColor: th.isDark ? 'rgba(44,44,46,0.82)' : 'rgba(255,255,255,0.82)' }]}
+        accessible accessibilityLabel={count != null ? t('{title}, {n} items', { title, n: count }) : title}>
+        <Text style={{ fontSize: 15, fontWeight: '600', color: th.label }}>{title}</Text>
+        {count != null ? <Text style={{ fontSize: 15, fontWeight: '600', color: th.secondaryLabel }}>{count}</Text> : null}
       </View>
     </View>
   );
@@ -80,15 +81,15 @@ export function ListSectionHeader({ title, count }: { title: string; count?: num
 
 /** A small round preview of the household background, for the switcher. */
 export function HouseholdThumbnail({ household, size = 26 }: { household: Household; size?: number }) {
-  const t = useTheme();
+  const th = useTheme();
   return (
-    <View style={{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden', borderWidth: StyleSheet.hairlineWidth, borderColor: t.separator }}>
+    <View style={{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden', borderWidth: StyleSheet.hairlineWidth, borderColor: th.separator }}>
       <HouseholdBackground household={household} emojiSize={null} />
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  headerWrap: { paddingHorizontal: 16, paddingTop: 18, paddingBottom: 6, alignItems: 'flex-start' },
+  headerWrap: { paddingLeft: 36, paddingRight: 16, paddingTop: 18, paddingBottom: 6, alignItems: 'flex-start' },
   pill: { flexDirection: 'row', gap: 6, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 999 },
 });

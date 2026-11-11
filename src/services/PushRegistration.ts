@@ -2,6 +2,7 @@ import { deleteDoc, doc, getFirestore, setDoc } from '@react-native-firebase/fir
 import { getMessaging, getToken, onTokenRefresh, registerDeviceForRemoteMessages, deleteToken } from '@react-native-firebase/messaging';
 import { Platform } from 'react-native';
 import type { AppPreferences } from './AppPreferences';
+import { deviceLanguageField } from './DeviceLanguage';
 import { StorageKeys } from './storageKeys';
 import { AppLog } from './AppLog';
 
@@ -41,7 +42,7 @@ export class PushRegistration {
     const uid = this.uid;
     if (!uid) return;
     try {
-      await setDoc(this.ref(uid), { alerts: this.alertsEnabled, updatedAt: new Date() }, { merge: true });
+      await setDoc(this.ref(uid), { alerts: this.alertsEnabled, updatedAt: new Date(), ...deviceLanguageField() }, { merge: true });
     } catch (error) {
       AppLog.warning('account', "Couldn't update alert settings", error);
     }
@@ -65,6 +66,6 @@ export class PushRegistration {
   }
 
   private async save(uid: string, token: string): Promise<void> {
-    await setDoc(this.ref(uid), { token, platform: Platform.OS, alerts: this.alertsEnabled, updatedAt: new Date() }, { merge: true });
+    await setDoc(this.ref(uid), { token, platform: Platform.OS, alerts: this.alertsEnabled, updatedAt: new Date(), ...deviceLanguageField() }, { merge: true });
   }
 }

@@ -1,4 +1,5 @@
 import { Glyph, type SymbolName } from '../../components/Glyph';
+import { locale, t as tr } from '../../i18n';
 import { useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
 import { Prompt } from '../../components/Prompt';
@@ -39,17 +40,17 @@ export function ItemEditorView({ item, householdID, onClose }: { item: GroceryIt
   const [recipientName, setRecipientName] = useState(initialRecipient?.kind === 'named' ? initialRecipient.name : '');
   const [newKind, setNewKind] = useState<'category' | 'room' | null>(null);
 
-  const byTitle = <T extends { title: string }>(xs: T[]) => xs.sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }));
+  const byTitle = <T extends { title: string }>(xs: T[]) => xs.sort((a, b) => a.title.localeCompare(b.title, locale(), { numeric: true }));
   const categoryChoices = byTitle<{ title: string; value: CategoryChoice }>([
     ...ITEM_CATEGORIES.map((c) => ({ title: categoryChoiceLabel(builtIn(c)), value: builtIn<typeof c>(c) as CategoryChoice, sort: categoryTitle(c) })),
     ...options.filter((o) => o.kindRaw === 'category').map((o) => ({ title: categoryChoiceLabel(custom(o)), value: custom<never>(o) as CategoryChoice, sort: o.name })),
-  ].sort((a, b) => a.sort.localeCompare(b.sort, undefined, { numeric: true })).map(({ title, value }) => ({ title, value })));
+  ].sort((a, b) => a.sort.localeCompare(b.sort, locale(), { numeric: true })).map(({ title, value }) => ({ title, value })));
   const roomChoices: { title: string; value: RoomChoice | null }[] = [
-    { title: 'None', value: null },
+    { title: tr('None'), value: null },
     ...[
       ...HOUSE_ROOMS.map((r) => ({ title: roomChoiceLabel(builtIn(r)), value: builtIn<typeof r>(r) as RoomChoice, sort: roomTitle(r) })),
       ...options.filter((o) => o.kindRaw === 'room').map((o) => ({ title: roomChoiceLabel(custom(o)), value: custom<never>(o) as RoomChoice, sort: o.name })),
-    ].sort((a, b) => a.sort.localeCompare(b.sort, undefined, { numeric: true })).map(({ title, value }) => ({ title, value })),
+    ].sort((a, b) => a.sort.localeCompare(b.sort, locale(), { numeric: true })).map(({ title, value }) => ({ title, value })),
   ];
 
   const recipient = (): ItemRecipient | null => {
@@ -78,48 +79,48 @@ export function ItemEditorView({ item, householdID, onClose }: { item: GroceryIt
   const input = { fontSize: 17, color: t.label, flex: 1, minHeight: 28 } as const;
 
   return (
-    <Sheet visible title="Edit item" onCancel={onClose} onSave={save} saveDisabled={name.trim() === ''}>
-      <FormSection><FormRow last><TextInput style={input} value={name} onChangeText={setName} placeholder="Name" placeholderTextColor={t.tertiaryLabel} /></FormRow></FormSection>
+    <Sheet visible title={tr('Edit item')} onCancel={onClose} onSave={save} saveDisabled={name.trim() === ''}>
+      <FormSection><FormRow last><TextInput style={input} value={name} onChangeText={setName} placeholder={tr('Name')} placeholderTextColor={t.tertiaryLabel} /></FormRow></FormSection>
 
-      <FormSection header="Amount">
+      <FormSection header={tr('Amount')}>
         <FormRow last style={{ gap: 12 }}>
-          <TextInput style={input} value={quantity} onChangeText={setQuantity} keyboardType="decimal-pad" placeholder="Quantity" placeholderTextColor={t.tertiaryLabel} />
+          <TextInput style={input} value={quantity} onChangeText={setQuantity} keyboardType="decimal-pad" placeholder={tr('Quantity')} placeholderTextColor={t.tertiaryLabel} />
           <UnitPicker unit={unit} onChange={setUnit} />
         </FormRow>
       </FormSection>
 
-      <FormSection header="Who" footer="The assigned person is asked to buy it, but anyone can tick it off.">
-        <PickerRow label="Assigned to" value={assigneeID} onChange={setAssigneeID}
-          options={[{ title: 'Anyone', value: null }, ...members.map((m) => ({ title: `${m.emoji} ${m.name}`, value: m.id as string | null }))]} />
-        <PickerRow label="For" value={pick} onChange={setPick} last={pick !== 'someoneElse'}
-          options={[{ title: 'Everyone', value: 'nobody' as RecipientPick }, ...members.map((m) => ({ title: `${m.emoji} ${m.name}`, value: `member:${m.id}` as RecipientPick })), { title: 'Someone else…', value: 'someoneElse' as RecipientPick }]} />
+      <FormSection header={tr('Who')} footer={tr('The assigned person is asked to buy it, but anyone can tick it off.')}>
+        <PickerRow label={tr('Assigned to')} value={assigneeID} onChange={setAssigneeID}
+          options={[{ title: tr('Anyone'), value: null }, ...members.map((m) => ({ title: `${m.emoji} ${m.name}`, value: m.id as string | null }))]} />
+        <PickerRow label={tr('For')} value={pick} onChange={setPick} last={pick !== 'someoneElse'}
+          options={[{ title: tr('Everyone'), value: 'nobody' as RecipientPick }, ...members.map((m) => ({ title: `${m.emoji} ${m.name}`, value: `member:${m.id}` as RecipientPick })), { title: tr('Someone else…'), value: 'someoneElse' as RecipientPick }]} />
         {pick === 'someoneElse' ? (
-          <FormRow last><TextInput style={input} value={recipientName} onChangeText={setRecipientName} placeholder="e.g. the kids, Grandma" placeholderTextColor={t.tertiaryLabel} autoCapitalize="words" /></FormRow>
+          <FormRow last><TextInput style={input} value={recipientName} onChangeText={setRecipientName} placeholder={tr('e.g. the kids, Grandma')} placeholderTextColor={t.tertiaryLabel} autoCapitalize="words" /></FormRow>
         ) : null}
       </FormSection>
 
-      <FormSection footer={`Shopzyy remembers this the next time anyone adds ${item.name.toLowerCase()}.`}>
-        <PickerRow label="Category" value={category} options={categoryChoices} onChange={setCategory} />
-        <FormRow onPress={() => setNewKind('category')}><Glyph name="plus" size={20} color={t.accent} style={{ marginRight: 10 }} /><Text style={{ fontSize: 17, color: t.accent }}>New category…</Text></FormRow>
-        <PickerRowChoice label="Room" value={room} options={roomChoices} onChange={setRoom} />
-        <FormRow last onPress={() => setNewKind('room')}><Glyph name="plus" size={20} color={t.accent} style={{ marginRight: 10 }} /><Text style={{ fontSize: 17, color: t.accent }}>New room…</Text></FormRow>
+      <FormSection footer={tr('Shopzyy remembers this the next time anyone adds {name}.', { name: item.name.toLowerCase() })}>
+        <PickerRow label={tr('Category')} value={category} options={categoryChoices} onChange={setCategory} />
+        <FormRow onPress={() => setNewKind('category')}><Glyph name="plus" size={20} color={t.accent} style={{ marginRight: 10 }} /><Text style={{ fontSize: 17, color: t.accent }}>{tr('New category…')}</Text></FormRow>
+        <PickerRowChoice label={tr('Room')} value={room} options={roomChoices} onChange={setRoom} />
+        <FormRow last onPress={() => setNewKind('room')}><Glyph name="plus" size={20} color={t.accent} style={{ marginRight: 10 }} /><Text style={{ fontSize: 17, color: t.accent }}>{tr('New room…')}</Text></FormRow>
       </FormSection>
 
-      <FormSection header="Note">
-        <FormRow last><TextInput style={[input, { minHeight: 44 }]} value={note} onChangeText={setNote} placeholder="e.g. the low-fat one" placeholderTextColor={t.tertiaryLabel} multiline /></FormRow>
+      <FormSection header={tr('Note')}>
+        <FormRow last><TextInput style={[input, { minHeight: 44 }]} value={note} onChangeText={setNote} placeholder={tr('e.g. the low-fat one')} placeholderTextColor={t.tertiaryLabel} multiline /></FormRow>
       </FormSection>
 
       {pattern ? (
-        <FormSection header="History">
-          <Labeled label="Times bought" value={String(purchaseCount(item))} />
-          <Labeled label="Last bought" value={relativeTime(pattern.lastPurchase)} last={pattern.expectedIntervalDays === null && !lastPurchase(item)?.member} />
-          {pattern.expectedIntervalDays !== null ? <Labeled label="Usually bought" value={DayPhrase.cadence(Math.round(pattern.expectedIntervalDays))} last={!lastPurchase(item)?.member} /> : null}
-          {lastPurchase(item)?.member ? <Labeled label="Last bought by" value={lastPurchase(item)!.member!.name} last /> : null}
+        <FormSection header={tr('History')}>
+          <Labeled label={tr('Times bought')} value={String(purchaseCount(item))} />
+          <Labeled label={tr('Last bought')} value={relativeTime(pattern.lastPurchase)} last={pattern.expectedIntervalDays === null && !lastPurchase(item)?.member} />
+          {pattern.expectedIntervalDays !== null ? <Labeled label={tr('Usually bought')} value={DayPhrase.cadence(Math.round(pattern.expectedIntervalDays))} last={!lastPurchase(item)?.member} /> : null}
+          {lastPurchase(item)?.member ? <Labeled label={tr('Last bought by')} value={lastPurchase(item)!.member!.name} last /> : null}
         </FormSection>
       ) : null}
 
-      <Prompt visible={newKind !== null} title={newKind === 'room' ? 'New room' : 'New category'} message="Everyone in the household can pick it for any item."
-        placeholder={newKind === 'room' ? 'e.g. Guest room' : 'e.g. Party supplies'} confirmTitle="Add" onConfirm={addOption} onCancel={() => setNewKind(null)} />
+      <Prompt visible={newKind !== null} title={newKind === 'room' ? tr('New room') : tr('New category')} message={tr('Everyone in the household can pick it for any item.')}
+        placeholder={newKind === 'room' ? tr('e.g. Guest room') : tr('e.g. Party supplies')} confirmTitle={tr('Add')} onConfirm={addOption} onCancel={() => setNewKind(null)} />
     </Sheet>
   );
 }
@@ -133,8 +134,8 @@ function PickerRowChoice({ label, value, options, onChange }: { label: string; v
 function UnitPicker({ unit, onChange }: { unit: MeasurementUnit | null; onChange: (u: MeasurementUnit | null) => void }) {
   return (
     <View style={{ width: 130 }}>
-      <PickerRow hideLabel label="Unit" value={unit} onChange={onChange} last
-        options={[{ title: 'Items', value: null as MeasurementUnit | null }, ...MEASUREMENT_UNITS.map((u) => ({ title: unitLabel(u), value: u as MeasurementUnit | null }))]} />
+      <PickerRow hideLabel label={tr('Unit')} value={unit} onChange={onChange} last
+        options={[{ title: tr('Items'), value: null as MeasurementUnit | null }, ...MEASUREMENT_UNITS.map((u) => ({ title: unitLabel(u), value: u as MeasurementUnit | null }))]} />
     </View>
   );
 }

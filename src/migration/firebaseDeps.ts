@@ -21,6 +21,7 @@ export function firebaseMigrationDeps(): MigrationDeps {
     legacyAvailable: ShopzyLegacy.isAvailable,
     log: (message) => AppLog.info('account', message),
     appVersion: Constants.expoConfig?.version ?? '1.0.0',
+    environment: (Constants.expoConfig?.extra?.appEnv as string | undefined) ?? 'development',
     now: () => new Date(),
   };
 }

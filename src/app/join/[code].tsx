@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { AppNotice } from '../../services/UserFacingError';
 import { useAppState } from '../../runtime/RuntimeProvider';
+import { t } from '../../i18n';
 
 /** Opens from a shopzyy://join/<code> invite link: joins now if signed in, otherwise after sign-in. */
 export default function JoinRoute() {
@@ -13,7 +14,7 @@ export default function JoinRoute() {
   useEffect(() => {
     if (!runtime.ready || !code) return;
     void runtime.handleInviteLink(String(code)).then((error) => {
-      if (error) AppNotice.show("Couldn't join the household", error);
+      if (error) AppNotice.show(t("Couldn't join the household"), error);
       router.replace('/');
     });
   }, [runtime, runtime.ready, code, router]);

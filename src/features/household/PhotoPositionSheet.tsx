@@ -1,4 +1,5 @@
 import { Glyph, type SymbolName } from '../../components/Glyph';
+import { t } from '../../i18n';
 import { useMemo, useRef, useState } from 'react';
 import { Image, PanResponder, StyleSheet, Text, View } from 'react-native';
 import { Sheet } from '../../components/Sheet';
@@ -7,7 +8,7 @@ import { FocusedImage } from './HouseholdBackground';
 
 /** Shown right after a photo is picked: choose which part of it stays visible on the list before it's applied. */
 export function PhotoPositionSheet({ base64, onUse, onCancel }: { base64: string; onUse: (x: number, y: number) => void; onCancel: () => void }) {
-  const t = useTheme();
+  const th = useTheme();
   const uri = `data:image/jpeg;base64,${base64}`;
   const [focus, setFocus] = useState({ x: 0.5, y: 0.5 });
   const focusRef = useRef(focus);
@@ -34,16 +35,16 @@ export function PhotoPositionSheet({ base64, onUse, onCancel }: { base64: string
   }), []);
 
   return (
-    <Sheet visible title="Position photo" onCancel={onCancel} saveTitle="Use Photo" onSave={() => onUse(focus.x, focus.y)} scroll={false}>
+    <Sheet visible title={t('Position photo')} onCancel={onCancel} saveTitle={t('Use Photo')} onSave={() => onUse(focus.x, focus.y)} scroll={false}>
       <View style={{ flex: 1, alignItems: 'center', padding: 16, gap: 16 }}>
-        <View style={[s.frame, { borderColor: t.separator }]} {...pan.panHandlers}
+        <View style={[s.frame, { borderColor: th.separator }]} {...pan.panHandlers}
           onLayout={(e) => { box.current = { w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height }; }}
-          accessibilityLabel="Preview of the list background" accessibilityHint="Drag to choose which part of the photo is shown">
+          accessibilityLabel={t('Preview of the list background')} accessibilityHint={t('Drag to choose which part of the photo is shown')}>
           <FocusedImage uri={uri} focusX={focus.x} focusY={focus.y} />
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Glyph name="hand.draw" size={16} color={t.secondaryLabel} />
-          <Text style={{ fontSize: 15, color: t.secondaryLabel }}>Drag the photo to position it</Text>
+          <Glyph name="hand.draw" size={16} color={th.secondaryLabel} />
+          <Text style={{ fontSize: 15, color: th.secondaryLabel }}>{t('Drag the photo to position it')}</Text>
         </View>
       </View>
     </Sheet>

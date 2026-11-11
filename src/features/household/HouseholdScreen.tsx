@@ -1,11 +1,13 @@
 import { Glyph, type SymbolName } from '../../components/Glyph';
+import { t, tn } from '../../i18n';
+import Constants from 'expo-constants';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 import { LoadingOverlay } from '../../components/LogoAnimation';
 import { PickerRow } from '../../components/Sheet';
-import { ScreenOptions, useHeaderInset } from '../../components/NativeHeader';
+import { ScreenOptions } from '../../components/NativeHeader';
 import { FormRow, FormSection, MemberBadge } from '../../components/ui';
 import { COMMON_CURRENCIES, currencyTitle } from '../../lib/currencies';
 import { deviceCurrency } from '../../lib/format';
@@ -21,14 +23,14 @@ import { HouseholdSwitcher } from './HouseholdSwitcher';
 import { PhotoPositionSheet } from './PhotoPositionSheet';
 
 const BANNER_WIDTH = 1200;
+const linkHost = (Constants.expoConfig?.extra?.linkHost as string | undefined) ?? 'shopzyy-19bc2.web.app';
 
 export function HouseholdScreen({ household }: { household: Household }) {
-  const t = useTheme();
+  const th = useTheme();
   const runtime = useRuntime();
   const account = useAccount();
   useStoreVersion();
   const service = runtime.households;
-  const inset = useHeaderInset();
   const members = runtime.store.membersOf(household.id);
   const owner = members.find((m) => m.userRecordName === household.ownerRecordName);
 
@@ -67,31 +69,31 @@ export function HouseholdScreen({ household }: { household: Household }) {
     setInviting(true);
     const result = await runtime.createInvite(household.id);
     setInviting(false);
-    if ('error' in result) { Alert.alert("Couldn't create an invite", result.error); return; }
+    if ('error' in result) { Alert.alert(t("Couldn't create an invite"), result.error); return; }
     await Share.share({
-      message: `Join ${name} on Shopzyy! Open this link: shopzyy://join/${result.code}\n\nOr open Shopzyy and enter the invite code ${result.code}.`,
+      message: t('Join {name} on Shopzyy! Open this link: {link}\n\nOr open Shopzyy and enter the invite code {code}.', { name, link: `https://${linkHost}/join/${result.code}`, code: result.code }),
     });
   };
 
   // MARK: Removal
 
   const remove = () => {
-    const title = household.isOwnedByMe ? `Delete ${name}?` : `Leave ${name}?`;
+    const title = household.isOwnedByMe ? t('Delete {name}?', { name }) : t('Leave {name}?', { name });
     const message = household.isOwnedByMe
-      ? 'This deletes the list, history and members for everyone in the household.'
-      : "You'll stop seeing this household's list. Someone can invite you again later.";
+      ? t('This deletes the list, history and members for everyone in the household.')
+      : t("You'll stop seeing this household's list. Someone can invite you again later.");
     Alert.alert(title, message, [
-      { text: 'Cancel', style: 'cancel' },
+      { text: t('Cancel'), style: 'cancel' },
       {
-        text: household.isOwnedByMe ? 'Delete for everyone' : 'Leave', style: 'destructive',
+        text: household.isOwnedByMe ? t('Delete for everyone') : t('Leave'), style: 'destructive',
         onPress: async () => {
           setRemovalError(null);
           try {
             if ((await service.remove(household)) === 'alreadyGone') {
-              Alert.alert(`${name} no longer exists`, "It had already been deleted or you were removed from it, so it's been removed from this phone.");
+              Alert.alert(t('{name} no longer exists', { name }), t("It had already been deleted or you were removed from it, so it's been removed from this phone."));
             }
           } catch (error) {
-            setRemovalError((household.isOwnedByMe ? "Couldn't delete the household. " : "Couldn't leave the household. ") + UserFacingError.message(error));
+            setRemovalError((household.isOwnedByMe ? t("Couldn't delete the household.") : t("Couldn't leave the household.")) + ' ' + UserFacingError.message(error));
           }
         },
       },
@@ -101,108 +103,109 @@ export function HouseholdScreen({ household }: { household: Household }) {
   const selected = (theme: HouseholdTheme) => household.customImage === null && household.themeRaw === theme;
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.groupedBackground }}>
-      <ScreenOptions title="Household" left={<HouseholdSwitcher />} />
-      <ScrollView contentContainerStyle={{ paddingTop: inset, paddingBottom: 40 }} scrollIndicatorInsets={{ top: inset }} keyboardShouldPersistTaps="handled">
-        <FormSection header="Household">
+    <ScrollView style={{ flex: 1, backgroundColor: th.groupedBackground }} contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
+      <ScreenOptions largeTitle title={t('Household')} left={<HouseholdSwitcher />} />
+      <>
+        <FormSection first header={t('Household')}>
           {household.isOwnedByMe ? (
             <FormRow last>
-              <TextInput value={draftName} onChangeText={setDraftName} placeholder="Name" placeholderTextColor={t.tertiaryLabel}
-                style={{ flex: 1, fontSize: 17, color: t.label }} returnKeyType="done"
+              <TextInput value={draftName} onChangeText={setDraftName} placeholder={t('Name')} placeholderTextColor={th.tertiaryLabel}
+                style={{ flex: 1, fontSize: 17, color: th.label }} returnKeyType="done"
                 onSubmitEditing={() => service.rename(household, draftName)} onBlur={() => service.rename(household, draftName)} />
             </FormRow>
           ) : (
             <>
-              <Labeled label="Name" value={name} last={!owner} />
-              {owner ? <Labeled label="Created by" value={owner.name} last /> : null}
+              <Labeled label={t('Name')} value={name} last={!owner} />
+              {owner ? <Labeled label={t('Created by')} value={owner.name} last /> : null}
             </>
           )}
         </FormSection>
 
-        <FormSection header="Background" footer="Pick a mood or use your own photo. Everyone in the household sees it at the top of the list.">
-          <View style={{ padding: 16, gap: 12 }}>
-            <View style={s.preview}><HouseholdBackground household={household} /></View>
-            <View style={s.grid}>
+        <FormSection header={t('Background')} footer={t('Pick a mood or use your own photo. Everyone in the household sees it at the top of the list.')}>
+          {/* Three rows, like the Swift Form: the preview, the theme grid and the photo actions, each with its own separator. */}
+          <FormRow style={{ paddingHorizontal: 16, paddingVertical: 8 }}><View style={[s.preview, { flex: 1 }]}><HouseholdBackground household={household} /></View></FormRow>
+          <FormRow style={{ paddingHorizontal: 20, paddingVertical: 18 }}>
+            <View style={[s.grid, { flex: 1 }]}>
               {HOUSEHOLD_THEMES.map((theme) => (
-                <Pressable key={theme} onPress={() => service.setTheme(theme, household)} accessibilityLabel={`${themeTitle(theme)} background`}
-                  accessibilityState={{ selected: selected(theme) }} style={[s.theme, selected(theme) && { borderColor: t.label, borderWidth: 2 }]}>
+                <Pressable key={theme} onPress={() => service.setTheme(theme, household)} accessibilityLabel={t('{theme} background', { theme: t(themeTitle(theme)) })}
+                  accessibilityState={{ selected: selected(theme) }} style={[s.theme, selected(theme) && { borderColor: th.label, borderWidth: 2 }]}>
                   <HouseholdThemeArt theme={theme} emojiSize={22} />
-                  <Text style={s.themeName}>{themeTitle(theme)}</Text>
+                  <Text style={s.themeName}>{t(themeTitle(theme))}</Text>
                 </Pressable>
               ))}
             </View>
-          </View>
+          </FormRow>
           <FormRow last={household.customImage === null} onPress={() => void choosePhoto()}>
-            <Glyph name="photo" size={20} color={t.accent} style={{ marginRight: 12 }} />
-            <Text style={{ fontSize: 17, color: t.accent }}>{household.customImage === null ? 'Choose a photo' : 'Choose another photo'}</Text>
+            <Glyph name="photo" size={26} color={th.accent} style={{ marginRight: 14 }} />
+            <Text style={{ fontSize: 17, color: th.accent }}>{household.customImage === null ? t('Choose a photo') : t('Choose another photo')}</Text>
           </FormRow>
           {household.customImage !== null ? (
             <FormRow last onPress={() => service.setCustomImage(null, household)}>
-              <Glyph name="trash" size={20} color={t.red} style={{ marginRight: 12 }} />
-              <Text style={{ fontSize: 17, color: t.red }}>Remove photo</Text>
+              <Glyph name="trash" size={20} color={th.red} style={{ marginRight: 12 }} />
+              <Text style={{ fontSize: 17, color: th.red }}>{t('Remove photo')}</Text>
             </FormRow>
           ) : null}
         </FormSection>
 
-        <FormSection header="Members" footer="Share an invite link or code. When they open it, Shopzyy asks them to set up their profile and they join this household.">
+        <FormSection header={t('Members')} footer={t('Share an invite link or code. When they open it, Shopzyy asks them to set up their profile and they join this household.')}>
           {members.map((m) => (
             <FormRow key={m.id} style={{ gap: 12 }}>
               <MemberBadge emoji={m.emoji} colorHex={m.colorHex} size={32} />
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 17, color: t.label }}>{m.userRecordName === account.userRecordName ? `${m.name} (you)` : m.name}</Text>
-                {m.userRecordName === household.ownerRecordName ? <Text style={{ fontSize: 12, color: t.secondaryLabel }}>Owner</Text> : null}
+                <Text style={{ fontSize: 17, color: th.label }}>{m.userRecordName === account.userRecordName ? t('{name} (you)', { name: m.name }) : m.name}</Text>
+                {m.userRecordName === household.ownerRecordName ? <Text style={{ fontSize: 12, color: th.secondaryLabel }}>{t('Owner')}</Text> : null}
               </View>
-              <Text style={{ fontSize: 13, color: t.secondaryLabel }}>{purchaseSummary(runtime.store.allPurchases().filter((p) => p.member === m).length)}</Text>
+              <Text style={{ fontSize: 13, color: th.secondaryLabel }}>{purchaseSummary(runtime.store.allPurchases().filter((p) => p.member === m).length)}</Text>
             </FormRow>
           ))}
           <FormRow last onPress={() => void invite()} disabled={inviting}>
-            <Glyph name="person.badge.plus" size={20} color={t.accent} style={{ marginRight: 12 }} />
-            <Text style={{ fontSize: 17, color: t.accent }}>{inviting ? 'Creating invite…' : 'Invite people'}</Text>
+            <Glyph name="person.badge.plus" size={20} color={th.accent} style={{ marginRight: 12 }} />
+            <Text style={{ fontSize: 17, color: th.accent }}>{inviting ? t('Creating invite…') : t('Invite people')}</Text>
           </FormRow>
         </FormSection>
 
-        <FormSection header="Organising" footer="Add your own categories and rooms. You can also create them while editing an item.">
+        <FormSection header={t('Organising')} footer={t('Add your own categories and rooms. You can also create them while editing an item.')}>
           <FormRow last onPress={() => setOptions(true)}>
-            <Glyph name="tag" size={20} color={t.accent} style={{ marginRight: 12 }} />
-            <Text style={{ fontSize: 17, color: t.label, flex: 1 }}>Categories & rooms</Text>
-            <Glyph name="chevron.right" size={16} color={t.tertiaryLabel} />
+            <Glyph name="tag" size={20} color={th.accent} style={{ marginRight: 12 }} />
+            <Text style={{ fontSize: 17, color: th.label, flex: 1 }}>{t('Categories & rooms')}</Text>
+            <Glyph name="chevron.right" size={16} color={th.tertiaryLabel} />
           </FormRow>
         </FormSection>
 
-        <FormSection header="Shopping totals" footer="After a shopping trip, Shopzyy can ask what it cost. Automatic uses your phone's region; pick a currency to use the same one for everyone in the household.">
-          <PickerRow label="Currency" value={household.currencyCode} last onChange={(code) => service.setCurrency(code, household)}
-            options={[{ title: `Automatic (${currencyTitle(deviceCurrency())})`, value: '' }, ...COMMON_CURRENCIES.map((c) => ({ title: currencyTitle(c), value: c }))]} />
+        <FormSection header={t('Shopping totals')} footer={t("After a shopping trip, Shopzyy can ask what it cost. Automatic uses your phone's region; pick a currency to use the same one for everyone in the household.")}>
+          <PickerRow label={t('Currency')} value={household.currencyCode} last onChange={(code) => service.setCurrency(code, household)}
+            options={[{ title: t('Automatic ({currency})', { currency: currencyTitle(deviceCurrency()) }), value: '' }, ...COMMON_CURRENCIES.map((c) => ({ title: currencyTitle(c), value: c }))]} />
         </FormSection>
 
-        <FormSection footer="Notifications, sync, your profile, diagnostics and your data.">
+        <FormSection footer={t('Notifications, sync, your profile, diagnostics and your data.')}>
           <FormRow last onPress={() => setSettings(true)}>
-            <Glyph name="gearshape" size={20} color={t.accent} style={{ marginRight: 12 }} />
-            <Text style={{ fontSize: 17, color: t.label, flex: 1 }}>App settings</Text>
-            <Glyph name="chevron.right" size={16} color={t.tertiaryLabel} />
+            <Glyph name="gearshape" size={20} color={th.accent} style={{ marginRight: 12 }} />
+            <Text style={{ fontSize: 17, color: th.label, flex: 1 }}>{t('App settings')}</Text>
+            <Glyph name="chevron.right" size={16} color={th.tertiaryLabel} />
           </FormRow>
         </FormSection>
 
-        <FormSection footer={removalError ? <Text style={{ fontSize: 13, marginHorizontal: 32, marginTop: 7, color: t.red }}>{removalError}</Text> : undefined}>
-          <FormRow last onPress={remove}><Text style={{ fontSize: 17, color: t.red }}>{household.isOwnedByMe ? 'Delete household' : 'Leave household'}</Text></FormRow>
+        <FormSection footer={removalError ? <Text style={{ fontSize: 13, marginHorizontal: 32, marginTop: 7, color: th.red }}>{removalError}</Text> : undefined}>
+          <FormRow last onPress={remove}><Text style={{ fontSize: 17, color: th.red }}>{household.isOwnedByMe ? t('Delete household') : t('Leave household')}</Text></FormRow>
         </FormSection>
-      </ScrollView>
+      </>
 
-      <LoadingOverlay visible={preparingPhoto} message="Preparing photo…" />
+      <LoadingOverlay visible={preparingPhoto} message={t('Preparing photo…')} />
       {options ? <CustomOptionsSheet householdID={household.id} onClose={() => setOptions(false)} /> : null}
       {settings ? <SettingsSheet onClose={() => setSettings(false)} /> : null}
       {pendingPhoto ? (
         <PhotoPositionSheet base64={pendingPhoto} onCancel={() => setPendingPhoto(null)}
           onUse={(x, y) => { service.setCustomImage(pendingPhoto, household, x, y); setPendingPhoto(null); }} />
       ) : null}
-    </View>
+    </ScrollView>
   );
 }
 
-const purchaseSummary = (n: number) => (n === 1 ? '1 purchase' : `${n} purchases`);
+const purchaseSummary = (n: number) => tn('{n} purchase', '{n} purchases', n);
 
 function Labeled({ label, value, last }: { label: string; value: string; last?: boolean }) {
-  const t = useTheme();
-  return <FormRow last={last}><Text style={{ fontSize: 17, color: t.label, flex: 1 }}>{label}</Text><Text style={{ fontSize: 17, color: t.secondaryLabel }}>{value}</Text></FormRow>;
+  const th = useTheme();
+  return <FormRow last={last}><Text style={{ fontSize: 17, color: th.label, flex: 1 }}>{label}</Text><Text style={{ fontSize: 17, color: th.secondaryLabel }}>{value}</Text></FormRow>;
 }
 
 const s = StyleSheet.create({

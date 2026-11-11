@@ -24,6 +24,7 @@
     "deploy:prod": "firebase deploy --project production --only firestore,functions"
   },
   "dependencies": {
+    "@expo/ui": "~58.0.28",
     "@expo/vector-icons": "^15.0.2",
     "@invertase/react-native-apple-authentication": "^2.5.1",
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -34,6 +35,7 @@
     "@react-native-firebase/messaging": "^27.1.1",
     "@react-native-google-signin/google-signin": "^17.0.0",
     "expo": "~58.0.23",
+    "expo-blur": "~58.0.6",
     "expo-build-properties": "~58.0.12",
     "expo-clipboard": "~58.0.4",
     "expo-constants": "~58.0.15",

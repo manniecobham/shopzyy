@@ -4,7 +4,7 @@ import { SmartItemParser, type ParsedItem } from '../logic/SmartItemParser';
 import { SuggestionEngine } from '../logic/SuggestionEngine';
 import { sameName } from '../lib/text';
 import { builtIn, custom, type CategoryChoice, type RoomChoice } from '../models/choices';
-import { HOUSE_ROOMS, ITEM_CATEGORIES, categoryTitle, roomTitle, type MeasurementUnit } from '../models/enums';
+import { HOUSE_ROOMS, ITEM_CATEGORIES, categoryTitle, categoryTitleEnglish, roomTitle, roomTitleEnglish, type MeasurementUnit } from '../models/enums';
 import type { CustomOption, GroceryItem, HouseholdMember, OptionKind, PurchaseRecord } from '../models/entities';
 import { makeItem, makeOption, makePurchase } from '../models/factories';
 import {
@@ -176,7 +176,7 @@ export class ShoppingListService {
     if (!this.isHouseholdAvailable) return null;
     const clean = NameNormalizer.displayName(name);
     if (clean === '') return null;
-    const builtInMatch = ITEM_CATEGORIES.find((c) => sameName(categoryTitle(c), clean));
+    const builtInMatch = ITEM_CATEGORIES.find((c) => (sameName(categoryTitle(c), clean) || sameName(categoryTitleEnglish(c), clean)));
     if (builtInMatch) return builtIn(builtInMatch);
     return custom(this.customOption(clean, 'category'));
   }
@@ -185,7 +185,7 @@ export class ShoppingListService {
     if (!this.isHouseholdAvailable) return null;
     const clean = NameNormalizer.displayName(name);
     if (clean === '') return null;
-    const builtInMatch = HOUSE_ROOMS.find((r) => sameName(roomTitle(r), clean));
+    const builtInMatch = HOUSE_ROOMS.find((r) => (sameName(roomTitle(r), clean) || sameName(roomTitleEnglish(r), clean)));
     if (builtInMatch) return builtIn(builtInMatch);
     return custom(this.customOption(clean, 'room'));
   }

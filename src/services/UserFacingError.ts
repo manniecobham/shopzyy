@@ -1,10 +1,11 @@
 import { Observable } from '../lib/observable';
+import { t } from '../i18n';
 import { isHouseholdGone } from './ports';
 
 /** Thrown when someone tries to change a household that was deleted, or that they were removed from. */
 export class HouseholdUnavailableError extends Error {
   readonly householdGone = true;
-  constructor(message = 'This household no longer exists. It may have been deleted by its owner.') {
+  constructor(message = t('This household no longer exists. It may have been deleted by its owner.')) {
     super(message);
     this.name = 'HouseholdUnavailableError';
   }
@@ -23,32 +24,32 @@ export const UserFacingError = {
       case 'network-request-failed':
       case 'unavailable':
       case 'deadline-exceeded':
-        return "You're offline. Check your internet connection and try again.";
+        return t("You're offline. Check your internet connection and try again.");
       case 'unauthenticated':
       case 'user-token-expired':
       case 'requires-recent-login':
-        return 'Sign in again to continue.';
+        return t('Sign in again to continue.');
       case 'invalid-credential':
       case 'wrong-password':
       case 'user-not-found':
       case 'invalid-email':
-        return 'That email or password is not right.';
+        return t('That email or password is not right.');
       case 'email-already-in-use':
-        return 'There is already an account with that email. Try signing in instead.';
+        return t('There is already an account with that email. Try signing in instead.');
       case 'weak-password':
-        return 'Choose a longer password (at least 6 characters).';
+        return t('Choose a longer password (at least 6 characters).');
       case 'too-many-requests':
       case 'resource-exhausted':
-        return 'Too many attempts. Please try again in a moment.';
+        return t('Too many attempts. Please try again in a moment.');
       case 'not-found':
-        return 'This household no longer exists.';
+        return t('This household no longer exists.');
       case 'permission-denied':
-        return "You don't have permission to change this household.";
+        return t("You don't have permission to change this household.");
       case 'already-exists':
       case 'failed-precondition':
-        return (error as { message?: string }).message || 'Something went wrong. Please try again.';
+        return (error as { message?: string }).message || t('Something went wrong. Please try again.');
       default:
-        return 'Something went wrong. Please try again.';
+        return t('Something went wrong. Please try again.');
     }
   },
 

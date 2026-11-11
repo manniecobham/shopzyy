@@ -1,4 +1,5 @@
 import { Glyph, type SymbolName } from '../../components/Glyph';
+import { t as tr } from '../../i18n';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Sheet } from '../../components/Sheet';
@@ -34,9 +35,9 @@ export function TripTotalBanner({ onAdd, onSkip }: { onAdd: () => void; onSkip: 
   return (
     <View style={[s.banner, { backgroundColor: t.isDark ? 'rgba(44,44,46,0.95)' : 'rgba(255,255,255,0.95)' }]}>
       <Glyph name="cart.badge.questionmark" size={20} color={t.accent} />
-      <Text style={{ fontSize: 15, fontWeight: '600', color: t.label, flex: 1 }}>Done shopping?</Text>
-      <Pressable onPress={onAdd} style={[s.add, { backgroundColor: t.accent }]}><Text style={{ fontSize: 15, fontWeight: '600', color: '#fff' }}>Add total</Text></Pressable>
-      <Pressable onPress={onSkip} accessibilityLabel="Skip" hitSlop={8}><Glyph name="xmark" size={16} color={t.secondaryLabel} /></Pressable>
+      <Text style={{ fontSize: 15, fontWeight: '600', color: t.label, flex: 1 }}>{tr('Done shopping?')}</Text>
+      <Pressable onPress={onAdd} style={[s.add, { backgroundColor: t.accent }]}><Text style={{ fontSize: 15, fontWeight: '600', color: '#fff' }}>{tr('Add total')}</Text></Pressable>
+      <Pressable onPress={onSkip} accessibilityLabel={tr('Skip')} hitSlop={8}><Glyph name="xmark" size={16} color={t.secondaryLabel} /></Pressable>
     </View>
   );
 }
@@ -64,15 +65,15 @@ export function TripTotalSheet({ target, household, onSkip, onClose }: {
   };
 
   return (
-    <Sheet visible title={target.existing ? 'Edit total' : 'Shopping total'} cancelTitle={target.existing ? 'Cancel' : 'Skip'}
+    <Sheet visible title={target.existing ? tr('Edit total') : tr('Shopping total')} cancelTitle={target.existing ? tr('Cancel') : tr('Skip')}
       onCancel={() => { if (!target.existing) onSkip(); onClose(); }} onSave={save} saveDisabled={!(value > 0)}>
-      <FormSection header="How much was this shop?" footer={`${target.summary ? `${target.summary}\n` : ''}Amounts are in ${currency}. Change the currency in Household settings.`}>
+      <FormSection header={tr('How much was this shop?')} footer={`${target.summary ? `${target.summary}\n` : ''}${tr('Amounts are in {currency}. Change the currency in Household settings.', { currency })}`}>
         <FormRow style={{ gap: 8 }}>
           <Text style={{ fontSize: 22, color: t.secondaryLabel }}>{currencySymbol(currency)}</Text>
           <TextInput autoFocus value={amount} onChangeText={setAmount} keyboardType="decimal-pad" placeholder="0.00" placeholderTextColor={t.tertiaryLabel}
             style={{ flex: 1, fontSize: 22, fontWeight: '600', color: t.label }} />
         </FormRow>
-        <FormRow last><TextInput value={store} onChangeText={setStore} placeholder="Store (optional)" placeholderTextColor={t.tertiaryLabel} style={{ flex: 1, fontSize: 17, color: t.label }} /></FormRow>
+        <FormRow last><TextInput value={store} onChangeText={setStore} placeholder={tr('Store (optional)')} placeholderTextColor={t.tertiaryLabel} style={{ flex: 1, fontSize: 17, color: t.label }} /></FormRow>
       </FormSection>
     </Sheet>
   );

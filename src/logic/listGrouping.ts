@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 import { categoryChoiceLabel, categorySortRank, roomChoiceLabel } from '../models/choices';
 import type { ListGrouping } from '../models/enums';
 import type { GroceryItem } from '../models/entities';
@@ -28,18 +29,18 @@ function headerFor(item: GroceryItem, grouping: ListGrouping): Header {
         const key = room.kind === 'builtIn' ? `room:${room.value}` : `room:custom:${room.option.id}`;
         return { key, title: roomChoiceLabel(room), rank: 0 };
       }
-      return { key: 'room:none', title: 'No room', rank: 1 };
+      return { key: 'room:none', title: t('No room'), rank: 1 };
     }
     case 'assignee':
       if (item.assignedTo) {
         return { key: `assignee:${item.assignedTo.userRecordName}`, title: `${item.assignedTo.emoji}  ${item.assignedTo.name}`, rank: 0 };
       }
-      return { key: 'assignee:none', title: 'Anyone', rank: 1 };
+      return { key: 'assignee:none', title: t('Anyone'), rank: 1 };
     case 'recipient': {
       const r = getRecipient(item);
-      if (r?.kind === 'member') return { key: `recipient:${r.member.userRecordName}`, title: `For ${r.member.name}`, rank: 0 };
-      if (r?.kind === 'named') return { key: `recipient:name:${r.name.toLowerCase()}`, title: `For ${r.name}`, rank: 0 };
-      return { key: 'recipient:none', title: 'Everyone', rank: 1 };
+      if (r?.kind === 'member') return { key: `recipient:${r.member.userRecordName}`, title: t('For {name}',{name:r.member.name}), rank: 0 };
+      if (r?.kind === 'named') return { key: `recipient:name:${r.name.toLowerCase()}`, title: t('For {name}',{name:r.name}), rank: 0 };
+      return { key: 'recipient:none', title: t('Everyone'), rank: 1 };
     }
   }
 }

@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, AppState, StyleSheet, View } from 'react-native';
+import { language, refreshLanguage, subscribeLanguage, t as tr } from '../i18n';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { MigrationView } from '../features/account/MigrationView';
@@ -11,8 +12,15 @@ import { AppNotice } from '../services/UserFacingError';
 import { useTheme } from '../theme/theme';
 
 export default function RootLayout() {
+  // Remounts the tree when the language changes (the phone's, or the in-app override on Android < 13), so every
+  // `t()` call re-reads it without each component subscribing.
+  const lang = useSyncExternalStore(subscribeLanguage, language);
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (s) => { if (s === 'active') refreshLanguage(); });
+    return () => sub.remove();
+  }, []);
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1 }} key={lang}>
       <SafeAreaProvider>
         <RuntimeProvider>
           <Shell />
@@ -38,7 +46,7 @@ function Shell() {
 
   useEffect(() => {
     const n = AppNotice.current;
-    if (n) Alert.alert(n.title, n.detail, [{ text: 'OK', onPress: () => AppNotice.dismiss() }]);
+    if (n) Alert.alert(n.title, n.detail, [{ text: tr('OK'), onPress: () => AppNotice.dismiss() }]);
   }, [noticeVersion]);
 
   const migrating = !!account.uid && (runtime.migration.state === 'running' || runtime.migration.state === 'failed');

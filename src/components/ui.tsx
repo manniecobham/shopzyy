@@ -1,17 +1,19 @@
 import { Glyph, type SymbolName } from './Glyph';
 import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
-import { colorFromHex, useTheme } from '../theme/theme';
+import { CARD_RADIUS, colorFromHex, useTheme } from '../theme/theme';
 
 export type IconName = SymbolName;
 
 /** A grouped-list section like SwiftUI's `Section` inside a `Form`. */
-export function FormSection({ header, footer, children }: { header?: string; footer?: ReactNode; children: ReactNode }) {
+export function FormSection({ header, footer, children, first }: { header?: string; footer?: ReactNode; children: ReactNode; first?: boolean }) {
   const t = useTheme();
+  // SwiftUI Form spacing: sections sit ~35 pt apart (less when a header takes some of it); the first one hugs the large title.
+  const marginTop = first ? (header ? 11 : 0) : header ? 28 : 35;
   return (
-    <View style={s.section}>
-      {header ? <Text style={[s.header, { color: t.secondaryLabel }]}>{header.toUpperCase()}</Text> : null}
-      <View style={[s.card, { backgroundColor: t.cell }]}>{children}</View>
+    <View style={{ marginTop }}>
+      {header ? <Text style={[s.header, { color: t.secondaryLabel }]}>{header}</Text> : null}
+      <View style={[s.card, { backgroundColor: t.cell, borderRadius: CARD_RADIUS }]}>{children}</View>
       {typeof footer === 'string' ? <Text style={[s.footer, { color: t.secondaryLabel }]}>{footer}</Text> : footer}
     </View>
   );
@@ -22,11 +24,14 @@ export function FormRow({ children, last, style, onPress, disabled }: {
   children: ReactNode; last?: boolean; style?: StyleProp<ViewStyle>; onPress?: () => void; disabled?: boolean;
 }) {
   const t = useTheme();
-  const inner = [s.row, !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.separator }, style];
-  if (!onPress) return <View style={inner}>{children}</View>;
+  const inner = [s.row, style];
+  // The separator starts 20 pt in from the card's edge, like a SwiftUI Form.
+  const line = last ? null : <View pointerEvents="none" style={{ position: 'absolute', left: 20, right: 20, bottom: 0, height: StyleSheet.hairlineWidth, backgroundColor: t.separator }} />;
+  if (!onPress) return <View style={inner}>{children}{line}</View>;
   return (
     <Pressable onPress={onPress} disabled={disabled} style={({ pressed }) => [inner, pressed && { backgroundColor: t.fill }]}>
       {children}
+      {line}
     </Pressable>
   );
 }
@@ -50,14 +55,14 @@ export function ProminentButton({ title, onPress, disabled, busy, style }: {
 }
 
 /** Plain text button in the accent colour. */
-export function TextButton({ title, onPress, destructive, disabled, style }: {
-  title: string; onPress: () => void; destructive?: boolean; disabled?: boolean; style?: StyleProp<TextStyle>;
+export function TextButton({ title, onPress, destructive, disabled, style, color }: {
+  title: string; onPress: () => void; destructive?: boolean; disabled?: boolean; style?: StyleProp<TextStyle>; color?: string;
 }) {
   const t = useTheme();
   return (
     <Pressable accessibilityRole="button" onPress={onPress} disabled={disabled} hitSlop={8}>
       {({ pressed }) => (
-        <Text style={[{ fontSize: 17, color: destructive ? t.red : t.accent, opacity: disabled ? 0.4 : pressed ? 0.5 : 1 }, style]}>{title}</Text>
+        <Text style={[{ fontSize: 17, color: color ?? (destructive ? t.red : t.accent), opacity: disabled ? 0.4 : pressed ? 0.5 : 1 }, style]}>{title}</Text>
       )}
     </Pressable>
   );
@@ -78,11 +83,10 @@ export function Icon({ name, size = 22, color }: { name: IconName; size?: number
 }
 
 const s = StyleSheet.create({
-  section: { marginTop: 22 },
-  header: { fontSize: 13, marginLeft: 32, marginBottom: 7 },
-  card: { marginHorizontal: 16, borderRadius: 10, overflow: 'hidden' },
-  footer: { fontSize: 13, marginHorizontal: 32, marginTop: 7 },
-  row: { minHeight: 44, paddingHorizontal: 16, paddingVertical: 10, flexDirection: 'row', alignItems: 'center' },
+  header: { fontSize: 17, fontWeight: '600', marginLeft: 36, marginBottom: 8 },
+  card: { marginHorizontal: 16, overflow: 'hidden' },
+  footer: { fontSize: 13, marginHorizontal: 36, marginTop: 8 },
+  row: { minHeight: 51, paddingHorizontal: 20, paddingVertical: 12, flexDirection: 'row', alignItems: 'center' },
   prominent: { minHeight: 50, borderRadius: 14, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 },
   prominentText: { color: '#fff', fontSize: 17, fontWeight: '600' },
 });

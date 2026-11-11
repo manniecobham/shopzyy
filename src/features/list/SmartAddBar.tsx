@@ -1,4 +1,5 @@
 import { Glyph, type SymbolName } from '../../components/Glyph';
+import { t as tr } from '../../i18n';
 import { useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { rankAutocomplete, type AutocompleteCandidate } from '../../logic/AutocompleteRanker';
@@ -68,7 +69,7 @@ export function SmartAddBar({ catalog, onSubmit }: { catalog: GroceryItem[]; onS
       {focused && matches.length > 0 ? (
         <ScrollView horizontal keyboardShouldPersistTaps="always" showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }} style={{ marginBottom: 8 }}>
           {matches.map((m) => (
-            <Pressable key={m.id} onPress={() => complete(m)} accessibilityHint={m.isOnList ? 'Already on the list' : 'Adds to the list'}
+            <Pressable key={m.id} onPress={() => complete(m)} accessibilityHint={m.isOnList ? tr('Already on the list') : tr('Adds to the list')}
               style={[s.chip, { backgroundColor: colorFromHex(t.accent, m.isOnList ? 0.08 : 0.15) }]}>
               <Glyph name={m.isOnList ? 'checkmark' : 'plus'} size={13} color={t.accent} />
               <Text style={{ fontSize: 15, color: t.label }}>{m.name}</Text>
@@ -77,18 +78,18 @@ export function SmartAddBar({ catalog, onSubmit }: { catalog: GroceryItem[]; onS
         </ScrollView>
       ) : null}
 
-      {parsed.length > 0 ? <Text numberOfLines={2} style={[s.preview, { color: t.secondaryLabel }]} accessibilityLabel={`Will add ${preview}`}>{preview}</Text> : null}
+      {parsed.length > 0 ? <Text numberOfLines={2} style={[s.preview, { color: t.secondaryLabel }]} accessibilityLabel={tr('Will add {items}', { items: preview })}>{preview}</Text> : null}
 
       <View style={[s.field, { backgroundColor: t.fill }]}>
         <Glyph name="sparkles" size={18} color={t.accent} />
         <TextInput
           ref={input} value={text} onChangeText={setText} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
-          placeholder="Add items, e.g. 2 kg rice, milk x2" placeholderTextColor={t.tertiaryLabel}
+          placeholder={tr('Add items, e.g. 2 kg rice, milk x2')} placeholderTextColor={t.tertiaryLabel}
           style={{ flex: 1, fontSize: 17, color: t.label, paddingVertical: 0 }} autoCorrect={false} returnKeyType="done"
           onSubmitEditing={submit} blurOnSubmit={false}
         />
         {trimmed ? (
-          <Pressable onPress={submit} accessibilityLabel="Add to list" hitSlop={8}><Glyph name="arrow.up.circle.fill" size={30} color={t.accent} /></Pressable>
+          <Pressable onPress={submit} accessibilityLabel={tr('Add to list')} hitSlop={8}><Glyph name="arrow.up.circle.fill" size={30} color={t.accent} /></Pressable>
         ) : null}
       </View>
     </View>

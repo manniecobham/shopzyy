@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { t } from '../../i18n';
 import { ScrollView, StyleSheet, Text, TextInput, View, Pressable } from 'react-native';
 import { Glyph, type SymbolName } from '../../components/Glyph';
 import { FormRow, FormSection, ProminentButton } from '../../components/ui';
@@ -11,7 +12,7 @@ import { colorFromHex, useTheme } from '../../theme/theme';
 export function ProfileFormView({ profile, submitTitle, onSubmit }: {
   profile: UserProfile; submitTitle: string; onSubmit: (profile: UserProfile) => void;
 }) {
-  const t = useTheme();
+  const th = useTheme();
   const [name, setName] = useState(profile.name);
   const [emoji, setEmoji] = useState(profile.emoji);
   const [colorHex, setColorHex] = useState(profile.colorHex);
@@ -23,31 +24,31 @@ export function ProfileFormView({ profile, submitTitle, onSubmit }: {
   };
 
   return (
-    <ScrollView style={{ backgroundColor: t.groupedBackground }} contentContainerStyle={{ paddingBottom: 40 }} keyboardShouldPersistTaps="handled" contentInsetAdjustmentBehavior="automatic">
-      <FormSection footer="This is how you appear to everyone in your households.">
+    <ScrollView style={{ backgroundColor: th.groupedBackground }} contentContainerStyle={{ paddingBottom: 40 }} keyboardShouldPersistTaps="handled" contentInsetAdjustmentBehavior="automatic">
+      <FormSection footer={t('This is how you appear to everyone in your households.')}>
         <FormRow last style={{ gap: 14, paddingVertical: 12 }}>
           <View style={[s.avatar, { backgroundColor: colorFromHex(colorHex, 0.22) }]}><Text style={{ fontSize: 28 }}>{emoji}</Text></View>
           <TextInput
-            style={{ flex: 1, fontSize: 20, color: t.label }}
-            placeholder="Your name" placeholderTextColor={t.tertiaryLabel}
+            style={{ flex: 1, fontSize: 20, color: th.label }}
+            placeholder={t('Your name')} placeholderTextColor={th.tertiaryLabel}
             value={name} onChangeText={setName} textContentType="givenName" autoFocus={trimmed === ''}
             returnKeyType="done" onSubmitEditing={submit} maxLength={40}
           />
         </FormRow>
       </FormSection>
 
-      <FormSection header="Avatar">
+      <FormSection header={t('Avatar')}>
         <View style={s.grid}>
           {EMOJI_CHOICES.map((choice) => (
             <Pressable key={choice} onPress={() => setEmoji(choice)} accessibilityState={{ selected: choice === emoji }}
-              style={[s.emojiCell, choice === emoji && { backgroundColor: colorFromHex(t.accent, 0.18) }]}>
+              style={[s.emojiCell, choice === emoji && { backgroundColor: colorFromHex(th.accent, 0.18) }]}>
               <Text style={{ fontSize: 26 }}>{choice}</Text>
             </Pressable>
           ))}
         </View>
       </FormSection>
 
-      <FormSection header="Colour">
+      <FormSection header={t('Colour')}>
         <View style={s.palette}>
           {MEMBER_PALETTE.map((hex) => (
             <Pressable key={hex} onPress={() => setColorHex(hex)} accessibilityState={{ selected: hex === colorHex }} style={{ flex: 1, alignItems: 'center' }}>

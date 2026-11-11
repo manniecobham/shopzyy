@@ -16,6 +16,8 @@ export interface MigrationDeps {
   /** A plain-language line for Settings → Diagnostics. */
   log?(message: string): void;
   appVersion: string;
+  /** Which Firebase project this build talks to: "development" or "production". */
+  environment: string;
   now(): Date;
 }
 
@@ -60,7 +62,7 @@ export class MigrationService {
     const reliable = this.deps.legacyAvailable;
     this.deps.log?.(
       hasLegacy
-        ? `Found ${data.households.length} household(s) and ${data.recordCount} records from the old app on this phone.`
+        ? `Found ${data.households.length} household(s) and ${data.recordCount} records from the old app on this phone (importing into the ${this.deps.environment} account).`
         : reliable
           ? 'No data from the old app was found on this phone.'
           : 'This build cannot read the old app\'s data.',
@@ -95,6 +97,8 @@ export class MigrationService {
 
     await this.deps.setUserDoc(uid, {
       migrationState: 'done', migratedAt: this.deps.now(), appVersion: this.deps.appVersion, legacyUserKey: userKey, households: moved,
+      // Which backend received it. The old app's data is whichever CloudKit environment that build used (Xcode = Development, TestFlight/App Store = Production).
+      migratedInto: this.deps.environment,
     });
     this.deps.log?.(`Moved ${moved} household(s) to your account.`);
     return { state: 'done', reliable: true, userRecordName: userKey, defaults, households: moved, records: data.recordCount };

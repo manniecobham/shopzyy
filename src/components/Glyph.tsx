@@ -64,7 +64,7 @@ export type SymbolName = keyof typeof ICONS;
 /** Brand logos aren't SF Symbols; they come from the icon font. */
 type BrandName = 'logo-google';
 
-export function Glyph({ name, size = 22, color, style, onPress, accessibilityLabel, accessibilityRole, hitSlop }: {
+export function Glyph({ name, size = 22, color, style, onPress, accessibilityLabel, accessibilityRole, hitSlop, weight }: {
   name: SymbolName | BrandName;
   size?: number;
   /** Defaults to the accent colour. */
@@ -74,6 +74,8 @@ export function Glyph({ name, size = 22, color, style, onPress, accessibilityLab
   accessibilityLabel?: string;
   accessibilityRole?: AccessibilityRole;
   hitSlop?: number;
+  /** SF Symbol weight (iOS), e.g. 'semibold' or 'bold'. */
+  weight?: 'regular' | 'medium' | 'semibold' | 'bold';
 }) {
   const t = useTheme();
   const tint = color ?? t.accent;
@@ -84,6 +86,7 @@ export function Glyph({ name, size = 22, color, style, onPress, accessibilityLab
         name={{ ios: name, android: ICONS[name], web: ICONS[name] }}
         size={size}
         tintColor={tint}
+        weight={weight}
         resizeMode="scaleAspectFit"
         style={onPress ? { width: size, height: size } : [{ width: size, height: size }, style as never]}
         accessibilityLabel={accessibilityLabel}

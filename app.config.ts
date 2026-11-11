@@ -9,7 +9,14 @@ import type { ExpoConfig } from 'expo/config';
  * Pick one with APP_ENV, e.g. `APP_ENV=production npx expo prebuild --clean`.
  */
 const APP_ENV = process.env.APP_ENV === 'production' ? 'production' : 'development';
+/** Where invite links live: Firebase Hosting on each project's default domain. */
+const LINK_HOST = APP_ENV === 'production' ? 'shopzyy-19bc2.web.app' : 'shopzyy-8e62c.web.app';
 const FIREBASE_DIR = `./firebase/${APP_ENV}`;
+
+// Demo mode (sample data, no sign-in) is for development only. Refuse to build a production app with it.
+if (APP_ENV === 'production' && process.env.EXPO_PUBLIC_DEMO === '1') {
+  throw new Error('EXPO_PUBLIC_DEMO=1 is not allowed for production builds (APP_ENV=production).');
+}
 /**
  * The Firebase files are gitignored, so cloud (EAS) builds get them from EAS file variables instead:
  * GOOGLE_SERVICES_PLIST (iOS) and GOOGLE_SERVICES_JSON (Android) hold the path of the uploaded file.
@@ -39,6 +46,8 @@ const config: ExpoConfig = {
   scheme: 'shopzyy',
   version: '1.1.0',
   orientation: 'portrait',
+  // Per-app language (iOS Settings > Apps > Shopzyy > Language; Android 13+ app language) and localised permission prompts.
+  locales: { es: './locales/es.json', fr: './locales/fr.json', nl: './locales/nl.json', de: './locales/de.json', it: './locales/it.json' },
   icon: './assets/icon.png',
   userInterfaceStyle: 'automatic',
   ios: {
@@ -54,6 +63,7 @@ const config: ExpoConfig = {
       usesNonExemptEncryption: false
     },
     entitlements: { 'com.apple.developer.applesignin': ['Default'] },
+    associatedDomains: [`applinks:${LINK_HOST}`],
   },
   android: {
     package: 'com.manniedevteam.shopzyy',
@@ -65,6 +75,12 @@ const config: ExpoConfig = {
       monochromeImage: './assets/android-icon-monochrome.png',
     },
     predictiveBackGestureEnabled: false,
+    intentFilters: [{
+      action: 'VIEW',
+      autoVerify: true,
+      data: [{ scheme: 'https', host: LINK_HOST, pathPrefix: '/join' }],
+      category: ['BROWSABLE', 'DEFAULT'],
+    }],
   },
   plugins: [
     // Android: resolves the notification-colour clash between expo-notifications and Firebase Messaging. Keep it first.
@@ -80,11 +96,12 @@ const config: ExpoConfig = {
     ['expo-notifications', { icon: './assets/notification-icon.png', color: '#1E9E68' }],
     // Same as the Swift app's launch screen: solid brand green (the in-app splash with the cart follows it).
     ['expo-splash-screen', { backgroundColor: '#1E9E68', dark: { backgroundColor: '#1E9E68' } }],
-    'expo-localization',
+    ['expo-localization', { supportedLocales: { ios: ['en', 'es', 'fr', 'nl', 'de', 'it'], android: ['en', 'es', 'fr', 'nl', 'de', 'it'] } }],
   ],
   extra: {
     googleWebClientId: googleWebClientId(),
     appEnv: APP_ENV,
+    linkHost: LINK_HOST,
     eas: { projectId: '36b49906-3fda-47f9-9edd-6d9417b05f17' },
   },
   experiments: { typedRoutes: true },

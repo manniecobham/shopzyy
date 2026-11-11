@@ -14,6 +14,7 @@ function setup(over: Partial<MigrationDeps> = {}, rows: LegacyStore | null = sto
     claim: async (p) => { calls.claims.push(p); return { created: true }; },
     importRecords: async (p) => { calls.imports.push({ kind: p.kind, count: p.docs.length }); return { created: p.docs.length }; },
     legacyAvailable: true,
+    environment: 'development',
     appVersion: '1.0.0',
     now: () => new Date(0),
     ...over,
@@ -31,7 +32,7 @@ describe('MigrationService', () => {
     expect(calls.claims).toHaveLength(1);
     expect(calls.claims[0]).toMatchObject({ householdID: '11111111-2222-3333-4444-555555555555', userRecordName: '_owner123' });
     expect(calls.imports.map((i) => i.kind)).toEqual(['items', 'purchases', 'tripTotals']);
-    expect(calls.userDocs.at(-1)).toMatchObject({ migrationState: 'done', legacyUserKey: '_owner123', households: 1 });
+    expect(calls.userDocs.at(-1)).toMatchObject({ migrationState: 'done', legacyUserKey: '_owner123', households: 1, migratedInto: 'development' });
     expect(progress.at(-1)).toBeGreaterThan(0);
   });
 

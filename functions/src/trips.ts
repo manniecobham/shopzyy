@@ -3,7 +3,8 @@ import { getFirestore, Timestamp, type QueryDocumentSnapshot } from 'firebase-ad
 import { getMessaging, type Message } from 'firebase-admin/messaging';
 import { onDocumentCreated, onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
-import { TRIP_MAX_GAP_MS, TRIP_QUIET_PERIOD_MS, groupTrips, totalMatchesTrip, tripBody, tripContaining, type Trip } from './tripLogic';
+import { MESSAGES, normalizeLang, tripSummary, tripTitle, type Lang } from './messages';
+import { TRIP_MAX_GAP_MS, TRIP_QUIET_PERIOD_MS, groupTrips, totalMatchesTrip, tripContaining, type Trip } from './tripLogic';
 
 // Background "someone went shopping" alerts: the server counterpart of the app's ActivityMonitor,
 // for when the app isn't running. One push per trip, sent once the buyer has been quiet for five
@@ -75,21 +76,32 @@ async function deliver(trip: Trip, originDeviceID: string): Promise<void> {
   const household = await db.doc(`households/${householdID}`).get();
   if (!household.exists) return;
   const memberUIDs = (household.get('memberUIDs') as string[] | undefined) ?? [];
-  const householdName = (household.get('name') as string) || 'Shared household';
+  const householdName = (household.get('name') as string) || '';
 
   const buyer = await db.doc(`households/${householdID}/members/${buyerKey}`).get();
-  const buyerName = (buyer.get('name') as string) || 'Someone';
+  const buyerName = (buyer.get('name') as string) || '';
 
   const itemRefs = [...new Set(trip.purchases.map((p) => p.itemID).filter((x): x is string => !!x))].map((id) => db.doc(`households/${householdID}/items/${id}`));
   const items = itemRefs.length ? await db.getAll(...itemRefs) : [];
-  const nameByItem = new Map(items.map((i) => [i.id, (i.get('name') as string) || 'an item']));
-  const names = trip.purchases.map((p) => (p.itemID ? nameByItem.get(p.itemID) : undefined) ?? 'an item').reverse(); // newest first, like Activity
+  const nameByItem = new Map(items.map((i) => [i.id, (i.get('name') as string) || '']));
+  const rawNames = trip.purchases.map((p) => (p.itemID ? nameByItem.get(p.itemID) : undefined) || '').reverse(); // newest first, like Activity
 
   const totals = await db.collection(`households/${householdID}/tripTotals`).where('enteredBy', '==', buyerKey).get();
   const match = totals.docs.find((t) => totalMatchesTrip({ tripKey: t.get('tripKey') as string, enteredBy: buyerKey, tripEndedAtMs: ms(t.get('tripEndedAt')) }, trip));
-  const totalText = match ? formatMoney(match.get('amount') as number, match.get('currencyCode') as string) : null;
 
-  const body = tripBody(names, 3, totalText);
+  // Text is composed per recipient language (each device stores its own), once per language.
+  const composed = new Map<Lang, { title: string; body: string; household: string }>();
+  const textFor = (lang: Lang) => {
+    let c = composed.get(lang);
+    if (!c) {
+      const m = MESSAGES[lang];
+      const names = rawNames.map((n) => n || m.anItem);
+      const totalText = match ? formatMoney(match.get('amount') as number, match.get('currencyCode') as string, lang) : null;
+      c = { title: tripTitle(buyerName || m.someone, lang), body: tripSummary(names, 3, totalText, lang), household: householdName || m.sharedHousehold };
+      composed.set(lang, c);
+    }
+    return c;
+  };
   const messaging = getMessaging();
   const invalid: string[] = [];
 
@@ -100,13 +112,16 @@ async function deliver(trip: Trip, originDeviceID: string): Promise<void> {
 
     // The household name only helps people who are in more than one.
     const count = (await db.collection('households').where('memberUIDs', 'array-contains', uid).count().get()).data().count;
-    const messages: Message[] = targets.map((d) => ({
+    const messages: Message[] = targets.map((d) => {
+      const text = textFor(normalizeLang(d.get('language')));
+      return {
       token: d.get('token') as string,
-      notification: { title: `${buyerName} went shopping`, body: count > 1 ? `${householdName}: ${body}` : body },
+      notification: { title: text.title, body: count > 1 ? `${text.household}: ${text.body}` : text.body },
       data: { kind: 'trip', tripId: trip.id, householdID },
       apns: { headers: { 'apns-collapse-id': trip.id.slice(0, 64) }, payload: { aps: { 'thread-id': 'trips', sound: 'default' } } },
       android: { notification: { tag: trip.id, channelId: 'default' } },
-    }));
+      };
+    });
     const result = await messaging.sendEach(messages);
     result.responses.forEach((r, i) => {
       const code = r.error?.code ?? '';
@@ -116,7 +131,7 @@ async function deliver(trip: Trip, originDeviceID: string): Promise<void> {
   await Promise.all(invalid.map((path) => db.doc(path).delete()));
 }
 
-function formatMoney(amount: number, code: string): string {
-  try { return new Intl.NumberFormat('en', { style: 'currency', currency: code }).format(amount); } catch { return `${amount.toFixed(2)} ${code}`; }
+function formatMoney(amount: number, code: string, lang: Lang): string {
+  try { return new Intl.NumberFormat(lang, { style: 'currency', currency: code }).format(amount); } catch { return `${amount.toFixed(2)} ${code}`; }
 }
 

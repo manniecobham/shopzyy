@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { t } from '../../i18n';
 import { Alert, Pressable } from 'react-native';
 import { ActionMenu, Sheet } from '../../components/Sheet';
 import { MemberBadge } from '../../components/ui';
@@ -12,9 +13,9 @@ export function EditProfileSheet({ onClose }: { onClose: () => void }) {
   const account = useAccount();
   const { households } = useRuntime();
   return (
-    <Sheet visible title="Your profile" onCancel={onClose} scroll={false}>
+    <Sheet visible title={t('Your profile')} onCancel={onClose} scroll={false}>
       {account.profile ? (
-        <ProfileFormView profile={account.profile} submitTitle="Save" onSubmit={(updated) => {
+        <ProfileFormView profile={account.profile} submitTitle={t('Save')} onSubmit={(updated) => {
           account.saveProfile(updated);
           if (account.userRecordName) households.updateProfile(updated, account.userRecordName);
           onClose();
@@ -33,23 +34,23 @@ export function ProfileMenu({ member }: { member: HouseholdMember | null }) {
   const [settings, setSettings] = useState(false);
 
   const confirmDelete = () => Alert.alert(
-    'Delete all your Shopzyy data?',
-    "Households you created are deleted for everyone in them. You'll leave households others invited you to. Your account and profile are removed. This can't be undone.",
-    [{ text: 'Cancel', style: 'cancel' }, {
-      text: 'Delete my data', style: 'destructive',
-      onPress: async () => { const error = await runtime.deleteMyData(); if (error) Alert.alert("Couldn't delete everything", error); },
+    t('Delete all your Shopzyy data?'),
+    t("Households you created are deleted for everyone in them. You'll leave households others invited you to. Your account and profile are removed. This can't be undone."),
+    [{ text: t('Cancel'), style: 'cancel' }, {
+      text: t('Delete my data'), style: 'destructive',
+      onPress: async () => { const error = await runtime.deleteMyData(); if (error) Alert.alert(t("Couldn't delete everything"), error); },
     }],
   );
 
   return (
     <>
-      <Pressable onPress={() => setMenu(true)} accessibilityLabel="Your profile">
+      <Pressable onPress={() => setMenu(true)} accessibilityLabel={t('Your profile')}>
         <MemberBadge emoji={member?.emoji ?? account.profile?.emoji} colorHex={member?.colorHex ?? account.profile?.colorHex} size={30} />
       </Pressable>
-      <ActionMenu visible={menu} title={account.profile?.name ?? 'You'} onClose={() => setMenu(false)} sections={[[
-        { title: 'Edit profile', icon: 'person.crop.circle', onPress: () => setEditing(true) },
-        { title: 'Settings', icon: 'gearshape', onPress: () => setSettings(true) },
-        { title: 'Delete my data…', icon: 'trash', destructive: true, onPress: confirmDelete },
+      <ActionMenu visible={menu} title={account.profile?.name ?? t('You')} onClose={() => setMenu(false)} sections={[[
+        { title: t('Edit profile'), icon: 'person.crop.circle', onPress: () => setEditing(true) },
+        { title: t('Settings'), icon: 'gearshape', onPress: () => setSettings(true) },
+        { title: t('Delete my data…'), icon: 'trash', destructive: true, onPress: confirmDelete },
       ]]} />
       {editing ? <EditProfileSheet onClose={() => setEditing(false)} /> : null}
       {settings ? <SettingsSheet onClose={() => setSettings(false)} /> : null}

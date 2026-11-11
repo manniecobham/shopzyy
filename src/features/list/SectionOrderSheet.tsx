@@ -1,4 +1,5 @@
 import { Glyph, type SymbolName } from '../../components/Glyph';
+import { t as tr } from '../../i18n';
 import { useState } from 'react';
 import { Pressable, Text } from 'react-native';
 import { Sheet } from '../../components/Sheet';
@@ -28,14 +29,14 @@ export function SectionOrderSheet({ household, sections, onClose }: { household:
   };
 
   return (
-    <Sheet visible title={`Order by ${groupingTitle(household.groupingRaw).toLowerCase()}`} onCancel={onClose}
+    <Sheet visible title={tr('Order by {grouping}', { grouping: groupingTitle(household.groupingRaw).toLowerCase() })} onCancel={onClose}
       onSave={() => { households.setSectionOrder(order.map((o) => o.key), household); onClose(); }}>
-      <FormSection footer={`Move sections into the order you shop in. Everyone in ${householdDisplayName(household)} sees this order.`}>
+      <FormSection footer={tr('Move sections into the order you shop in. Everyone in {name} sees this order.', { name: householdDisplayName(household) })}>
         {order.map((o, i) => (
           <FormRow key={o.key} last={i === order.length - 1} style={{ gap: 8 }}>
             <Text style={{ flex: 1, fontSize: 17, color: t.label }}>{o.title}</Text>
-            <Pressable onPress={() => move(i, -1)} disabled={i === 0} hitSlop={8} accessibilityLabel={`Move ${o.title} up`}><Glyph name="chevron.up" size={22} color={i === 0 ? t.tertiaryLabel : t.accent} /></Pressable>
-            <Pressable onPress={() => move(i, 1)} disabled={i === order.length - 1} hitSlop={8} accessibilityLabel={`Move ${o.title} down`}><Glyph name="chevron.down" size={22} color={i === order.length - 1 ? t.tertiaryLabel : t.accent} /></Pressable>
+            <Pressable onPress={() => move(i, -1)} disabled={i === 0} hitSlop={8} accessibilityLabel={tr('Move {name} up', { name: o.title })}><Glyph name="chevron.up" size={22} color={i === 0 ? t.tertiaryLabel : t.accent} /></Pressable>
+            <Pressable onPress={() => move(i, 1)} disabled={i === order.length - 1} hitSlop={8} accessibilityLabel={tr('Move {name} down', { name: o.title })}><Glyph name="chevron.down" size={22} color={i === order.length - 1 ? t.tertiaryLabel : t.accent} /></Pressable>
           </FormRow>
         ))}
       </FormSection>

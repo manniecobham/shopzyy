@@ -10,6 +10,7 @@ import { Observable } from '../lib/observable';
 import type { UserProfile } from '../models/entities';
 import { AppPreferences, StorageKeys } from './AppPreferences';
 import { AppLog } from './AppLog';
+import { demoIdentity, isDemo } from '../demo/demo';
 import { UserFacingError } from './UserFacingError';
 
 /**
@@ -55,6 +56,17 @@ export class AccountService extends Observable {
   start(): void {
     if (this.started) return;
     this.started = true;
+    if (isDemo) {
+      // The demo account is ready from the start and has no sign-in to check.
+      this.uid = 'demo';
+      this.email = null;
+      const demo = demoIdentity();
+      this.userRecordName = demo.userKey;
+      this.profile = demo.profile;
+      this.prefs.setBool(StorageKeys.hasSeenWelcome, true);
+      this.updatePhase();
+      return;
+    }
     GoogleSignin.configure({ webClientId: (Constants.expoConfig?.extra?.googleWebClientId as string) || undefined });
     onAuthStateChanged(getAuth(), (user) => {
       this.uid = user?.uid ?? null;
