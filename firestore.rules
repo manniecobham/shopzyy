@@ -30,6 +30,19 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Anonymous error reports: signed-in apps may add them; only the developer reads them (console).
+    match /errorLogs/{id} {
+      allow create: if signedIn() && request.resource.data.keys().hasOnly([
+        'id', 'date', 'level', 'area', 'message', 'errorDomain', 'errorCode', 'errorDetail', 'appVersion', 'osVersion', 'deviceModel'
+      ]);
+      allow read, update, delete: if false;
+    }
+
+    // Old-identity claims for the CloudKit migration are handled by Cloud Functions only.
+    match /legacyUsers/{key} {
+      allow read, write: if false;
+    }
+
     // Per-person data, e.g. migrationState.
     match /users/{uid} {
       allow read, write: if signedIn() && request.auth.uid == uid;

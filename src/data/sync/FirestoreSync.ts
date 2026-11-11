@@ -6,6 +6,8 @@ import { getFunctions, httpsCallable } from '@react-native-firebase/functions';
 import type { DataStore } from '../DataStore';
 import type { Entity, Household } from '../../models/entities';
 import type { SyncBackend } from '../../services/ports';
+import { AppLog } from '../../services/AppLog';
+import { UserFacingError } from '../../services/UserFacingError';
 import {
   DocApplier, householdDoc, itemDoc, memberDoc, memberKey, optionDoc, purchaseDoc, tripTotalDoc, type DocData,
 } from './mapping';
@@ -60,8 +62,9 @@ export class FirestoreSync implements SyncBackend {
   get status(): SyncStatus { return this._status; }
   private setStatus(s: SyncStatus) { this._status = s; this.hooks.onStatus?.(s); }
   private report(error: unknown) {
-    if (isOffline(error)) this.setStatus({ state: 'offline' });
-    else this.setStatus({ state: 'failed', message: error instanceof Error ? error.message : 'Sync failed' });
+    if (isOffline(error)) { this.setStatus({ state: 'offline' }); return; }
+    AppLog.error('sync', 'Sync failed', error);
+    this.setStatus({ state: 'failed', message: UserFacingError.message(error) });
   }
 
   // MARK: Lifecycle

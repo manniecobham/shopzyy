@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase-admin/app';
-import { FieldValue, getFirestore } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp, getFirestore } from 'firebase-admin/firestore';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { randomInt } from 'node:crypto';
 
@@ -89,4 +89,136 @@ export const deleteHousehold = onCall(async (req) => {
   const invites = await db.collection('invites').where('householdID', '==', householdID).get();
   await Promise.all(invites.docs.map((d) => d.ref.delete()));
   return { ok: true };
+});
+
+// MARK: Migration from the original iOS app (CloudKit → Firebase)
+//
+// Every member's phone holds a full copy of their households (CloudKit mirrored it locally), so any
+// member can upload a household the first time; later members only join it. Rules that keep this safe:
+//  - nobody can overwrite data that already exists (documents are created only if missing), so a
+//    member migrating late with an old copy can never undo newer edits;
+//  - joining needs the household's id AND a member key from its member list, neither of which a
+//    non-member has; each old identity (CloudKit user key) can be claimed by one Firebase account only;
+//  - claims close LEGACY_WINDOW_DAYS after the household was first imported.
+
+const LEGACY_WINDOW_MS = 180 * 24 * 60 * 60 * 1000;
+const UUID_RE = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/;
+
+type Wire = unknown;
+type DocEntry = { id: string; data: Record<string, Wire> };
+
+/** Revives the client's `{ __date: ms }` markers into Firestore Timestamps. */
+function revive(value: Wire): Wire {
+  if (Array.isArray(value)) return value.map(revive);
+  if (value && typeof value === 'object') {
+    const obj = value as Record<string, Wire>;
+    if (typeof obj.__date === 'number' && Object.keys(obj).length === 1) return Timestamp.fromMillis(obj.__date);
+    return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, revive(v)]));
+  }
+  return value;
+}
+
+const validEntries = (v: Wire, max: number): DocEntry[] => {
+  if (!Array.isArray(v) || v.length > max) throw new HttpsError('invalid-argument', 'Bad records.');
+  return v.map((e) => {
+    const entry = e as DocEntry;
+    if (typeof entry?.id !== 'string' || !entry.id || entry.id.includes('/') || typeof entry.data !== 'object' || entry.data === null) {
+      throw new HttpsError('invalid-argument', 'Bad record.');
+    }
+    return entry;
+  });
+};
+
+/** Writes only the documents that don't exist yet, in batches. Returns how many were created. */
+async function createMissing(parent: string, entries: DocEntry[]): Promise<number> {
+  let created = 0;
+  for (let i = 0; i < entries.length; i += 400) {
+    const chunk = entries.slice(i, i + 400);
+    const refs = chunk.map((e) => db.doc(`${parent}/${e.id}`));
+    const existing = await db.getAll(...refs);
+    const batch = db.batch();
+    chunk.forEach((e, j) => {
+      if (existing[j].exists) return;
+      batch.set(refs[j], revive(e.data) as Record<string, unknown>);
+      created++;
+    });
+    await batch.commit();
+  }
+  return created;
+}
+
+/**
+ * Claims a household from the old app for the signed-in person. If the household isn't in Firebase
+ * yet, it is created from the uploaded snapshot (household, members, custom options, banner);
+ * items, purchases and totals follow through `importLegacyRecords`.
+ */
+export const claimLegacyHousehold = onCall({ memory: '512MiB', timeoutSeconds: 120 }, async (req) => {
+  const uid = requireAuth(req.auth?.uid);
+  const householdID = String(req.data?.householdID ?? '').toUpperCase();
+  const userKey = String(req.data?.userRecordName ?? '');
+  if (!UUID_RE.test(householdID) || !userKey || userKey.includes('/')) throw new HttpsError('invalid-argument', 'Bad request.');
+
+  // One Firebase account per old identity.
+  const claimRef = db.doc(`legacyUsers/${userKey}`);
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(claimRef);
+    if (snap.exists && snap.get('uid') !== uid) {
+      throw new HttpsError('already-exists', 'Your lists were already moved using a different sign-in method. Sign in the way you did the first time.');
+    }
+    if (!snap.exists) tx.set(claimRef, { uid, claimedAt: FieldValue.serverTimestamp() });
+  });
+
+  const ref = db.doc(`households/${householdID}`);
+  const snap = await ref.get();
+
+  if (!snap.exists) {
+    const members = validEntries(req.data?.members, 200);
+    const options = validEntries(req.data?.options, 2000);
+    const household = req.data?.household as Record<string, Wire> | undefined;
+    if (!household || typeof household !== 'object') throw new HttpsError('invalid-argument', 'Missing household.');
+    if (!members.some((m) => m.id === userKey)) throw new HttpsError('permission-denied', 'You are not a member of this household.');
+
+    const isOwner = household.ownerRecordName === userKey;
+    await ref.create({
+      ...(revive(household) as Record<string, unknown>),
+      ownerUID: isOwner ? uid : null,
+      memberUIDs: [uid],
+      legacy: true,
+      legacyMembers: members.map((m) => m.id),
+      legacyUntil: Timestamp.fromMillis(Date.now() + LEGACY_WINDOW_MS),
+    });
+    await createMissing(`households/${householdID}/members`, members);
+    await createMissing(`households/${householdID}/options`, options);
+    if (typeof req.data?.banner === 'string' && req.data.banner.length < 900_000) {
+      await db.doc(`households/${householdID}/assets/banner`).set({ data: req.data.banner });
+    }
+    return { created: true };
+  }
+
+  // Already imported by another member (or by the owner): join it.
+  const legacy = snap.get('legacy') === true;
+  const until = (snap.get('legacyUntil') as Timestamp | undefined)?.toMillis() ?? 0;
+  const knownMembers = (snap.get('legacyMembers') as string[] | undefined) ?? [];
+  if (!legacy || until < Date.now() || !knownMembers.includes(userKey)) throw new HttpsError('permission-denied', 'This household can no longer be claimed.');
+
+  const update: Record<string, unknown> = { memberUIDs: FieldValue.arrayUnion(uid) };
+  if (!snap.get('ownerUID') && snap.get('ownerRecordName') === userKey) update.ownerUID = uid;
+  await ref.update(update);
+  return { created: false };
+});
+
+/** Adds items, purchases and trip totals to a legacy household. Existing documents are never overwritten. */
+export const importLegacyRecords = onCall({ memory: '512MiB', timeoutSeconds: 120 }, async (req) => {
+  const uid = requireAuth(req.auth?.uid);
+  const householdID = String(req.data?.householdID ?? '').toUpperCase();
+  const kind = String(req.data?.kind ?? '');
+  if (!UUID_RE.test(householdID) || !['items', 'purchases', 'tripTotals'].includes(kind)) throw new HttpsError('invalid-argument', 'Bad request.');
+
+  const snap = await db.doc(`households/${householdID}`).get();
+  if (!snap.exists || snap.get('legacy') !== true) throw new HttpsError('failed-precondition', 'Nothing to import into.');
+  if (!((snap.get('memberUIDs') as string[] | undefined) ?? []).includes(uid)) throw new HttpsError('permission-denied', 'Not a member.');
+  if (((snap.get('legacyUntil') as Timestamp | undefined)?.toMillis() ?? 0) < Date.now()) throw new HttpsError('failed-precondition', 'The migration window has closed.');
+
+  const created = await createMissing(`households/${householdID}/${kind}`, validEntries(req.data?.docs, 500));
+  return { created };
 });

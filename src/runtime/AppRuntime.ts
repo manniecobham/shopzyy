@@ -5,7 +5,16 @@ import { AccountService } from '../services/AccountService';
 import { AppPreferences } from '../services/AppPreferences';
 import { HouseholdService } from '../services/HouseholdService';
 import { ShoppingListService } from '../services/ShoppingListService';
-import { noopNotifier, type Notifier, type ServiceEnv } from '../services/ports';
+import type { ServiceEnv } from '../services/ports';
+import { router } from 'expo-router';
+import { AppState, Platform } from 'react-native';
+import { ShopzyLegacy } from '../../modules/shopzy-legacy';
+import { applyLegacyDefaults } from '../migration/legacyDefaults';
+import { firebaseMigrationDeps } from '../migration/firebaseDeps';
+import { MigrationService } from '../migration/MigrationService';
+import { AppLog } from '../services/AppLog';
+import { scanForRemotePurchases } from '../services/ActivityMonitor';
+import { NotificationService } from '../services/NotificationService';
 import { getFunctions, httpsCallable } from '@react-native-firebase/functions';
 import { StorageKeys } from '../services/AppPreferences';
 import { AppNotice, UserFacingError } from '../services/UserFacingError';
@@ -21,14 +30,20 @@ export class AppRuntime extends Observable {
   readonly env: ServiceEnv;
   readonly households: HouseholdService;
   syncStatus: SyncStatus = { state: 'idle' };
+  /** The one-time move from the original iOS app's data. Sync waits until it is done. */
+  migration: { state: 'idle' | 'running' | 'failed' | 'done'; message: string | null; progress: { done: number; total: number } | null } =
+    { state: 'idle', message: null, progress: null };
+  private migrationUID: string | null = null;
   ready = false;
 
   private sync: FirestoreSync | null = null;
   private syncUID: string | null = null;
 
-  constructor(notifier: Notifier = noopNotifier) {
+  readonly notifications = new NotificationService(this.prefs);
+
+  constructor() {
     super();
-    this.env = { store: this.store, sync: null, prefs: this.prefs, notifier };
+    this.env = { store: this.store, sync: null, prefs: this.prefs, notifier: this.notifications };
     this.households = new HouseholdService(this.env);
     this.account.subscribe(() => this.onAccountChanged());
   }
@@ -36,11 +51,66 @@ export class AppRuntime extends Observable {
   /** Loads preferences, then starts watching the sign-in state. */
   async start(): Promise<void> {
     await this.prefs.load();
+    await AppLog.load();
+    // First launch after updating from the original iOS app: adopt who they were and their settings,
+    // so they skip the welcome and profile screens and only need to sign in.
+    if (Platform.OS === 'ios') {
+      const legacy = await ShopzyLegacy.readDefaults().catch(() => ({}));
+      applyLegacyDefaults(this.prefs, legacy);
+    } else {
+      applyLegacyDefaults(this.prefs, {});
+    }
+    this.account.reloadFromPrefs();
+    this.wireNotifications();
     // Re-read values that depend on preferences now that they are loaded.
     this.account.userRecordName = this.prefs.userRecordName;
     this.account.start();
     this.ready = true;
     this.changed();
+    // Whenever the app comes back to the foreground: catch up on trips, reminders and queued error reports.
+    AppState.addEventListener('change', (state) => {
+      if (state !== 'active') return;
+      this.account.refresh();
+      this.scanActivity();
+      ShoppingListService.refreshRestockReminders(this.env);
+      void AppLog.uploadPending();
+    });
+  }
+
+  /** Wired here (not in a screen) so "Add to list" works even when a notification action wakes the app in the background. */
+  private wireNotifications(): void {
+    const n = this.notifications;
+    void n.configure();
+    n.onAddToList = (itemID) => ShoppingListService.forItem(itemID, this.env)?.addToList(itemID);
+    n.onSnooze = (itemID) => ShoppingListService.forItem(itemID, this.env)?.snooze(itemID, 7);
+    n.onOpenActivity = () => router.navigate('/activity');
+  }
+
+  scanActivity(): void { scanForRemotePurchases(this.env, this.prefs); }
+
+  /** Restarts the listeners, e.g. from "Sync now" in Settings. */
+  restartSync(): void {
+    const uid = this.account.uid;
+    this.stopSync();
+    if (uid) this.startSync(uid);
+    this.changed();
+  }
+
+  /**
+   * "Delete my data": owned households are deleted for everyone, joined ones are left, the account
+   * is removed and the app returns to the welcome screen.
+   */
+  async deleteMyData(): Promise<string | null> {
+    try {
+      await this.households.deleteMyData();
+      try { await this.account.deleteAccount(); } catch { await this.account.signOut(); } // e.g. needs a recent sign-in
+      this.account.reset();
+      this.prefs.currentHouseholdID = null;
+      return null;
+    } catch (error) {
+      AppLog.error('account', "Delete my data didn't finish", error);
+      return UserFacingError.message(error);
+    }
   }
 
   // MARK: Selection and invites
@@ -101,7 +171,13 @@ export class AppRuntime extends Observable {
   /** Sync starts as soon as someone is signed in, before the profile is set, so a person setting up a new device sees their households arrive. */
   private onAccountChanged(): void {
     const { phase, uid } = this.account;
-    const shouldSync = !!uid && (phase === 'needsProfile' || phase === 'ready');
+    if (this.migrationUID !== uid) {
+      this.migrationUID = uid;
+      this.migration = { state: 'idle', message: null, progress: null };
+    }
+    if (uid && this.migration.state === 'idle') void this.runMigration(uid);
+    // Households only appear once the migration has moved them, so sync waits for it.
+    const shouldSync = !!uid && this.migration.state === 'done' && (phase === 'needsProfile' || phase === 'ready');
 
     if (!uid && this.sync) {
       // Another person's households must not stay on this device.
@@ -120,6 +196,41 @@ export class AppRuntime extends Observable {
     this.changed();
   }
 
+  /** Moves the old app's data to Firebase (iPhone only). Safe to retry. */
+  async runMigration(uid: string): Promise<void> {
+    if (this.migration.state === 'running') return;
+    const marker = `shopzy.migrated.${uid}`;
+    if (Platform.OS !== 'ios' || this.prefs.getString(marker)) {
+      this.migration = { state: 'done', message: null, progress: null };
+      this.onAccountChanged();
+      return;
+    }
+    this.migration = { state: 'running', message: null, progress: null };
+    this.changed();
+    try {
+      const result = await new MigrationService(firebaseMigrationDeps()).run(uid, (progress) => {
+        this.migration = { ...this.migration, progress };
+        this.changed();
+      });
+      // Keep the identity the data is filed under (the old CloudKit user key).
+      if (result.userRecordName && result.userRecordName !== this.account.userRecordName) this.account.setUserRecordName(result.userRecordName);
+      this.prefs.setString(marker, '1');
+      this.migration = { state: 'done', message: null, progress: null };
+      this.onAccountChanged();
+    } catch (error) {
+      AppLog.error('account', 'Moving the data from the old app failed', error);
+      this.migration = { state: 'failed', message: UserFacingError.message(error), progress: null };
+      this.changed();
+    }
+  }
+
+  retryMigration(): void {
+    const uid = this.account.uid;
+    if (!uid) return;
+    this.migration = { state: 'idle', message: null, progress: null };
+    this.onAccountChanged();
+  }
+
   private startSync(uid: string): void {
     const sync = new FirestoreSync(this.store, uid, {
       onStatus: (s) => { this.syncStatus = s; this.changed(); },
@@ -127,7 +238,11 @@ export class AppRuntime extends Observable {
         `${name || 'This household'} is no longer available`,
         "It was deleted by its owner or you were removed from it, so it's been removed from this phone.",
       ),
-      onRemoteChange: () => ShoppingListService.refreshRestockReminders(this.env),
+      onRemoteChange: () => {
+        // Handled here, not in a screen: when the app is woken in the background no screen exists.
+        this.scanActivity();
+        ShoppingListService.refreshRestockReminders(this.env);
+      },
       onFetched: () => {
         const { profile, userRecordName } = this.account;
         if (profile && userRecordName) this.households.updateProfile(profile, userRecordName);

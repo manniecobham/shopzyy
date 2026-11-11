@@ -1,4 +1,5 @@
-import { StorageKeys, type AppPreferences } from './AppPreferences';
+import type { AppPreferences } from './AppPreferences';
+import { StorageKeys } from './storageKeys';
 
 const LIMIT = 50;
 

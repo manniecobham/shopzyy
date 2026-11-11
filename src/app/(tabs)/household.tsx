@@ -1,8 +1,9 @@
-import { Text, View } from 'react-native';
-import { useTheme } from '../../theme/theme';
+import { HouseholdScreen } from '../../features/household/HouseholdScreen';
+import { useRuntime, useStoreVersion } from '../../runtime/RuntimeProvider';
 
-/** Built in the next step. */
-export default function Screen() {
-  const t = useTheme();
-  return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: t.groupedBackground }}><Text style={{ color: t.label }}>household</Text></View>;
+export default function HouseholdTab() {
+  const runtime = useRuntime();
+  useStoreVersion();
+  const household = runtime.currentHousehold;
+  return household ? <HouseholdScreen key={household.id} household={household} /> : null;
 }

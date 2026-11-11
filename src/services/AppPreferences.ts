@@ -2,20 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { uuid } from '../lib/uuid';
 import type { Preferences } from './ports';
 
-/** Same keys as the Swift app's UserDefaults. */
-export const StorageKeys = {
-  currentHouseholdID: 'shopzy.currentHouseholdID',
-  userRecordName: 'shopzy.userRecordName',
-  profile: 'shopzy.profile',
-  hasSeenWelcome: 'shopzy.hasSeenWelcome',
-  notifyPurchases: 'shopzy.notifyPurchases',
-  notifyRestock: 'shopzy.notifyRestock',
-  announcedTrips: 'shopzy.announcedTrips',
-  skippedTrips: 'shopzy.skippedTrips',
-  selectedTab: 'shopzy.selectedTab',
-  deviceID: 'shopzy.deviceID',
-  pendingInvite: 'shopzy.pendingInvite',
-} as const;
+import { StorageKeys } from './storageKeys';
+export { StorageKeys };
 
 /**
  * Per-person values the Swift app kept in UserDefaults. Reads are synchronous from a

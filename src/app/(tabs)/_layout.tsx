@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { useSyncExternalStore } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
+import { ShoppingListService } from '../../services/ShoppingListService';
 import { SuggestionEngine } from '../../logic/SuggestionEngine';
 import { itemHistory } from '../../models/itemOps';
 import { useRuntime, useStoreVersion } from '../../runtime/RuntimeProvider';
@@ -12,6 +13,13 @@ export default function TabsLayout() {
   const runtime = useRuntime();
   useStoreVersion();
   useSyncExternalStore(runtime.subscribe, runtime.getSnapshot);
+  // Once per launch, when the tabs first appear: ask for notification permission, schedule reminders, catch up on trips.
+  useEffect(() => {
+    void runtime.notifications.requestAuthorization().then(() => {
+      ShoppingListService.refreshRestockReminders(runtime.env);
+      runtime.scanActivity();
+    });
+  }, [runtime]);
   const household = runtime.currentHousehold;
   const suggestionCount = household
     ? new SuggestionEngine().suggestions(runtime.store.itemsIn(household.id).map(itemHistory)).length

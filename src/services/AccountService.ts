@@ -9,6 +9,7 @@ import { Platform } from 'react-native';
 import { Observable } from '../lib/observable';
 import type { UserProfile } from '../models/entities';
 import { AppPreferences, StorageKeys } from './AppPreferences';
+import { AppLog } from './AppLog';
 import { UserFacingError } from './UserFacingError';
 
 /**
@@ -42,6 +43,13 @@ export class AccountService extends Observable {
   }
 
   private get hasSeenWelcome(): boolean { return this.prefs.getBool(StorageKeys.hasSeenWelcome, false); }
+
+  /** Re-reads identity and profile after the legacy defaults were applied at launch. */
+  reloadFromPrefs(): void {
+    this.userRecordName = this.prefs.userRecordName;
+    this.profile = this.prefs.getJSON<UserProfile>(StorageKeys.profile);
+    this.changed();
+  }
 
   /** Starts listening for sign-in changes. Call once at launch, after preferences have loaded. */
   start(): void {
@@ -181,6 +189,7 @@ export class AccountService extends Observable {
     const code = String((error as { code?: unknown })?.code ?? '');
     // Closing the Apple/Google sheet isn't an error worth showing.
     if (code === '1001' || code.includes('SIGN_IN_CANCELLED') || code === '-5') return;
+    AppLog.warning('account', 'Sign-in failed', error);
     this.lastError = UserFacingError.message(error);
     this.changed();
   }

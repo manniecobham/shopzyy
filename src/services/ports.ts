@@ -1,6 +1,7 @@
 import type { DataStore } from '../data/DataStore';
 import type { Entity, Household } from '../models/entities';
 import type { RestockForecast } from '../logic/SuggestionEngine';
+import type { ShoppingTrip } from '../logic/ShoppingTrip';
 
 /** What the Firebase sync layer offers the services. All optional behaviour is a no-op when absent (tests, demo). */
 export interface SyncBackend {
@@ -22,11 +23,14 @@ export interface SyncBackend {
 
 export interface Notifier {
   scheduleRestockReminders(forecasts: RestockForecast[]): Promise<void>;
+  /** One summary per shopping trip; a later call for the same trip replaces the earlier one. */
+  postShoppingTrip(trip: ShoppingTrip, householdName: string | null, totalText: string | null, now: Date): Promise<void>;
   removeAll(): Promise<void>;
 }
 
 export const noopNotifier: Notifier = {
   scheduleRestockReminders: async () => {},
+  postShoppingTrip: async () => {},
   removeAll: async () => {},
 };
 

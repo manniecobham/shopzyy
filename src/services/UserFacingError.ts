@@ -44,6 +44,7 @@ export const UserFacingError = {
         return 'This household no longer exists.';
       case 'permission-denied':
         return "You don't have permission to change this household.";
+      case 'already-exists':
       case 'failed-precondition':
         return (error as { message?: string }).message || 'Something went wrong. Please try again.';
       default:

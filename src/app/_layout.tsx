@@ -3,6 +3,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { MigrationView } from '../features/account/MigrationView';
 import { SplashView } from '../features/shared/SplashView';
 import { RuntimeProvider, useAccount, useAppState, useStoreVersion } from '../runtime/RuntimeProvider';
 import { AppNotice } from '../services/UserFacingError';
@@ -38,7 +39,8 @@ function Shell() {
     if (n) Alert.alert(n.title, n.detail, [{ text: 'OK', onPress: () => AppNotice.dismiss() }]);
   }, [noticeVersion]);
 
-  const inMain = runtime.ready && account.phase === 'ready' && runtime.currentHousehold !== null;
+  const migrating = !!account.uid && (runtime.migration.state === 'running' || runtime.migration.state === 'failed');
+  const inMain = runtime.ready && account.phase === 'ready' && runtime.currentHousehold !== null && !migrating;
 
   return (
     <View style={[StyleSheet.absoluteFill, { backgroundColor: t.background }]}>
@@ -47,6 +49,7 @@ function Shell() {
         <Stack.Protected guard={inMain}><Stack.Screen name="(tabs)" /></Stack.Protected>
         <Stack.Screen name="join/[code]" />
       </Stack>
+      {migrating && !showsSplash ? <View style={StyleSheet.absoluteFill}><MigrationView /></View> : null}
       {showsSplash ? <SplashView /> : null}
     </View>
   );
