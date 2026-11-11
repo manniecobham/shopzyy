@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Glyph, type SymbolName } from '../../components/Glyph';
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -43,13 +43,13 @@ export function SignInView() {
             {Platform.OS === 'ios' ? (
               <Pressable accessibilityRole="button" disabled={account.busy} onPress={() => void account.signInWithApple()}
                 style={[s.social, { backgroundColor: t.isDark ? '#fff' : '#000' }]}>
-                <Ionicons name="logo-apple" size={22} color={t.isDark ? '#000' : '#fff'} />
+                <Glyph name="apple.logo" size={22} color={t.isDark ? '#000' : '#fff'} />
                 <Text style={[s.socialText, { color: t.isDark ? '#000' : '#fff' }]}>Continue with Apple</Text>
               </Pressable>
             ) : null}
             <Pressable accessibilityRole="button" disabled={account.busy} onPress={() => void account.signInWithGoogle()}
               style={[s.social, { backgroundColor: t.cell, borderWidth: StyleSheet.hairlineWidth, borderColor: t.separator }]}>
-              <Ionicons name="logo-google" size={20} color={t.label} />
+              <Glyph name="logo-google" size={20} color={t.label} />
               <Text style={[s.socialText, { color: t.label }]}>Continue with Google</Text>
             </Pressable>
           </View>

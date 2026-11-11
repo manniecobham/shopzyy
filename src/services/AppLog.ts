@@ -6,7 +6,7 @@ import { Platform } from 'react-native';
 import { Observable } from '../lib/observable';
 import { uuid } from '../lib/uuid';
 
-export type LogLevel = 'warning' | 'error';
+export type LogLevel = 'info' | 'warning' | 'error';
 export type LogArea = 'sync' | 'sharing' | 'household' | 'list' | 'account' | 'storage';
 export const LOG_AREA_TITLE: Record<LogArea, string> = {
   sync: 'Syncing', sharing: 'Invites', household: 'Household', list: 'Shopping list', account: 'Account', storage: 'Saving',
@@ -54,6 +54,7 @@ class AppLogService extends Observable {
     } catch { /* start empty */ }
   }
 
+  info(area: LogArea, message: string): void { this.record('info', area, message); }
   error(area: LogArea, message: string, error?: unknown): void { this.record('error', area, message, error); }
   warning(area: LogArea, message: string, error?: unknown): void { this.record('warning', area, message, error); }
 

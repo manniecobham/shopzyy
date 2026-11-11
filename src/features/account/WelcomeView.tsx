@@ -18,9 +18,9 @@ export function WelcomeView({ onStart }: { onStart: () => void }) {
           </Text>
         </View>
         <View style={s.features}>
-          <Feature icon="people-outline" text="Share a list with everyone at home" />
-          <Feature icon="sparkles-outline" text="Get reminded before things run out" />
-          <Feature icon="notifications-outline" text="Know when someone has been shopping" />
+          <Feature icon="person.2" text="Share a list with everyone at home" />
+          <Feature icon="sparkles" text="Get reminded before things run out" />
+          <Feature icon="bell.badge" text="Know when someone has been shopping" />
         </View>
       </ScrollView>
       <View style={s.footer}>

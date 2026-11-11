@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Glyph, type SymbolName } from '../../components/Glyph';
 import { Text, View } from 'react-native';
 import { useAppState } from '../../runtime/RuntimeProvider';
 import { useTheme } from '../../theme/theme';
@@ -16,7 +16,7 @@ export function SyncStatusView() {
   return (
     <View style={{ marginHorizontal: 16, marginTop: 12, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, backgroundColor: t.cell, flexDirection: 'row', alignItems: 'center', gap: 8 }}
       accessible accessibilityHint={detail}>
-      <Ionicons name={offline ? 'cloud-offline-outline' : 'alert-circle-outline'} size={16} color={t.orange} />
+      <Glyph name={offline ? 'wifi.slash' : 'exclamationmark.icloud'} size={16} color={t.orange} />
       <Text style={{ fontSize: 13, fontWeight: '600', color: t.label, flex: 1 }}>{offline ? 'Offline' : 'Not syncing'}</Text>
     </View>
   );

@@ -1,6 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Glyph, type SymbolName } from '../../components/Glyph';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { ScreenHeader } from '../../components/ScreenHeader';
+import { ScreenOptions, useHeaderInset } from '../../components/NativeHeader';
 import { SwipeRow } from '../../components/SwipeRow';
 import { FormSection, TextButton } from '../../components/ui';
 import { KIND_EXPLANATION, KIND_TITLE, SuggestionEngine, suggestionReason, type Suggestion, type SuggestionKind } from '../../logic/SuggestionEngine';
@@ -19,6 +19,7 @@ export function SuggestionsScreen({ household }: { household: Household }) {
   const account = useAccount();
   useStoreVersion();
   const list = runtime.list(household.id);
+  const inset = useHeaderInset();
   const member = account.userRecordName ? runtime.store.member(account.userRecordName, household.id) ?? null : null;
 
   const suggestions = new SuggestionEngine().suggestions(runtime.store.itemsIn(household.id).map(itemHistory));
@@ -27,18 +28,18 @@ export function SuggestionsScreen({ household }: { household: Household }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: t.groupedBackground }}>
-      <ScreenHeader title="Suggestions" leading={<HouseholdSwitcher />}
-        trailing={urgent.length > 0 ? <TextButton title={`Add ${urgent.length} due`} onPress={() => urgent.forEach(add)} style={{ fontSize: 16 }} /> : undefined} />
+      <ScreenOptions title="Suggestions" left={<HouseholdSwitcher />}
+        right={urgent.length > 0 ? <TextButton title={`Add ${urgent.length} due`} onPress={() => urgent.forEach(add)} style={{ fontSize: 16 }} /> : undefined} />
       {suggestions.length === 0 ? (
-        <View style={s.empty}>
-          <Ionicons name="sparkles-outline" size={44} color={t.secondaryLabel} />
+        <View style={[s.empty, { paddingTop: inset }]}>
+          <Glyph name="sparkles" size={44} color={t.secondaryLabel} />
           <Text style={{ fontSize: 20, fontWeight: '600', color: t.label }}>Nothing to suggest yet</Text>
           <Text style={{ fontSize: 15, color: t.secondaryLabel, textAlign: 'center' }}>
             Mark items as bought from your list. After a couple of trips, Shopzyy learns your rhythm and suggests things before you run out.
           </Text>
         </View>
       ) : (
-        <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
+        <ScrollView contentContainerStyle={{ paddingTop: inset, paddingBottom: 32 }} scrollIndicatorInsets={{ top: inset }}>
           {KINDS.map((kind) => {
             const group = suggestions.filter((x) => x.kind === kind);
             if (group.length === 0) return null;
@@ -46,17 +47,17 @@ export function SuggestionsScreen({ household }: { household: Household }) {
               <FormSection key={kind} header={KIND_TITLE[kind]} footer={KIND_EXPLANATION[kind]}>
                 {group.map((sug, i) => (
                   <SwipeRow key={sug.itemID}
-                    leading={[{ label: 'Add', icon: 'add', color: t.accent, onPress: () => add(sug) }]}
+                    leading={[{ label: 'Add', icon: 'plus', color: t.accent, onPress: () => add(sug) }]}
                     trailing={[
-                      { label: 'Next week', icon: 'moon-outline', color: t.orange, onPress: () => list.snooze(sug.itemID, 7) },
-                      { label: 'Not needed', icon: 'hand-left-outline', color: '#8E8E93', onPress: () => list.snooze(sug.itemID, 90) },
+                      { label: 'Next week', icon: 'moon.zzz', color: t.orange, onPress: () => list.snooze(sug.itemID, 7) },
+                      { label: 'Not needed', icon: 'hand.raised', color: '#8E8E93', onPress: () => list.snooze(sug.itemID, 90) },
                     ]}>
                     <View style={[s.row, { backgroundColor: t.cell, borderBottomWidth: i === group.length - 1 ? 0 : StyleSheet.hairlineWidth, borderBottomColor: t.separator }]}>
                       <View style={{ flex: 1, gap: 3 }}>
                         <Text style={{ fontSize: 17, fontWeight: '500', color: t.label }}>{sug.name}</Text>
                         <Text style={{ fontSize: 12, color: t.secondaryLabel }}>{suggestionReason(sug)}</Text>
                       </View>
-                      <Ionicons name="add-circle" size={28} color={t.accent} onPress={() => add(sug)} accessibilityLabel={`Add ${sug.name} to the list`} />
+                      <Glyph name="plus.circle.fill" size={28} color={t.accent} onPress={() => add(sug)} accessibilityLabel={`Add ${sug.name} to the list`} />
                     </View>
                   </SwipeRow>
                 ))}

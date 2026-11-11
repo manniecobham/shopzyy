@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Glyph, type SymbolName } from '../../components/Glyph';
 import { useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { rankAutocomplete, type AutocompleteCandidate } from '../../logic/AutocompleteRanker';
@@ -70,7 +70,7 @@ export function SmartAddBar({ catalog, onSubmit }: { catalog: GroceryItem[]; onS
           {matches.map((m) => (
             <Pressable key={m.id} onPress={() => complete(m)} accessibilityHint={m.isOnList ? 'Already on the list' : 'Adds to the list'}
               style={[s.chip, { backgroundColor: colorFromHex(t.accent, m.isOnList ? 0.08 : 0.15) }]}>
-              <Ionicons name={m.isOnList ? 'checkmark' : 'add'} size={13} color={t.accent} />
+              <Glyph name={m.isOnList ? 'checkmark' : 'plus'} size={13} color={t.accent} />
               <Text style={{ fontSize: 15, color: t.label }}>{m.name}</Text>
             </Pressable>
           ))}
@@ -80,7 +80,7 @@ export function SmartAddBar({ catalog, onSubmit }: { catalog: GroceryItem[]; onS
       {parsed.length > 0 ? <Text numberOfLines={2} style={[s.preview, { color: t.secondaryLabel }]} accessibilityLabel={`Will add ${preview}`}>{preview}</Text> : null}
 
       <View style={[s.field, { backgroundColor: t.fill }]}>
-        <Ionicons name="sparkles" size={18} color={t.accent} />
+        <Glyph name="sparkles" size={18} color={t.accent} />
         <TextInput
           ref={input} value={text} onChangeText={setText} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
           placeholder="Add items, e.g. 2 kg rice, milk x2" placeholderTextColor={t.tertiaryLabel}
@@ -88,7 +88,7 @@ export function SmartAddBar({ catalog, onSubmit }: { catalog: GroceryItem[]; onS
           onSubmitEditing={submit} blurOnSubmit={false}
         />
         {trimmed ? (
-          <Pressable onPress={submit} accessibilityLabel="Add to list" hitSlop={8}><Ionicons name="arrow-up-circle" size={30} color={t.accent} /></Pressable>
+          <Pressable onPress={submit} accessibilityLabel="Add to list" hitSlop={8}><Glyph name="arrow.up.circle.fill" size={30} color={t.accent} /></Pressable>
         ) : null}
       </View>
     </View>

@@ -1,5 +1,5 @@
-import { ActivityScreen } from '../../features/activity/ActivityScreen';
-import { useRuntime, useStoreVersion } from '../../runtime/RuntimeProvider';
+import { ActivityScreen } from '../../../features/activity/ActivityScreen';
+import { useRuntime, useStoreVersion } from '../../../runtime/RuntimeProvider';
 
 export default function ActivityTab() {
   const runtime = useRuntime();

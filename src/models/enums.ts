@@ -64,15 +64,16 @@ export const isHouseRoom = (raw: string | null | undefined): raw is HouseRoom =>
 export const LIST_GROUPINGS = ['category', 'room', 'assignee', 'recipient'] as const;
 export type ListGrouping = (typeof LIST_GROUPINGS)[number];
 
-const GROUPING_INFO: Record<ListGrouping, { title: string; icon: string }> = {
-  category: { title: 'Category', icon: 'grid-outline' },
-  room: { title: 'Room', icon: 'home-outline' },
-  assignee: { title: 'Assigned to', icon: 'person-circle-outline' },
-  recipient: { title: "Who it's for", icon: 'gift-outline' },
+type GroupingSymbol = 'square.grid.2x2' | 'house' | 'person.crop.circle.badge.checkmark' | 'gift';
+const GROUPING_INFO: Record<ListGrouping, { title: string; icon: GroupingSymbol }> = {
+  category: { title: 'Category', icon: 'square.grid.2x2' },
+  room: { title: 'Room', icon: 'house' },
+  assignee: { title: 'Assigned to', icon: 'person.crop.circle.badge.checkmark' },
+  recipient: { title: "Who it's for", icon: 'gift' },
 };
 
 export const groupingTitle = (g: ListGrouping) => GROUPING_INFO[g].title;
-/** Ionicons name standing in for the SF Symbol the iOS app uses. */
+/** The SF Symbol name the iOS app uses (see components/Glyph for the Android stand-ins). */
 export const groupingIcon = (g: ListGrouping) => GROUPING_INFO[g].icon;
 export const isListGrouping = (raw: string | null | undefined): raw is ListGrouping =>
   !!raw && (LIST_GROUPINGS as readonly string[]).includes(raw);

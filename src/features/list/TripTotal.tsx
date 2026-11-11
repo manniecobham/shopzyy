@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Glyph, type SymbolName } from '../../components/Glyph';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Sheet } from '../../components/Sheet';
@@ -33,10 +33,10 @@ export function TripTotalBanner({ onAdd, onSkip }: { onAdd: () => void; onSkip: 
   const t = useTheme();
   return (
     <View style={[s.banner, { backgroundColor: t.isDark ? 'rgba(44,44,46,0.95)' : 'rgba(255,255,255,0.95)' }]}>
-      <Ionicons name="cart-outline" size={20} color={t.accent} />
+      <Glyph name="cart.badge.questionmark" size={20} color={t.accent} />
       <Text style={{ fontSize: 15, fontWeight: '600', color: t.label, flex: 1 }}>Done shopping?</Text>
       <Pressable onPress={onAdd} style={[s.add, { backgroundColor: t.accent }]}><Text style={{ fontSize: 15, fontWeight: '600', color: '#fff' }}>Add total</Text></Pressable>
-      <Pressable onPress={onSkip} accessibilityLabel="Skip" hitSlop={8}><Ionicons name="close" size={16} color={t.secondaryLabel} /></Pressable>
+      <Pressable onPress={onSkip} accessibilityLabel="Skip" hitSlop={8}><Glyph name="xmark" size={16} color={t.secondaryLabel} /></Pressable>
     </View>
   );
 }

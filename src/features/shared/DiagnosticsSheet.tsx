@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Glyph, type SymbolName } from '../../components/Glyph';
 import { useState, useSyncExternalStore } from 'react';
 import { Text, View } from 'react-native';
 import { ActionMenu, Sheet } from '../../components/Sheet';
@@ -18,7 +18,7 @@ export function DiagnosticsSheet({ onClose }: { onClose: () => void }) {
       onSave={entries.length > 0 ? () => setMenu(true) : undefined} saveTitle="More">
       {entries.length === 0 ? (
         <View style={{ alignItems: 'center', gap: 8, paddingTop: 80, paddingHorizontal: 40 }}>
-          <Ionicons name="shield-checkmark-outline" size={44} color={t.secondaryLabel} />
+          <Glyph name="checkmark.seal" size={44} color={t.secondaryLabel} />
           <Text style={{ fontSize: 20, fontWeight: '600', color: t.label }}>All good</Text>
           <Text style={{ fontSize: 15, color: t.secondaryLabel, textAlign: 'center' }}>If something goes wrong, it will show up here.</Text>
         </View>
@@ -28,8 +28,8 @@ export function DiagnosticsSheet({ onClose }: { onClose: () => void }) {
         </FormSection>
       )}
       <ActionMenu visible={menu} onClose={() => setMenu(false)} sections={[[
-        { title: 'Send report now', icon: 'paper-plane-outline', onPress: () => void AppLog.uploadPending() },
-        { title: 'Clear', icon: 'trash-outline', destructive: true, onPress: () => AppLog.clear() },
+        { title: 'Send report now', icon: 'paperplane', onPress: () => void AppLog.uploadPending() },
+        { title: 'Clear', icon: 'trash', destructive: true, onPress: () => AppLog.clear() },
       ]]} />
     </Sheet>
   );
@@ -38,16 +38,17 @@ export function DiagnosticsSheet({ onClose }: { onClose: () => void }) {
 function Row({ entry, last }: { entry: LogEntry; last: boolean }) {
   const t = useTheme();
   const error = entry.level === 'error';
+  const info = entry.level === 'info';
   return (
     <FormRow last={last} style={{ alignItems: 'flex-start', gap: 12 }}>
-      <Ionicons name={error ? 'alert-circle' : 'warning'} size={20} color={error ? t.red : t.orange} style={{ marginTop: 2 }} />
+      <Glyph name={error ? 'exclamationmark.circle.fill' : info ? 'info.circle.fill' : 'exclamationmark.triangle.fill'} size={20} color={error ? t.red : info ? t.accent : t.orange} style={{ marginTop: 2 }} />
       <View style={{ flex: 1, gap: 2 }}>
         <Text style={{ fontSize: 15, fontWeight: '500', color: t.label }}>{entry.message}</Text>
         <Text style={{ fontSize: 12, color: t.secondaryLabel }}>
           {LOG_AREA_TITLE[entry.area]} · {new Date(entry.date).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
         </Text>
       </View>
-      {entry.isUploaded ? <Ionicons name="cloud-done-outline" size={16} color={t.secondaryLabel} accessibilityLabel="Reported" /> : null}
+      {entry.isUploaded ? <Glyph name="checkmark.icloud" size={16} color={t.secondaryLabel} accessibilityLabel="Reported" /> : null}
     </FormRow>
   );
 }

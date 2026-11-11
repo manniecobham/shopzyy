@@ -2,6 +2,7 @@ import Constants from 'expo-constants';
 import { doc, getDoc, getFirestore, setDoc } from '@react-native-firebase/firestore';
 import { getFunctions, httpsCallable } from '@react-native-firebase/functions';
 import { ShopzyLegacy } from '../../modules/shopzy-legacy';
+import { AppLog } from '../services/AppLog';
 import type { MigrationDeps } from './MigrationService';
 
 /** The real Firebase + native-module wiring for MigrationService. */
@@ -17,6 +18,8 @@ export function firebaseMigrationDeps(): MigrationDeps {
     setUserDoc: (uid, data) => setDoc(doc(getFirestore(), 'users', uid), data, { merge: true }),
     claim: async (payload) => (await call<Record<string, unknown>, { created: boolean }>('claimLegacyHousehold')(payload)).data,
     importRecords: async (payload) => (await call<typeof payload, { created: number }>('importLegacyRecords')(payload)).data,
+    legacyAvailable: ShopzyLegacy.isAvailable,
+    log: (message) => AppLog.info('account', message),
     appVersion: Constants.expoConfig?.version ?? '1.0.0',
     now: () => new Date(),
   };

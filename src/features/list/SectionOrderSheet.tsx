@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Glyph, type SymbolName } from '../../components/Glyph';
 import { useState } from 'react';
 import { Pressable, Text } from 'react-native';
 import { Sheet } from '../../components/Sheet';
@@ -34,8 +34,8 @@ export function SectionOrderSheet({ household, sections, onClose }: { household:
         {order.map((o, i) => (
           <FormRow key={o.key} last={i === order.length - 1} style={{ gap: 8 }}>
             <Text style={{ flex: 1, fontSize: 17, color: t.label }}>{o.title}</Text>
-            <Pressable onPress={() => move(i, -1)} disabled={i === 0} hitSlop={8} accessibilityLabel={`Move ${o.title} up`}><Ionicons name="chevron-up" size={22} color={i === 0 ? t.tertiaryLabel : t.accent} /></Pressable>
-            <Pressable onPress={() => move(i, 1)} disabled={i === order.length - 1} hitSlop={8} accessibilityLabel={`Move ${o.title} down`}><Ionicons name="chevron-down" size={22} color={i === order.length - 1 ? t.tertiaryLabel : t.accent} /></Pressable>
+            <Pressable onPress={() => move(i, -1)} disabled={i === 0} hitSlop={8} accessibilityLabel={`Move ${o.title} up`}><Glyph name="chevron.up" size={22} color={i === 0 ? t.tertiaryLabel : t.accent} /></Pressable>
+            <Pressable onPress={() => move(i, 1)} disabled={i === order.length - 1} hitSlop={8} accessibilityLabel={`Move ${o.title} down`}><Glyph name="chevron.down" size={22} color={i === order.length - 1 ? t.tertiaryLabel : t.accent} /></Pressable>
           </FormRow>
         ))}
       </FormSection>

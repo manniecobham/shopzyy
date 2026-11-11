@@ -1,9 +1,9 @@
-import { Ionicons } from '@expo/vector-icons';
-import type { ComponentProps, ReactNode } from 'react';
+import { Glyph, type SymbolName } from './Glyph';
+import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 import { colorFromHex, useTheme } from '../theme/theme';
 
-export type IconName = ComponentProps<typeof Ionicons>['name'];
+export type IconName = SymbolName;
 
 /** A grouped-list section like SwiftUI's `Section` inside a `Form`. */
 export function FormSection({ header, footer, children }: { header?: string; footer?: ReactNode; children: ReactNode }) {
@@ -74,7 +74,7 @@ export function MemberBadge({ emoji, colorHex, size = 28 }: { emoji?: string | n
 
 export function Icon({ name, size = 22, color }: { name: IconName; size?: number; color?: string }) {
   const t = useTheme();
-  return <Ionicons name={name} size={size} color={color ?? t.accent} />;
+  return <Glyph name={name} size={size} color={color ?? t.accent} />;
 }
 
 const s = StyleSheet.create({

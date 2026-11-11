@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Glyph, type SymbolName } from '../../components/Glyph';
 import * as Haptics from 'expo-haptics';
 import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -43,8 +43,8 @@ export function ItemRow({ item, first, last, onBought, onEdit, onRemove }: {
         overshootLeft={false}
         overshootRight={false}
         friction={2}
-        renderLeftActions={() => <View style={[s.action, { backgroundColor: t.green, alignItems: 'flex-start' }]}><Ionicons name="checkmark" size={22} color="#fff" /><Text style={s.actionText}>Bought</Text></View>}
-        renderRightActions={() => <View style={[s.action, { backgroundColor: t.red, alignItems: 'flex-end' }]}><Ionicons name="trash" size={22} color="#fff" /><Text style={s.actionText}>Remove</Text></View>}
+        renderLeftActions={() => <View style={[s.action, { backgroundColor: t.green, alignItems: 'flex-start' }]}><Glyph name="checkmark" size={22} color="#fff" /><Text style={s.actionText}>Bought</Text></View>}
+        renderRightActions={() => <View style={[s.action, { backgroundColor: t.red, alignItems: 'flex-end' }]}><Glyph name="trash" size={22} color="#fff" /><Text style={s.actionText}>Remove</Text></View>}
         onSwipeableOpen={(direction) => {
           swipe.current?.close();
           if (direction === 'left') onBought(); // the left-hand action ("Bought") was revealed by swiping right
@@ -53,7 +53,7 @@ export function ItemRow({ item, first, last, onBought, onEdit, onRemove }: {
       >
         <Pressable onPress={onEdit} style={[s.row, { backgroundColor: t.cell, borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth, borderBottomColor: t.separator }]}>
           <Pressable onPress={check} hitSlop={8} accessibilityRole="button" accessibilityLabel={`Mark ${item.name} as bought`}>
-            <Ionicons name={checked ? 'checkmark-circle' : 'ellipse-outline'} size={28} color={checked ? t.green : t.secondaryLabel} />
+            <Glyph name={checked ? 'checkmark.circle.fill' : 'circle'} size={28} color={checked ? t.green : t.secondaryLabel} />
           </Pressable>
 
           <View style={{ flex: 1, gap: 3 }}>
@@ -63,8 +63,8 @@ export function ItemRow({ item, first, last, onBought, onEdit, onRemove }: {
             </View>
             {item.assignedTo || recipient ? (
               <View style={{ flexDirection: 'row', gap: 10 }}>
-                {item.assignedTo ? <Tag icon="cart-outline" text={`${item.assignedTo.emoji} ${item.assignedTo.name}`} label={`Assigned to ${item.assignedTo.name}`} /> : null}
-                {recipient ? <Tag icon="gift-outline" text={`for ${recipientName(recipient)}`} /> : null}
+                {item.assignedTo ? <Tag icon="cart" text={`${item.assignedTo.emoji} ${item.assignedTo.name}`} label={`Assigned to ${item.assignedTo.name}`} /> : null}
+                {recipient ? <Tag icon="gift" text={`for ${recipientName(recipient)}`} /> : null}
               </View>
             ) : null}
             {room ? <Text style={{ fontSize: 12, color: t.secondaryLabel }} accessibilityLabel={`For the ${roomChoiceTitle(room)}`}>{roomChoiceLabel(room)}</Text> : null}
@@ -79,11 +79,11 @@ export function ItemRow({ item, first, last, onBought, onEdit, onRemove }: {
   );
 }
 
-function Tag({ icon, text, label }: { icon: React.ComponentProps<typeof Ionicons>['name']; text: string; label?: string }) {
+function Tag({ icon, text, label }: { icon: SymbolName; text: string; label?: string }) {
   const t = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }} accessibilityLabel={label}>
-      <Ionicons name={icon} size={12} color={t.accent} />
+      <Glyph name={icon} size={12} color={t.accent} />
       <Text style={{ fontSize: 12, fontWeight: '500', color: t.accent }}>{text}</Text>
     </View>
   );

@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Glyph, type SymbolName } from '../../components/Glyph';
 import { useState } from 'react';
 import { Alert, Text } from 'react-native';
 import { Prompt } from '../../components/Prompt';
@@ -41,7 +41,7 @@ export function CustomOptionsSheet({ householdID, onClose }: { householdID: stri
           );
         })}
         <FormRow last onPress={() => setAdding(kind)}>
-          <Ionicons name="add" size={20} color={t.accent} style={{ marginRight: 10 }} />
+          <Glyph name="plus" size={20} color={t.accent} style={{ marginRight: 10 }} />
           <Text style={{ fontSize: 17, color: t.accent }}>{addTitle}</Text>
         </FormRow>
       </FormSection>

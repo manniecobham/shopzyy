@@ -1,7 +1,7 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Glyph, type SymbolName } from '../../components/Glyph';
 import Constants from 'expo-constants';
 import { useEffect, useState } from 'react';
-import { Alert, Linking, Switch, Text, View } from 'react-native';
+import { Alert, Linking, Platform, Switch, Text, View } from 'react-native';
 import { LoadingOverlay } from '../../components/LogoAnimation';
 import { Sheet } from '../../components/Sheet';
 import { FormRow, FormSection, MemberBadge } from '../../components/ui';
@@ -27,6 +27,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
   const [editing, setEditing] = useState(false);
   const [diagnostics, setDiagnostics] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   // The person can change this in system Settings and come back.
   useEffect(() => { void runtime.notifications.permissionDenied().then(setDenied); }, [runtime]);
@@ -53,9 +54,27 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
     }],
   );
 
+  const importFromOldApp = () => Alert.alert(
+    'Import from the old Shopzy app?',
+    'This looks for households and lists the original Shopzy app left on this phone and adds anything missing to your account. Nothing is changed or deleted on the phone or in iCloud, and nothing already in your account is overwritten.',
+    [{ text: 'Cancel', style: 'cancel' }, {
+      text: 'Import',
+      onPress: async () => {
+        setImporting(true);
+        const result = await runtime.importFromOldApp();
+        setImporting(false);
+        if (!result) Alert.alert("Couldn't import", 'Something went wrong. Settings → Diagnostics shows what happened.');
+        else if (result.state === 'done') Alert.alert('Import finished', `Moved ${result.households} household${result.households === 1 ? '' : 's'} (${result.records} records) to your account.`);
+        else Alert.alert('Nothing to import', result.reliable
+          ? "No data from the old app was found on this phone. It's only available on phones where the old app was installed before you updated."
+          : "This version of the app can't read the old app's data.");
+      },
+    }],
+  );
+
   const sync = runtime.syncStatus;
   const syncTitle = { idle: 'Up to date', syncing: 'Syncing…', offline: 'Offline', failed: 'Not syncing' }[sync.state];
-  const syncIcon = ({ idle: 'cloud-done-outline', syncing: 'cloud-outline', offline: 'cloud-offline-outline', failed: 'alert-circle-outline' } as const)[sync.state];
+  const syncIcon = ({ idle: 'checkmark.icloud', syncing: 'icloud', offline: 'wifi.slash', failed: 'exclamationmark.icloud' } as const)[sync.state];
   const syncColor = sync.state === 'idle' ? t.green : sync.state === 'syncing' ? t.secondaryLabel : t.orange;
   const version = Constants.expoConfig?.version ?? '1.0';
 
@@ -68,7 +87,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
             <Text style={{ fontSize: 17, color: t.label }}>{account.profile?.name ?? 'Your profile'}</Text>
             <Text style={{ fontSize: 13, color: t.secondaryLabel }}>Edit name, avatar and colour</Text>
           </View>
-          <Ionicons name="chevron-forward" size={16} color={t.tertiaryLabel} />
+          <Glyph name="chevron.right" size={16} color={t.tertiaryLabel} />
         </FormRow>
       </FormSection>
 
@@ -83,7 +102,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
         <FormRow last={!denied}><Text style={{ flex: 1, fontSize: 17, color: t.label }}>Restock reminders</Text><Switch value={restock} onValueChange={toggle(StorageKeys.notifyRestock, setRestock)} trackColor={{ true: t.green }} /></FormRow>
         {denied ? (
           <FormRow last onPress={() => void Linking.openSettings()}>
-            <Ionicons name="notifications-outline" size={20} color={t.accent} style={{ marginRight: 12 }} />
+            <Glyph name="bell.badge" size={20} color={t.accent} style={{ marginRight: 12 }} />
             <Text style={{ fontSize: 17, color: t.accent }}>Turn on notifications in Settings</Text>
           </FormRow>
         ) : null}
@@ -92,20 +111,27 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
       <FormSection header="Sync" footer="Lists sync through your account. The app works offline and catches up when you're back online.">
         <FormRow>
           <Text style={{ flex: 1, fontSize: 17, color: t.label }}>Sync</Text>
-          <Ionicons name={syncIcon} size={18} color={syncColor} />
+          <Glyph name={syncIcon} size={18} color={syncColor} />
           <Text style={{ fontSize: 17, color: syncColor, marginLeft: 6 }}>{syncTitle}</Text>
         </FormRow>
         <FormRow last onPress={() => runtime.restartSync()} disabled={sync.state === 'syncing'}>
-          <Ionicons name="sync-outline" size={20} color={t.accent} style={{ marginRight: 12 }} />
+          <Glyph name="arrow.triangle.2.circlepath" size={20} color={t.accent} style={{ marginRight: 12 }} />
           <Text style={{ fontSize: 17, color: t.accent }}>Sync now</Text>
         </FormRow>
       </FormSection>
 
       <FormSection header="Your data" footer="Diagnostics shows problems the app ran into; they're sent anonymously to help fix them. Deleting your data removes households you created for everyone in them, leaves the ones you joined, and removes your account and profile.">
+        {Platform.OS === 'ios' ? (
+          <FormRow onPress={importFromOldApp}>
+            <Glyph name="square.and.arrow.down" size={20} color={t.accent} style={{ marginRight: 12 }} />
+            <Text style={{ fontSize: 17, color: t.label, flex: 1 }}>Import from the old Shopzy app</Text>
+            <Glyph name="chevron.right" size={16} color={t.tertiaryLabel} />
+          </FormRow>
+        ) : null}
         <FormRow onPress={() => setDiagnostics(true)}>
-          <Ionicons name="pulse-outline" size={20} color={t.accent} style={{ marginRight: 12 }} />
+          <Glyph name="stethoscope" size={20} color={t.accent} style={{ marginRight: 12 }} />
           <Text style={{ fontSize: 17, color: t.label, flex: 1 }}>Diagnostics</Text>
-          <Ionicons name="chevron-forward" size={16} color={t.tertiaryLabel} />
+          <Glyph name="chevron.right" size={16} color={t.tertiaryLabel} />
         </FormRow>
         <FormRow last onPress={confirmDelete}><Text style={{ fontSize: 17, color: t.red }}>Delete my data…</Text></FormRow>
       </FormSection>
@@ -119,6 +145,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
       {editing ? <EditProfileSheet onClose={() => setEditing(false)} /> : null}
       {diagnostics ? <DiagnosticsSheet onClose={() => setDiagnostics(false)} /> : null}
       <LoadingOverlay visible={deleting} message="Deleting your data…" />
+      <LoadingOverlay visible={importing} message="Importing your lists…" />
     </Sheet>
   );
 }

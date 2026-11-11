@@ -47,9 +47,9 @@ export function ProfileMenu({ member }: { member: HouseholdMember | null }) {
         <MemberBadge emoji={member?.emoji ?? account.profile?.emoji} colorHex={member?.colorHex ?? account.profile?.colorHex} size={30} />
       </Pressable>
       <ActionMenu visible={menu} title={account.profile?.name ?? 'You'} onClose={() => setMenu(false)} sections={[[
-        { title: 'Edit profile', icon: 'person-circle-outline', onPress: () => setEditing(true) },
-        { title: 'Settings', icon: 'settings-outline', onPress: () => setSettings(true) },
-        { title: 'Delete my data…', icon: 'trash-outline', destructive: true, onPress: confirmDelete },
+        { title: 'Edit profile', icon: 'person.crop.circle', onPress: () => setEditing(true) },
+        { title: 'Settings', icon: 'gearshape', onPress: () => setSettings(true) },
+        { title: 'Delete my data…', icon: 'trash', destructive: true, onPress: confirmDelete },
       ]]} />
       {editing ? <EditProfileSheet onClose={() => setEditing(false)} /> : null}
       {settings ? <SettingsSheet onClose={() => setSettings(false)} /> : null}

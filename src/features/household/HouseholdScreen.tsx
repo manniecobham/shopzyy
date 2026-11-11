@@ -1,11 +1,11 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Glyph, type SymbolName } from '../../components/Glyph';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 import { LoadingOverlay } from '../../components/LogoAnimation';
 import { PickerRow } from '../../components/Sheet';
-import { ScreenHeader } from '../../components/ScreenHeader';
+import { ScreenOptions, useHeaderInset } from '../../components/NativeHeader';
 import { FormRow, FormSection, MemberBadge } from '../../components/ui';
 import { COMMON_CURRENCIES, currencyTitle } from '../../lib/currencies';
 import { deviceCurrency } from '../../lib/format';
@@ -28,6 +28,7 @@ export function HouseholdScreen({ household }: { household: Household }) {
   const account = useAccount();
   useStoreVersion();
   const service = runtime.households;
+  const inset = useHeaderInset();
   const members = runtime.store.membersOf(household.id);
   const owner = members.find((m) => m.userRecordName === household.ownerRecordName);
 
@@ -101,8 +102,8 @@ export function HouseholdScreen({ household }: { household: Household }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: t.groupedBackground }}>
-      <ScreenHeader title="Household" leading={<HouseholdSwitcher />} />
-      <ScrollView contentContainerStyle={{ paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
+      <ScreenOptions title="Household" left={<HouseholdSwitcher />} />
+      <ScrollView contentContainerStyle={{ paddingTop: inset, paddingBottom: 40 }} scrollIndicatorInsets={{ top: inset }} keyboardShouldPersistTaps="handled">
         <FormSection header="Household">
           {household.isOwnedByMe ? (
             <FormRow last>
@@ -132,12 +133,12 @@ export function HouseholdScreen({ household }: { household: Household }) {
             </View>
           </View>
           <FormRow last={household.customImage === null} onPress={() => void choosePhoto()}>
-            <Ionicons name="image-outline" size={20} color={t.accent} style={{ marginRight: 12 }} />
+            <Glyph name="photo" size={20} color={t.accent} style={{ marginRight: 12 }} />
             <Text style={{ fontSize: 17, color: t.accent }}>{household.customImage === null ? 'Choose a photo' : 'Choose another photo'}</Text>
           </FormRow>
           {household.customImage !== null ? (
             <FormRow last onPress={() => service.setCustomImage(null, household)}>
-              <Ionicons name="trash-outline" size={20} color={t.red} style={{ marginRight: 12 }} />
+              <Glyph name="trash" size={20} color={t.red} style={{ marginRight: 12 }} />
               <Text style={{ fontSize: 17, color: t.red }}>Remove photo</Text>
             </FormRow>
           ) : null}
@@ -155,16 +156,16 @@ export function HouseholdScreen({ household }: { household: Household }) {
             </FormRow>
           ))}
           <FormRow last onPress={() => void invite()} disabled={inviting}>
-            <Ionicons name="person-add-outline" size={20} color={t.accent} style={{ marginRight: 12 }} />
+            <Glyph name="person.badge.plus" size={20} color={t.accent} style={{ marginRight: 12 }} />
             <Text style={{ fontSize: 17, color: t.accent }}>{inviting ? 'Creating invite…' : 'Invite people'}</Text>
           </FormRow>
         </FormSection>
 
         <FormSection header="Organising" footer="Add your own categories and rooms. You can also create them while editing an item.">
           <FormRow last onPress={() => setOptions(true)}>
-            <Ionicons name="pricetag-outline" size={20} color={t.accent} style={{ marginRight: 12 }} />
+            <Glyph name="tag" size={20} color={t.accent} style={{ marginRight: 12 }} />
             <Text style={{ fontSize: 17, color: t.label, flex: 1 }}>Categories & rooms</Text>
-            <Ionicons name="chevron-forward" size={16} color={t.tertiaryLabel} />
+            <Glyph name="chevron.right" size={16} color={t.tertiaryLabel} />
           </FormRow>
         </FormSection>
 
@@ -175,9 +176,9 @@ export function HouseholdScreen({ household }: { household: Household }) {
 
         <FormSection footer="Notifications, sync, your profile, diagnostics and your data.">
           <FormRow last onPress={() => setSettings(true)}>
-            <Ionicons name="settings-outline" size={20} color={t.accent} style={{ marginRight: 12 }} />
+            <Glyph name="gearshape" size={20} color={t.accent} style={{ marginRight: 12 }} />
             <Text style={{ fontSize: 17, color: t.label, flex: 1 }}>App settings</Text>
-            <Ionicons name="chevron-forward" size={16} color={t.tertiaryLabel} />
+            <Glyph name="chevron.right" size={16} color={t.tertiaryLabel} />
           </FormRow>
         </FormSection>
 

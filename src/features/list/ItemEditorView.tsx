@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Glyph, type SymbolName } from '../../components/Glyph';
 import { useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
 import { Prompt } from '../../components/Prompt';
@@ -100,9 +100,9 @@ export function ItemEditorView({ item, householdID, onClose }: { item: GroceryIt
 
       <FormSection footer={`Shopzyy remembers this the next time anyone adds ${item.name.toLowerCase()}.`}>
         <PickerRow label="Category" value={category} options={categoryChoices} onChange={setCategory} />
-        <FormRow onPress={() => setNewKind('category')}><Ionicons name="add" size={20} color={t.accent} style={{ marginRight: 10 }} /><Text style={{ fontSize: 17, color: t.accent }}>New category…</Text></FormRow>
+        <FormRow onPress={() => setNewKind('category')}><Glyph name="plus" size={20} color={t.accent} style={{ marginRight: 10 }} /><Text style={{ fontSize: 17, color: t.accent }}>New category…</Text></FormRow>
         <PickerRowChoice label="Room" value={room} options={roomChoices} onChange={setRoom} />
-        <FormRow last onPress={() => setNewKind('room')}><Ionicons name="add" size={20} color={t.accent} style={{ marginRight: 10 }} /><Text style={{ fontSize: 17, color: t.accent }}>New room…</Text></FormRow>
+        <FormRow last onPress={() => setNewKind('room')}><Glyph name="plus" size={20} color={t.accent} style={{ marginRight: 10 }} /><Text style={{ fontSize: 17, color: t.accent }}>New room…</Text></FormRow>
       </FormSection>
 
       <FormSection header="Note">

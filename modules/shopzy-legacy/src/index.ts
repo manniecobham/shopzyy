@@ -32,6 +32,8 @@ interface Native {
 const native = requireOptionalNativeModule<Native>('ShopzyLegacy');
 
 export const ShopzyLegacy = {
+  /** False on Android, and on an iOS build that was made without this native module. */
+  isAvailable: native !== null,
   readStore: async (): Promise<LegacyStore | null> => (native ? native.readStore() : null),
   readDefaults: async (): Promise<LegacyDefaults> => (native ? native.readDefaults() : {}),
 };

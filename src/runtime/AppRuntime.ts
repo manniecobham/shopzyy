@@ -11,7 +11,7 @@ import { AppState, Platform } from 'react-native';
 import { ShopzyLegacy } from '../../modules/shopzy-legacy';
 import { applyLegacyDefaults } from '../migration/legacyDefaults';
 import { firebaseMigrationDeps } from '../migration/firebaseDeps';
-import { MigrationService } from '../migration/MigrationService';
+import { MigrationService, type MigrationResult } from '../migration/MigrationService';
 import { AppLog } from '../services/AppLog';
 import { scanForRemotePurchases } from '../services/ActivityMonitor';
 import { NotificationService } from '../services/NotificationService';
@@ -63,8 +63,11 @@ export class AppRuntime extends Observable {
     // First launch after updating from the original iOS app: adopt who they were and their settings,
     // so they skip the welcome and profile screens and only need to sign in.
     if (Platform.OS === 'ios') {
-      const legacy = await ShopzyLegacy.readDefaults().catch(() => ({}));
-      applyLegacyDefaults(this.prefs, legacy);
+      // Only when this build can actually read them: otherwise "nothing found" would be remembered forever.
+      if (ShopzyLegacy.isAvailable) {
+        const legacy = await ShopzyLegacy.readDefaults().catch(() => ({}));
+        applyLegacyDefaults(this.prefs, legacy);
+      }
     } else {
       applyLegacyDefaults(this.prefs, {});
     }
@@ -216,14 +219,14 @@ export class AppRuntime extends Observable {
   }
 
   /** Moves the old app's data to Firebase (iPhone only). Safe to retry. */
-  async runMigration(uid: string): Promise<void> {
-    if (this.migration.state === 'running') return;
+  async runMigration(uid: string, options: { force?: boolean } = {}): Promise<MigrationResult | null> {
+    if (this.migration.state === 'running') return null;
     const marker = `shopzy.migrated.${uid}`;
     // The migration can be switched off remotely (config/app.migrationEnabled) once it is no longer wanted.
-    if (Platform.OS !== 'ios' || this.prefs.getString(marker) || !this.appConfig.migrationEnabled) {
+    if (!options.force && (Platform.OS !== 'ios' || this.prefs.getString(marker) || !this.appConfig.migrationEnabled)) {
       this.migration = { state: 'done', message: null, progress: null };
       this.onAccountChanged();
-      return;
+      return null;
     }
     this.migration = { state: 'running', message: null, progress: null };
     this.changed();
@@ -231,17 +234,27 @@ export class AppRuntime extends Observable {
       const result = await new MigrationService(firebaseMigrationDeps()).run(uid, (progress) => {
         this.migration = { ...this.migration, progress };
         this.changed();
-      });
+      }, options);
       // Keep the identity the data is filed under (the old CloudKit user key).
       if (result.userRecordName && result.userRecordName !== this.account.userRecordName) this.account.setUserRecordName(result.userRecordName);
-      this.prefs.setString(marker, '1');
+      // Remember only results we can trust: a "nothing to move" from a build without the reader must be re-checked next launch.
+      if (result.state !== 'none' || result.reliable) this.prefs.setString(marker, '1');
       this.migration = { state: 'done', message: null, progress: null };
       this.onAccountChanged();
+      return result;
     } catch (error) {
       AppLog.error('account', 'Moving the data from the old app failed', error);
       this.migration = { state: 'failed', message: UserFacingError.message(error), progress: null };
       this.changed();
+      return null;
     }
+  }
+
+  /** Settings → "Import from the old Shopzy app": runs the migration again, ignoring what was recorded before. */
+  async importFromOldApp(): Promise<MigrationResult | null> {
+    const uid = this.account.uid;
+    if (!uid) return null;
+    return this.runMigration(uid, { force: true });
   }
 
   private versionReportedFor: string | null = null;

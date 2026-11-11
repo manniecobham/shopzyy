@@ -1,8 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Glyph, type SymbolName } from '../../components/Glyph';
 import { useEffect, useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, SectionList, StyleSheet, Text, View } from 'react-native';
 import { ActionMenu } from '../../components/Sheet';
-import { ScreenHeader } from '../../components/ScreenHeader';
+import { ScreenOptions, useHeaderInset } from '../../components/NativeHeader';
 import { SuggestionEngine } from '../../logic/SuggestionEngine';
 import { ShoppingTrip } from '../../logic/ShoppingTrip';
 import { makeSections } from '../../logic/listGrouping';
@@ -33,6 +33,7 @@ export function ShoppingListScreen({ household }: { household: Household }) {
   useStoreVersion();
   const { store, prefs, households } = runtime;
   const list = runtime.list(household.id);
+  const inset = useHeaderInset();
 
   const [editing, setEditing] = useState<GroceryItem | null>(null);
   const [groupMenu, setGroupMenu] = useState(false);
@@ -92,11 +93,11 @@ export function ShoppingListScreen({ household }: { household: Household }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: t.groupedBackground }}>
-      <ScreenHeader title="List" leading={<HouseholdSwitcher />}
-        trailing={<>
-          <Ionicons name="filter-circle-outline" size={26} color={t.accent} onPress={() => setGroupMenu(true)} accessibilityLabel="Group and order the list" />
+      <ScreenOptions title="List" left={<HouseholdSwitcher />}
+        right={<View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+          <Glyph name="line.3.horizontal.decrease.circle" size={26} color={t.accent} onPress={() => setGroupMenu(true)} accessibilityLabel="Group and order the list" />
           <ProfileMenu member={currentMember} />
-        </>} />
+        </View>} />
       <View style={{ flex: 1 }}>
         <ListBackdrop household={household} />
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -105,7 +106,8 @@ export function ShoppingListScreen({ household }: { household: Household }) {
             keyExtractor={(i) => i.id}
             keyboardShouldPersistTaps="handled"
             stickySectionHeadersEnabled={false}
-            contentContainerStyle={{ paddingBottom: 16 }}
+            contentContainerStyle={{ paddingTop: inset, paddingBottom: 16 }}
+            scrollIndicatorInsets={{ top: inset }}
             ListHeaderComponent={<>
               <SyncStatusView />
               {runningLow.length > 0 ? (
@@ -116,7 +118,7 @@ export function ShoppingListScreen({ household }: { household: Household }) {
               ) : null}
               {listItems.length === 0 ? (
                 <View style={[s.empty, { backgroundColor: t.isDark ? 'rgba(44,44,46,0.8)' : 'rgba(255,255,255,0.8)' }]}>
-                  <Ionicons name="cart-outline" size={42} color={t.secondaryLabel} />
+                  <Glyph name="cart" size={42} color={t.secondaryLabel} />
                   <Text style={{ fontSize: 20, fontWeight: '600', color: t.label }}>Your list is empty</Text>
                   <Text style={{ fontSize: 15, color: t.secondaryLabel, textAlign: 'center' }}>Type below to add items. Try “2 kg rice, milk x2, eggs”.</Text>
                 </View>
@@ -138,8 +140,8 @@ export function ShoppingListScreen({ household }: { household: Household }) {
       </View>
 
       <ActionMenu visible={groupMenu} title="Group by" onClose={() => setGroupMenu(false)} sections={[
-        LIST_GROUPINGS.map((g) => ({ title: groupingTitle(g), icon: groupingIcon(g) as never, checked: household.groupingRaw === g, onPress: () => households.setGrouping(g, household) })),
-        [{ title: 'Reorder sections…', icon: 'swap-vertical', disabled: sections.length < 2, onPress: () => setReordering(true) }],
+        LIST_GROUPINGS.map((g) => ({ title: groupingTitle(g), icon: groupingIcon(g), checked: household.groupingRaw === g, onPress: () => households.setGrouping(g, household) })),
+        [{ title: 'Reorder sections…', icon: 'arrow.up.arrow.down', disabled: sections.length < 2, onPress: () => setReordering(true) }],
       ]} />
       {editing ? <ItemEditorView item={editing} householdID={household.id} onClose={() => setEditing(null)} /> : null}
       {reordering ? <SectionOrderSheet household={household} sections={sections} onClose={() => setReordering(false)} /> : null}

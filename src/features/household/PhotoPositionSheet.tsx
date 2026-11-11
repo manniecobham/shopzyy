@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Glyph, type SymbolName } from '../../components/Glyph';
 import { useMemo, useRef, useState } from 'react';
 import { Image, PanResponder, StyleSheet, Text, View } from 'react-native';
 import { Sheet } from '../../components/Sheet';
@@ -42,7 +42,7 @@ export function PhotoPositionSheet({ base64, onUse, onCancel }: { base64: string
           <FocusedImage uri={uri} focusX={focus.x} focusY={focus.y} />
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Ionicons name="hand-left-outline" size={16} color={t.secondaryLabel} />
+          <Glyph name="hand.draw" size={16} color={t.secondaryLabel} />
           <Text style={{ fontSize: 15, color: t.secondaryLabel }}>Drag the photo to position it</Text>
         </View>
       </View>

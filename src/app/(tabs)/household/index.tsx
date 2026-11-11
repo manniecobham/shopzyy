@@ -1,5 +1,5 @@
-import { HouseholdScreen } from '../../features/household/HouseholdScreen';
-import { useRuntime, useStoreVersion } from '../../runtime/RuntimeProvider';
+import { HouseholdScreen } from '../../../features/household/HouseholdScreen';
+import { useRuntime, useStoreVersion } from '../../../runtime/RuntimeProvider';
 
 export default function HouseholdTab() {
   const runtime = useRuntime();

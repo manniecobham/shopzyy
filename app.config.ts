@@ -67,6 +67,8 @@ const config: ExpoConfig = {
     predictiveBackGestureEnabled: false,
   },
   plugins: [
+    // Android: resolves the notification-colour clash between expo-notifications and Firebase Messaging. Keep it first.
+    './plugins/withNotificationColorMerge',
     'expo-router',
     '@react-native-firebase/app',
     '@react-native-firebase/auth',

@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Glyph, type SymbolName } from './Glyph';
 import { useState as useStateLocal, type ReactNode } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -31,7 +31,7 @@ export function Sheet({ visible, title, onCancel, onSave, saveTitle = 'Save', ca
 
 export interface MenuItem {
   title: string;
-  icon?: React.ComponentProps<typeof Ionicons>['name'];
+  icon?: SymbolName;
   destructive?: boolean;
   checked?: boolean;
   disabled?: boolean;
@@ -55,9 +55,9 @@ export function ActionMenu({ visible, title, sections, onClose }: {
                 {items.map((item, j) => (
                   <FormRow key={item.title} last={j === items.length - 1} disabled={item.disabled}
                     onPress={() => { onClose(); item.onPress(); }} style={{ opacity: item.disabled ? 0.4 : 1 }}>
-                    {item.icon ? <Ionicons name={item.icon} size={20} color={item.destructive ? t.red : t.accent} style={{ marginRight: 12 }} /> : null}
+                    {item.icon ? <Glyph name={item.icon} size={20} color={item.destructive ? t.red : t.accent} style={{ marginRight: 12 }} /> : null}
                     <Text style={{ flex: 1, fontSize: 17, color: item.destructive ? t.red : t.label }}>{item.title}</Text>
-                    {item.checked ? <Ionicons name="checkmark" size={20} color={t.accent} /> : null}
+                    {item.checked ? <Glyph name="checkmark" size={20} color={t.accent} /> : null}
                   </FormRow>
                 ))}
               </FormSection>
@@ -86,7 +86,7 @@ export function PickerRow<T>({ label, value, options, onChange, last, hideLabel 
       <FormRow last={last} onPress={() => setOpen(true)}>
         {hideLabel ? null : <Text style={{ fontSize: 17, color: t.label, flex: 1 }}>{label}</Text>}
         <Text style={{ fontSize: 17, color: t.secondaryLabel, flex: hideLabel ? 1 : undefined, textAlign: hideLabel ? 'left' : 'right' }} numberOfLines={1}>{current?.title ?? ''}</Text>
-        <Ionicons name="chevron-expand" size={16} color={t.tertiaryLabel} style={{ marginLeft: 6 }} />
+        <Glyph name="chevron.up.chevron.down" size={16} color={t.tertiaryLabel} style={{ marginLeft: 6 }} />
       </FormRow>
       <ActionMenu visible={open} title={label} onClose={() => setOpen(false)}
         sections={[options.map((o) => ({ title: o.title, checked: Object.is(o.value, value), onPress: () => onChange(o.value) }))]} />

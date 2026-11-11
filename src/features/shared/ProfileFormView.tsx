@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Glyph, type SymbolName } from '../../components/Glyph';
 import { FormRow, FormSection, ProminentButton } from '../../components/ui';
 import { NameNormalizer } from '../../logic/NameNormalizer';
 import type { UserProfile } from '../../models/entities';
@@ -52,7 +52,7 @@ export function ProfileFormView({ profile, submitTitle, onSubmit }: {
           {MEMBER_PALETTE.map((hex) => (
             <Pressable key={hex} onPress={() => setColorHex(hex)} accessibilityState={{ selected: hex === colorHex }} style={{ flex: 1, alignItems: 'center' }}>
               <View style={[s.swatch, { backgroundColor: hex }]}>
-                {hex === colorHex ? <Ionicons name="checkmark" size={16} color="#fff" /> : null}
+                {hex === colorHex ? <Glyph name="checkmark" size={16} color="#fff" /> : null}
               </View>
             </Pressable>
           ))}

@@ -1,11 +1,11 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Glyph, type SymbolName } from './Glyph';
 import { useRef, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import ReanimatedSwipeable, { type SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 
 export interface SwipeAction {
   label: string;
-  icon: React.ComponentProps<typeof Ionicons>['name'];
+  icon: SymbolName;
   color: string;
   onPress: () => void;
 }
@@ -17,7 +17,7 @@ export function SwipeRow({ leading = [], trailing = [], children }: { leading?: 
     <View style={{ flexDirection: 'row' }}>
       {actions.map((a) => (
         <Pressable key={a.label} onPress={() => { ref.current?.close(); a.onPress(); }} style={[s.action, { backgroundColor: a.color }]} accessibilityRole="button" accessibilityLabel={a.label}>
-          <Ionicons name={a.icon} size={22} color="#fff" />
+          <Glyph name={a.icon} size={22} color="#fff" />
           <Text style={s.text}>{a.label}</Text>
         </Pressable>
       ))}

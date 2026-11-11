@@ -13,6 +13,7 @@ function setup(over: Partial<MigrationDeps> = {}, rows: LegacyStore | null = sto
     setUserDoc: async (_uid, data) => { calls.userDocs.push(data); },
     claim: async (p) => { calls.claims.push(p); return { created: true }; },
     importRecords: async (p) => { calls.imports.push({ kind: p.kind, count: p.docs.length }); return { created: p.docs.length }; },
+    legacyAvailable: true,
     appVersion: '1.0.0',
     now: () => new Date(0),
     ...over,
@@ -41,14 +42,42 @@ describe('MigrationService', () => {
     expect(household.createdAt).toEqual({ __date: expect.any(Number) });
   });
 
-  test('a person already migrated is skipped without reading anything', async () => {
-    const read = jest.fn();
-    const { svc, calls } = setup({ getUserDoc: async () => ({ migrationState: 'done', legacyUserKey: '_owner123' }), readStore: read });
+  test('a person already migrated is not migrated again, and a second phone adopts the same identity', async () => {
+    const { svc, calls } = setup({ getUserDoc: async () => ({ migrationState: 'done', legacyUserKey: '_owner123' }) });
     const result = await svc.run('uid-1');
     expect(result.state).toBe('alreadyDone');
-    expect(result.userRecordName).toBe('_owner123'); // a second phone adopts the same identity
-    expect(read).not.toHaveBeenCalled();
+    expect(result.userRecordName).toBe('_owner123');
     expect(calls.claims).toEqual([]);
+  });
+
+  test('a "none" recorded earlier (by a build that could not read the old data) does NOT block migrating real data', async () => {
+    const { svc, calls } = setup({ getUserDoc: async () => ({ migrationState: 'none' }) });
+    const result = await svc.run('uid-1');
+    expect(result.state).toBe('done');
+    expect(calls.claims).toHaveLength(1);
+    expect(calls.userDocs.at(-1)).toMatchObject({ migrationState: 'done' });
+  });
+
+  test('"force" re-imports even when the person is marked done (safe: the server only creates what is missing)', async () => {
+    const { svc, calls } = setup({ getUserDoc: async () => ({ migrationState: 'done', legacyUserKey: '_owner123' }) });
+    const result = await svc.run('uid-1', undefined, { force: true });
+    expect(result.state).toBe('done');
+    expect(calls.claims).toHaveLength(1);
+  });
+
+  test('"nothing found" from a build that cannot read the old data is not recorded and is flagged unreliable', async () => {
+    const { svc, calls } = setup({ legacyAvailable: false }, null, {} as never);
+    const result = await svc.run('uid-1');
+    expect(result).toMatchObject({ state: 'none', reliable: false });
+    expect(calls.userDocs).toEqual([]);
+  });
+
+  test('it explains what it found in plain language for Diagnostics', async () => {
+    const lines: string[] = [];
+    const { svc } = setup({ log: (m) => lines.push(m) });
+    await svc.run('uid-1');
+    expect(lines[0]).toMatch(/Found 2 household\(s\)/);
+    expect(lines.at(-1)).toMatch(/Moved 1 household/);
   });
 
   test('a fresh install (no old store) is recorded as nothing to migrate', async () => {

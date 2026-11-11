@@ -1,5 +1,5 @@
-import { ShoppingListScreen } from '../../features/list/ShoppingListScreen';
-import { useRuntime, useStoreVersion } from '../../runtime/RuntimeProvider';
+import { ShoppingListScreen } from '../../../features/list/ShoppingListScreen';
+import { useRuntime, useStoreVersion } from '../../../runtime/RuntimeProvider';
 
 export default function ListTab() {
   const runtime = useRuntime();
