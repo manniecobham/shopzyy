@@ -55,4 +55,10 @@ export class HouseholdGoneError extends Error {
   readonly householdGone = true;
   constructor(message = 'This household no longer exists.') { super(message); this.name = 'HouseholdGoneError'; }
 }
-export const isHouseholdGone = (e: unknown): boolean => !!e && typeof e === 'object' && (e as { householdGone?: boolean }).householdGone === true;
+/** True when the error means the household is gone from the server (deleted, or this person was removed). */
+export const isHouseholdGone = (e: unknown): boolean => {
+  if (!e || typeof e !== 'object') return false;
+  if ((e as { householdGone?: boolean }).householdGone === true) return true;
+  const code = String((e as { code?: unknown }).code ?? '');
+  return code === 'not-found' || code === 'functions/not-found' || code === 'firestore/not-found' || code === 'firestore/permission-denied';
+};

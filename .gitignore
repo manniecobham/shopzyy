@@ -51,3 +51,29 @@ AGENTS.md
 .aider*
 .windsurf/
 .github/copilot-instructions.md
+
+# Firebase config (per-environment, download from the Firebase console)
+GoogleService-Info.plist
+google-services.json
+
+# Cloud Functions build output
+functions/lib/
+
+# Firebase CLI: cache, logs and service-account keys (never commit keys)
+.firebase/
+firebase-debug.log*
+firestore-debug.log
+ui-debug.log
+functions/*.local
+serviceAccount*.json
+*-adminsdk-*.json
+
+# Build artifacts
+*.apk
+*.aab
+*.ipa
+*.app
+*.dSYM.zip
+.eas/
+.vscode/*.local
+coverage/

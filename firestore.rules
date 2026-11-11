@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function household(hid) { return get(/databases/$(database)/documents/households/$(hid)); }
+    function isMember(hid) { return signedIn() && request.auth.uid in household(hid).data.memberUIDs; }
+
+    // One document per household. Membership is only changed by Cloud Functions
+    // (joinHousehold / leaveHousehold), and deleting happens only in deleteHousehold.
+    match /households/{hid} {
+      allow read: if signedIn() && request.auth.uid in resource.data.memberUIDs;
+      allow create: if signedIn()
+        && request.resource.data.ownerUID == request.auth.uid
+        && request.resource.data.memberUIDs == [request.auth.uid];
+      allow update: if signedIn()
+        && request.auth.uid in resource.data.memberUIDs
+        && request.resource.data.ownerUID == resource.data.ownerUID
+        && request.resource.data.memberUIDs == resource.data.memberUIDs;
+      allow delete: if false;
+
+      // members, options, items, purchases, tripTotals, assets/banner
+      match /{collection}/{docId} {
+        allow read, write: if isMember(hid);
+      }
+    }
+
+    // Invite codes are created and redeemed by Cloud Functions only.
+    match /invites/{code} {
+      allow read, write: if false;
+    }
+
+    // Per-person data, e.g. migrationState.
+    match /users/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+  }
+}
