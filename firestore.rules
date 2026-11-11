@@ -43,9 +43,26 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // App-wide settings you edit in the console: minimum version, store links, migration switch.
+    // Public so the update check works before anyone signs in; nothing sensitive belongs here.
+    match /config/{doc} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Live adoption counters and the daily migration-readiness report (console only).
+    match /stats/{doc} {
+      allow read, write: if false;
+    }
+
     // Per-person data, e.g. migrationState.
     match /users/{uid} {
       allow read, write: if signedIn() && request.auth.uid == uid;
+
+      // This person's devices and their push tokens (read by the alert functions only).
+      match /devices/{deviceID} {
+        allow read, write: if signedIn() && request.auth.uid == uid;
+      }
     }
   }
 }

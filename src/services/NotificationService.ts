@@ -39,7 +39,12 @@ export class NotificationService implements Notifier {
 
   async configure(): Promise<void> {
     Notifications.setNotificationHandler({
-      handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: true, shouldSetBadge: false }),
+      handleNotification: async (notification) => {
+        // While the app is open the local trip scan already announces trips, so don't show the same
+        // trip twice when the server's push arrives too.
+        const isTripPush = (notification.request.trigger as { type?: string } | null)?.type === 'push' && (notification.request.content.data as { kind?: string } | null)?.kind === 'trip';
+        return { shouldShowBanner: !isTripPush, shouldShowList: !isTripPush, shouldPlaySound: !isTripPush, shouldSetBadge: false };
+      },
     });
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync('default', { name: 'Shopzyy', importance: Notifications.AndroidImportance.DEFAULT });
@@ -52,7 +57,8 @@ export class NotificationService implements Notifier {
 
     Notifications.addNotificationResponseReceivedListener((response) => {
       const content = response.notification.request.content;
-      if (content.categoryIdentifier === NotificationIds.tripCategory) { this.onOpenActivity?.(); return; }
+      const kind = (content.data as { kind?: string } | null)?.kind;
+      if (content.categoryIdentifier === NotificationIds.tripCategory || kind === 'trip') { this.onOpenActivity?.(); return; }
       const itemID = (content.data as { itemID?: string } | null)?.itemID;
       if (!itemID) return;
       if (response.actionIdentifier === NotificationIds.addToListAction) this.onAddToList?.(itemID);

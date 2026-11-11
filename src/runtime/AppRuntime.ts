@@ -15,6 +15,9 @@ import { MigrationService } from '../migration/MigrationService';
 import { AppLog } from '../services/AppLog';
 import { scanForRemotePurchases } from '../services/ActivityMonitor';
 import { NotificationService } from '../services/NotificationService';
+import { PushRegistration } from '../services/PushRegistration';
+import { AppConfigService, appVersion } from '../services/AppConfig';
+import { doc, getFirestore, setDoc } from '@react-native-firebase/firestore';
 import { getFunctions, httpsCallable } from '@react-native-firebase/functions';
 import { StorageKeys } from '../services/AppPreferences';
 import { AppNotice, UserFacingError } from '../services/UserFacingError';
@@ -40,6 +43,8 @@ export class AppRuntime extends Observable {
   private syncUID: string | null = null;
 
   readonly notifications = new NotificationService(this.prefs);
+  readonly appConfig = new AppConfigService(this.prefs);
+  readonly push = new PushRegistration(this.prefs, () => this.notifications.requestAuthorization());
 
   constructor() {
     super();
@@ -61,6 +66,9 @@ export class AppRuntime extends Observable {
       applyLegacyDefaults(this.prefs, {});
     }
     this.account.reloadFromPrefs();
+    this.appConfig.reloadFromCache();
+    void this.appConfig.refresh();
+    this.appConfig.subscribe(() => this.changed());
     this.wireNotifications();
     // Re-read values that depend on preferences now that they are loaded.
     this.account.userRecordName = this.prefs.userRecordName;
@@ -71,6 +79,7 @@ export class AppRuntime extends Observable {
     AppState.addEventListener('change', (state) => {
       if (state !== 'active') return;
       this.account.refresh();
+      void this.appConfig.refresh();
       this.scanActivity();
       ShoppingListService.refreshRestockReminders(this.env);
       void AppLog.uploadPending();
@@ -179,6 +188,13 @@ export class AppRuntime extends Observable {
     // Households only appear once the migration has moved them, so sync waits for it.
     const shouldSync = !!uid && this.migration.state === 'done' && (phase === 'needsProfile' || phase === 'ready');
 
+    // Background alerts: register this phone once the person is set up; drop it on sign-out.
+    if (uid && this.migration.state === 'done' && phase === 'ready') {
+      void this.push.register(uid);
+      this.reportVersion(uid);
+    }
+    if (!uid) void this.push.unregister();
+
     if (!uid && this.sync) {
       // Another person's households must not stay on this device.
       this.stopSync();
@@ -200,7 +216,8 @@ export class AppRuntime extends Observable {
   async runMigration(uid: string): Promise<void> {
     if (this.migration.state === 'running') return;
     const marker = `shopzy.migrated.${uid}`;
-    if (Platform.OS !== 'ios' || this.prefs.getString(marker)) {
+    // The migration can be switched off remotely (config/app.migrationEnabled) once it is no longer wanted.
+    if (Platform.OS !== 'ios' || this.prefs.getString(marker) || !this.appConfig.migrationEnabled) {
       this.migration = { state: 'done', message: null, progress: null };
       this.onAccountChanged();
       return;
@@ -222,6 +239,17 @@ export class AppRuntime extends Observable {
       this.migration = { state: 'failed', message: UserFacingError.message(error), progress: null };
       this.changed();
     }
+  }
+
+  private versionReportedFor: string | null = null;
+
+  /** Once per launch: record which app version and platform this person is on (feeds the adoption counters). */
+  private reportVersion(uid: string): void {
+    if (this.versionReportedFor === uid) return;
+    this.versionReportedFor = uid;
+    void setDoc(doc(getFirestore(), 'users', uid), { appVersion: appVersion(), platform: Platform.OS, lastSeenAt: new Date() }, { merge: true }).catch(() => {
+      this.versionReportedFor = null;
+    });
   }
 
   retryMigration(): void {

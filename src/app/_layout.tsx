@@ -4,6 +4,7 @@ import { Alert, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { MigrationView } from '../features/account/MigrationView';
+import { UpdateRequiredView } from '../features/shared/UpdateRequiredView';
 import { SplashView } from '../features/shared/SplashView';
 import { RuntimeProvider, useAccount, useAppState, useStoreVersion } from '../runtime/RuntimeProvider';
 import { AppNotice } from '../services/UserFacingError';
@@ -50,6 +51,7 @@ function Shell() {
         <Stack.Screen name="join/[code]" />
       </Stack>
       {migrating && !showsSplash ? <View style={StyleSheet.absoluteFill}><MigrationView /></View> : null}
+      {runtime.appConfig.updateRequired && !showsSplash ? <View style={StyleSheet.absoluteFill}><UpdateRequiredView /></View> : null}
       {showsSplash ? <SplashView /> : null}
     </View>
   );

@@ -222,3 +222,6 @@ export const importLegacyRecords = onCall({ memory: '512MiB', timeoutSeconds: 12
   const created = await createMissing(`households/${householdID}/${kind}`, validEntries(req.data?.docs, 500));
   return { created };
 });
+
+export * from './trips';
+export * from './adoption';

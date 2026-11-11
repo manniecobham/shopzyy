@@ -34,6 +34,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
     set(value);
     prefs.setBool(key, value);
     if (key === StorageKeys.notifyRestock) ShoppingListService.refreshRestockReminders(runtime.env);
+    if (key === StorageKeys.notifyPurchases) void runtime.push.updateAlerts();
   };
 
   const confirmDelete = () => Alert.alert(
