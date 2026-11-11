@@ -14,6 +14,7 @@ export const StorageKeys = {
   skippedTrips: 'shopzy.skippedTrips',
   selectedTab: 'shopzy.selectedTab',
   deviceID: 'shopzy.deviceID',
+  pendingInvite: 'shopzy.pendingInvite',
 } as const;
 
 /**
