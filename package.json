@@ -2,6 +2,24 @@
   "name": "shopzyy",
   "version": "1.0.0",
   "main": "index.ts",
+  "private": true,
+  "scripts": {
+    "start": "expo start",
+    "start:clear": "expo start --clear",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "ios:device": "expo run:ios --device",
+    "web": "expo start --web",
+    "prebuild": "expo prebuild",
+    "prebuild:clean": "expo prebuild --clean",
+    "prebuild:ios": "expo prebuild  --platform ios",
+    "prebuild:andriod": "expo prebuild  --platform andriod",
+    "release:ios": "expo run:ios --configuration Release",
+    "release:android": "expo run:android --variant Release",
+    "test": "jest --watchAll",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
     "@invertase/react-native-apple-authentication": "^2.5.1",
@@ -16,6 +34,7 @@
     "expo-build-properties": "~58.0.12",
     "expo-clipboard": "~58.0.4",
     "expo-constants": "~58.0.15",
+    "expo-dev-client": "~58.0.18",
     "expo-device": "~58.0.5",
     "expo-file-system": "~58.0.13",
     "expo-haptics": "~58.0.7",
@@ -31,6 +50,7 @@
     "expo-status-bar": "~58.0.4",
     "expo-system-ui": "~58.0.7",
     "react": "19.3.0",
+    "react-dom": "19.3.0",
     "react-native": "0.88.1",
     "react-native-draggable-flatlist": "^4.0.3",
     "react-native-gesture-handler": "~3.3.0",
@@ -46,12 +66,5 @@
     "jest": "^30.5.2",
     "jest-expo": "^58.0.14",
     "typescript": "~6.0.3"
-  },
-  "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
-  },
-  "private": true
+  }
 }

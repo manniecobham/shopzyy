@@ -8,7 +8,6 @@ const config: ExpoConfig = {
   orientation: 'portrait',
   icon: './assets/icon.png',
   userInterfaceStyle: 'automatic',
-  newArchEnabled: true,
   ios: {
     supportsTablet: false,
     bundleIdentifier: 'com.manniedev-team.shopzyy',
@@ -32,8 +31,7 @@ const config: ExpoConfig = {
     '@react-native-firebase/app',
     '@react-native-firebase/auth',
     '@react-native-google-signin/google-signin',
-    '@invertase/react-native-apple-authentication',
-    ['expo-build-properties', { ios: { useFrameworks: 'static' } }],
+    ['expo-build-properties', { ios: { useFrameworks: 'dynamic' } }],
     'expo-notifications',
     'expo-localization',
   ],

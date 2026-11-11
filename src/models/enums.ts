@@ -108,3 +108,83 @@ export const MEASUREMENT_UNITS = [
 export type MeasurementUnit = (typeof MEASUREMENT_UNITS)[number];
 export const isMeasurementUnit = (raw: string | null | undefined): raw is MeasurementUnit =>
   !!raw && (MEASUREMENT_UNITS as readonly string[]).includes(raw);
+
+const UNIT_ALIASES: Record<string, MeasurementUnit> = {};
+{
+  const table: Record<MeasurementUnit, string[]> = {
+    kilogram: ['kg', 'kgs', 'kilo', 'kilos', 'kilogram', 'kilograms'],
+    gram: ['g', 'gr', 'grs', 'gram', 'grams'],
+    pound: ['lb', 'lbs', 'pound', 'pounds'],
+    ounce: ['oz', 'ounce', 'ounces'],
+    liter: ['l', 'lt', 'ltr', 'liter', 'liters', 'litre', 'litres'],
+    milliliter: ['ml', 'milliliter', 'milliliters', 'millilitre', 'millilitres'],
+    pack: ['pack', 'packs', 'pk', 'pkt', 'packet', 'packets'],
+    bottle: ['bottle', 'bottles', 'btl'],
+    can: ['can', 'cans', 'tin', 'tins'],
+    bag: ['bag', 'bags'],
+    box: ['box', 'boxes'],
+    loaf: ['loaf', 'loaves'],
+    bunch: ['bunch', 'bunches'],
+    jar: ['jar', 'jars'],
+    carton: ['carton', 'cartons', 'crate', 'crates'],
+    piece: ['pc', 'pcs', 'piece', 'pieces'],
+  };
+  for (const unit of MEASUREMENT_UNITS) for (const word of table[unit]) UNIT_ALIASES[word] = unit;
+}
+
+/** Recognises the many ways people type units ("kg", "kilos", "litres", "tins"). */
+export function unitFromToken(token: string): MeasurementUnit | null {
+  const key = token.toLowerCase().replace(/^[\p{P}\s]+|[\p{P}\s]+$/gu, '');
+  return Object.prototype.hasOwnProperty.call(UNIT_ALIASES, key) ? UNIT_ALIASES[key] : null;
+}
+
+const MEASURED: readonly MeasurementUnit[] = ['kilogram', 'gram', 'pound', 'ounce', 'liter', 'milliliter'];
+const isMeasured = (u: MeasurementUnit) => MEASURED.includes(u);
+
+/** Canonical token the parser round-trips, used when rebuilding input text. */
+export function unitInputToken(u: MeasurementUnit): string {
+  switch (u) {
+    case 'kilogram': return 'kg';
+    case 'gram': return 'g';
+    case 'pound': return 'lb';
+    case 'ounce': return 'oz';
+    case 'liter': return 'l';
+    case 'milliliter': return 'ml';
+    default: return u;
+  }
+}
+
+export function unitLabel(u: MeasurementUnit): string {
+  switch (u) {
+    case 'kilogram': return 'kg';
+    case 'gram': return 'g';
+    case 'pound': return 'lb';
+    case 'ounce': return 'oz';
+    case 'liter': return 'L';
+    case 'milliliter': return 'mL';
+    default: return u;
+  }
+}
+
+function pluralLabel(u: MeasurementUnit, quantity: number): string {
+  if (isMeasured(u) || quantity === 1) return unitLabel(u);
+  switch (u) {
+    case 'box': return 'boxes';
+    case 'loaf': return 'loaves';
+    case 'bunch': return 'bunches';
+    default: return unitLabel(u) + 's';
+  }
+}
+
+/** Locale-independent formatting ("1.5", "2") so it can be fed back through SmartItemParser. */
+export function plainQuantity(value: number): string {
+  if (Math.round(value) === value && Math.abs(value) < 1_000_000) return String(Math.trunc(value));
+  return value.toFixed(2).replace(/\.?0+$/, '');
+}
+
+/** Human-readable amount, or null for the unremarkable "1 of something". */
+export function describeQuantity(quantity: number, unit: MeasurementUnit | null | undefined): string | null {
+  const number = plainQuantity(quantity);
+  if (!unit || unit === 'piece') return quantity === 1 ? null : `×${number}`;
+  return `${number} ${pluralLabel(unit, quantity)}`;
+}
