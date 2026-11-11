@@ -3,6 +3,7 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import { LoadingOverlay } from '../../components/LogoAnimation';
 import { PickerRow } from '../../components/Sheet';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { FormRow, FormSection, MemberBadge } from '../../components/ui';
@@ -36,6 +37,7 @@ export function HouseholdScreen({ household }: { household: Household }) {
   const [settings, setSettings] = useState(false);
   const [removalError, setRemovalError] = useState<string | null>(null);
   const [inviting, setInviting] = useState(false);
+  const [preparingPhoto, setPreparingPhoto] = useState(false);
   useEffect(() => setDraftName(household.name), [household.name]);
 
   const name = householdDisplayName(household);
@@ -46,11 +48,16 @@ export function HouseholdScreen({ household }: { household: Household }) {
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1 });
     if (result.canceled || !result.assets[0]) return;
     const asset = result.assets[0];
+    setPreparingPhoto(true);
+    try {
     // Shrink to banner size before it's stored and synced, so every member downloads ~150 KB instead of a full-resolution picture.
     let ctx = ImageManipulator.ImageManipulator.manipulate(asset.uri);
     if (asset.width > BANNER_WIDTH) ctx = ctx.resize({ width: BANNER_WIDTH });
     const image = await (await ctx.renderAsync()).saveAsync({ format: ImageManipulator.SaveFormat.JPEG, compress: 0.75, base64: true });
     if (image.base64) setPendingPhoto(image.base64);
+    } finally {
+      setPreparingPhoto(false);
+    }
   };
 
   // MARK: Invite
@@ -179,6 +186,7 @@ export function HouseholdScreen({ household }: { household: Household }) {
         </FormSection>
       </ScrollView>
 
+      <LoadingOverlay visible={preparingPhoto} message="Preparing photo…" />
       {options ? <CustomOptionsSheet householdID={household.id} onClose={() => setOptions(false)} /> : null}
       {settings ? <SettingsSheet onClose={() => setSettings(false)} /> : null}
       {pendingPhoto ? (

@@ -1,5 +1,6 @@
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LogoLoader } from '../../components/LogoAnimation';
 import { ProminentButton, TextButton } from '../../components/ui';
 import { useAccount, useAppState } from '../../runtime/RuntimeProvider';
 import { useTheme } from '../../theme/theme';
@@ -16,14 +17,13 @@ export function MigrationView() {
   return (
     <SafeAreaView style={[s.root, { backgroundColor: t.background }]}>
       <View style={s.body}>
-        <Text style={{ fontSize: 56 }}>🛒</Text>
+        {failed ? <Text style={{ fontSize: 56 }}>🛒</Text> : <LogoLoader size={128} label="Moving your lists" />}
         <Text style={[s.title, { color: t.label }]}>{failed ? "Couldn't move your lists yet" : 'Moving your lists…'}</Text>
         <Text style={[s.sub, { color: t.secondaryLabel }]}>
           {failed
             ? migration.message
             : 'Shopzyy is bringing your households, lists and shopping history to your new account. Nothing on your phone or in iCloud is changed or deleted.'}
         </Text>
-        {!failed ? <ActivityIndicator style={{ marginTop: 20 }} /> : null}
         {!failed && p && p.total > 0 ? <Text style={{ marginTop: 10, fontSize: 13, color: t.secondaryLabel }}>{Math.min(p.done, p.total)} of {p.total}</Text> : null}
       </View>
       {failed ? (

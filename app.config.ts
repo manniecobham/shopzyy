@@ -71,7 +71,9 @@ const config: ExpoConfig = {
     '@react-native-firebase/app',
     '@react-native-firebase/auth',
     '@react-native-google-signin/google-signin',
-    ['expo-build-properties', { ios: { useFrameworks: 'dynamic' } }],
+    // iOS: react-native-firebase needs dynamic frameworks.
+    // Android: Firebase Auth 25 (Firebase BoM 35) is compiled with Kotlin 2.4, but RN 0.88 defaults to 2.2.
+    ['expo-build-properties', { ios: { useFrameworks: 'dynamic' }, android: { kotlinVersion: '2.4.0' } }],
     // Android status-bar icon: white silhouette of the basket, in the brand green.
     ['expo-notifications', { icon: './assets/notification-icon.png', color: '#1E9E68' }],
     // Same as the Swift app's launch screen: solid brand green (the in-app splash with the cart follows it).

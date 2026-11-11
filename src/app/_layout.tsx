@@ -30,10 +30,11 @@ function Shell() {
   useStoreVersion();
   const noticeVersion = useSyncExternalStore(AppNotice.subscribe, AppNotice.getSnapshot);
 
-  // Keep the splash up briefly even when loading is instant, so it reads as a deliberate brand moment.
-  const [minimumShown, setMinimumShown] = useState(false);
-  useEffect(() => { const id = setTimeout(() => setMinimumShown(true), 1400); return () => clearTimeout(id); }, []);
-  const showsSplash = !minimumShown || !runtime.ready || account.phase === 'loading';
+  // The splash plays its logo animation to the end, even when loading is instant, so it reads as a deliberate
+  // brand moment. A hard cap keeps a stuck animation from ever blocking the app.
+  const [animationDone, setAnimationDone] = useState(false);
+  useEffect(() => { const id = setTimeout(() => setAnimationDone(true), 3500); return () => clearTimeout(id); }, []);
+  const showsSplash = !animationDone || !runtime.ready || account.phase === 'loading';
 
   useEffect(() => {
     const n = AppNotice.current;
@@ -52,7 +53,7 @@ function Shell() {
       </Stack>
       {migrating && !showsSplash ? <View style={StyleSheet.absoluteFill}><MigrationView /></View> : null}
       {runtime.appConfig.updateRequired && !showsSplash ? <View style={StyleSheet.absoluteFill}><UpdateRequiredView /></View> : null}
-      {showsSplash ? <SplashView /> : null}
+      {showsSplash ? <SplashView onFinish={() => setAnimationDone(true)} /> : null}
     </View>
   );
 }

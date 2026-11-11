@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LoadingOverlay } from '../../components/LogoAnimation';
 import { FormRow, FormSection, TextButton } from '../../components/ui';
 import { useAccount, useRuntime } from '../../runtime/RuntimeProvider';
 import { useTheme } from '../../theme/theme';
@@ -14,6 +15,13 @@ export function HouseholdSetupView() {
   const [code, setCode] = useState('');
   const [joining, setJoining] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
+  // After a successful join the household still has to arrive; this screen goes away when it does.
+  const [arriving, setArriving] = useState(false);
+  useEffect(() => {
+    if (!arriving) return;
+    const id = setTimeout(() => setArriving(false), 10_000);
+    return () => clearTimeout(id);
+  }, [arriving]);
 
   const create = () => {
     if (!account.userRecordName || !account.profile) return;
@@ -24,8 +32,10 @@ export function HouseholdSetupView() {
   const join = async () => {
     if (!code.trim()) return;
     setJoining(true);
-    setJoinError(await runtime.joinHousehold(code));
+    const error = await runtime.joinHousehold(code);
+    setJoinError(error);
     setJoining(false);
+    if (!error) setArriving(true);
   };
 
   return (
@@ -55,6 +65,7 @@ export function HouseholdSetupView() {
           </FormSection>
         </ScrollView>
       </KeyboardAvoidingView>
+      <LoadingOverlay visible={joining || arriving} message="Joining household…" />
     </SafeAreaView>
   );
 }

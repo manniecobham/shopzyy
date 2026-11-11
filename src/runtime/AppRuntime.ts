@@ -37,6 +37,9 @@ export class AppRuntime extends Observable {
   migration: { state: 'idle' | 'running' | 'failed' | 'done'; message: string | null; progress: { done: number; total: number } | null } =
     { state: 'idle', message: null, progress: null };
   private migrationUID: string | null = null;
+  /** False from the moment sync starts until the first households arrive (or a short timeout), so we show a loader instead of flashing "create a household". */
+  initialSyncDone = false;
+  private initialSyncTimer: ReturnType<typeof setTimeout> | null = null;
   ready = false;
 
   private sync: FirestoreSync | null = null;
@@ -260,8 +263,11 @@ export class AppRuntime extends Observable {
   }
 
   private startSync(uid: string): void {
+    this.initialSyncDone = false;
+    if (this.initialSyncTimer) clearTimeout(this.initialSyncTimer);
+    this.initialSyncTimer = setTimeout(() => this.markInitialSyncDone(), 6000); // never wait forever (offline, slow network)
     const sync = new FirestoreSync(this.store, uid, {
-      onStatus: (s) => { this.syncStatus = s; this.changed(); },
+      onStatus: (s) => { this.syncStatus = s; if (s.state === 'offline' || s.state === 'failed') this.markInitialSyncDone(); this.changed(); },
       onHouseholdRemoved: (name) => AppNotice.show(
         `${name || 'This household'} is no longer available`,
         "It was deleted by its owner or you were removed from it, so it's been removed from this phone.",
@@ -272,6 +278,7 @@ export class AppRuntime extends Observable {
         ShoppingListService.refreshRestockReminders(this.env);
       },
       onFetched: () => {
+        this.markInitialSyncDone();
         const { profile, userRecordName } = this.account;
         if (profile && userRecordName) this.households.updateProfile(profile, userRecordName);
       },
@@ -282,7 +289,15 @@ export class AppRuntime extends Observable {
     sync.start();
   }
 
+  private markInitialSyncDone(): void {
+    if (this.initialSyncTimer) { clearTimeout(this.initialSyncTimer); this.initialSyncTimer = null; }
+    if (this.initialSyncDone) return;
+    this.initialSyncDone = true;
+    this.changed();
+  }
+
   private stopSync(): void {
+    this.initialSyncDone = false;
     this.sync?.stop();
     this.sync = null;
     this.syncUID = null;

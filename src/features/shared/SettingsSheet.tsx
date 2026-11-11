@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Linking, Switch, Text, View } from 'react-native';
+import { Alert, Linking, Switch, Text, View } from 'react-native';
+import { LoadingOverlay } from '../../components/LogoAnimation';
 import { Sheet } from '../../components/Sheet';
 import { FormRow, FormSection, MemberBadge } from '../../components/ui';
 import { useAccount, useAppState } from '../../runtime/RuntimeProvider';
@@ -117,7 +118,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
 
       {editing ? <EditProfileSheet onClose={() => setEditing(false)} /> : null}
       {diagnostics ? <DiagnosticsSheet onClose={() => setDiagnostics(false)} /> : null}
-      {deleting ? <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.25)' }}><ActivityIndicator size="large" /></View> : null}
+      <LoadingOverlay visible={deleting} message="Deleting your data…" />
     </Sheet>
   );
 }

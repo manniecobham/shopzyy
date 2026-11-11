@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LoadingOverlay } from '../../components/LogoAnimation';
 import { FormRow, FormSection, ProminentButton, TextButton } from '../../components/ui';
 import { useAccount } from '../../runtime/RuntimeProvider';
 import { Brand, useTheme } from '../../theme/theme';
@@ -76,9 +77,9 @@ export function SignInView() {
             <TextButton title={mode === 'signIn' ? 'Create an account' : 'I already have an account'} onPress={() => setMode(mode === 'signIn' ? 'signUp' : 'signIn')} />
             {mode === 'signIn' ? <TextButton title="Forgot password?" onPress={() => void forgot()} /> : null}
           </View>
-          {account.busy ? <ActivityIndicator style={{ marginTop: 16 }} /> : null}
         </ScrollView>
       </KeyboardAvoidingView>
+      <LoadingOverlay visible={account.busy} message="Signing in…" />
     </SafeAreaView>
   );
 }
