@@ -77,3 +77,7 @@ serviceAccount*.json
 .eas/
 .vscode/*.local
 coverage/
+
+# Per-environment Firebase client files (development / production)
+firebase/*/GoogleService-Info.plist
+firebase/*/google-services.json

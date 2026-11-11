@@ -10,15 +10,18 @@
     "ios": "expo run:ios",
     "ios:device": "expo run:ios --device",
     "web": "expo start --web",
-    "prebuild": "expo prebuild",
-    "prebuild:clean": "expo prebuild --clean",
-    "prebuild:ios": "expo prebuild  --platform ios",
-    "prebuild:andriod": "expo prebuild  --platform andriod",
+    "prebuild": "APP_ENV=development expo prebuild",
+    "prebuild:clean": "APP_ENV=development expo prebuild --clean",
+    "prebuild:ios": "APP_ENV=development expo prebuild  --platform ios",
+    "prebuild:andriod": "APP_ENV=development expo prebuild  --platform andriod",
     "release:ios": "expo run:ios --configuration Release",
     "release:android": "expo run:android --variant Release",
     "test": "jest --watchAll",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "prebuild:prod": "APP_ENV=production expo prebuild --clean",
+    "deploy:dev": "firebase deploy --project development --only firestore,functions",
+    "deploy:prod": "firebase deploy --project production --only firestore,functions"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
