@@ -1,8 +1,9 @@
-import { Text, View } from 'react-native';
-import { useTheme } from '../../theme/theme';
+import { ActivityScreen } from '../../features/activity/ActivityScreen';
+import { useRuntime, useStoreVersion } from '../../runtime/RuntimeProvider';
 
-/** Built in the next step. */
-export default function Screen() {
-  const t = useTheme();
-  return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: t.groupedBackground }}><Text style={{ color: t.label }}>activity</Text></View>;
+export default function ActivityTab() {
+  const runtime = useRuntime();
+  useStoreVersion();
+  const household = runtime.currentHousehold;
+  return household ? <ActivityScreen key={household.id} household={household} /> : null;
 }
