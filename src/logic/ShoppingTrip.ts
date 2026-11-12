@@ -3,6 +3,7 @@ import { t, tn } from '../i18n';
 export interface TripPurchase {
   id: string;
   itemName: string;
+  quantityText?: string | null;
   purchasedAt: Date;
 }
 

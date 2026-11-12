@@ -1,5 +1,5 @@
 import { Glyph, type SymbolName } from '../../components/Glyph';
-import { t as tr } from '../../i18n';
+import { t as tr, tn } from '../../i18n';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Sheet } from '../../components/Sheet';
@@ -15,15 +15,17 @@ export interface TripTotalTarget {
   householdID: string;
   endedAt: Date;
   skipKey: string;
-  summary: string | null;
+  items: TripLine[];
   existing: TripTotal | null;
 }
 
-export const targetForTrip = (trip: ShoppingTrip, skipKey: string): TripTotalTarget => ({
-  tripKey: trip.id, householdID: trip.householdID, endedAt: trip.end, skipKey, summary: trip.body(), existing: null,
+export interface TripLine { name: string; quantity: string | null }
+
+export const targetForTrip = (trip: ShoppingTrip, skipKey: string, items: TripLine[] = trip.purchases.map((p) => ({ name: p.itemName, quantity: p.quantityText || null }))): TripTotalTarget => ({
+  tripKey: trip.id, householdID: trip.householdID, endedAt: trip.end, skipKey, items, existing: null,
 });
-export const targetForTotal = (total: TripTotal): TripTotalTarget => ({
-  tripKey: total.tripKey, householdID: total.householdID, endedAt: total.tripEndedAt, skipKey: total.tripKey, summary: null, existing: total,
+export const targetForTotal = (total: TripTotal, items: TripLine[]): TripTotalTarget => ({
+  tripKey: total.tripKey, householdID: total.householdID, endedAt: total.tripEndedAt, skipKey: total.tripKey, items, existing: total,
 });
 
 export function TripTotalBanner({ onAdd, onSkip }: { onAdd: () => void; onSkip: () => void }) {
@@ -62,7 +64,7 @@ export function TripTotalSheet({ target, household, onSkip, onClose }: {
   return (
     <Sheet visible title={target.existing ? tr('Edit total') : tr('Shopping total')} cancelTitle={target.existing ? tr('Cancel') : tr('Skip')}
       onCancel={() => { if (!target.existing) onSkip(); onClose(); }} onSave={save} saveDisabled={!(value > 0)}>
-      <FormSection header={tr('How much was this shop?')} footer={`${target.summary ? `${target.summary}\n` : ''}${tr('Amounts are in {currency}. Change the currency in Household settings.', { currency })}`}>
+      <FormSection header={tr('How much was this shop?')} footer={tr('Amounts are in {currency}. Change the currency in Household settings.', { currency })}>
         <FormRow style={{ gap: 8 }}>
           <Text style={{ fontSize: 22, color: t.secondaryLabel }}>{currencySymbol(currency)}</Text>
           <TextInput autoFocus value={amount} onChangeText={setAmount} keyboardType="decimal-pad" placeholder="0.00" placeholderTextColor={t.tertiaryLabel}
@@ -70,6 +72,16 @@ export function TripTotalSheet({ target, household, onSkip, onClose }: {
         </FormRow>
         <FormRow last><TextInput value={store} onChangeText={setStore} placeholder={tr('Store (optional)')} placeholderTextColor={t.tertiaryLabel} style={{ flex: 1, fontSize: 17, color: t.label }} /></FormRow>
       </FormSection>
+      {target.items.length > 0 ? (
+        <FormSection header={tn('{n} item', '{n} items', target.items.length)}>
+          {target.items.map((item, i) => (
+            <FormRow key={`${item.name}-${i}`} last={i === target.items.length - 1}>
+              <Text style={{ flex: 1, fontSize: 17, color: t.label }}>{item.name}</Text>
+              {item.quantity ? <Text style={{ fontSize: 17, color: t.secondaryLabel }}>{item.quantity}</Text> : null}
+            </FormRow>
+          ))}
+        </FormSection>
+      ) : null}
     </Sheet>
   );
 }

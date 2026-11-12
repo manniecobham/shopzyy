@@ -3,6 +3,7 @@ import { useHeaderHeight } from 'expo-router/react-navigation';
 import type { ReactNode } from 'react';
 import { Platform, View } from 'react-native';
 import { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActionMenu, type MenuItem } from './Sheet';
 import { Glyph, type SymbolName } from './Glyph';
 import { useTheme } from '../theme/theme';
@@ -13,6 +14,13 @@ export { isIOS26 };
 export function useHeaderInset(): number {
   const height = useHeaderHeight();
   return Platform.OS === 'ios' ? height : 0;
+}
+
+export function useEmptyStateInset(): number {
+  const header = useHeaderInset();
+  const { bottom } = useSafeAreaInsets();
+  if (Platform.OS !== 'ios') return 0;
+  return header + (isIOS26 ? 84 : 49 + bottom);
 }
 
 export function ScreenOptions({ title, left, right, menu, largeTitle }: {

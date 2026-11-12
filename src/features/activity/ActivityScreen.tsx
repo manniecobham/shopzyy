@@ -2,7 +2,7 @@ import { Glyph, type SymbolName } from '../../components/Glyph';
 import { locale, t, tn } from '../../i18n';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { ScreenOptions } from '../../components/NativeHeader';
+import { ScreenOptions, useEmptyStateInset } from '../../components/NativeHeader';
 import { SwipeRow } from '../../components/SwipeRow';
 import { FormSection, MemberBadge, TextButton } from '../../components/ui';
 import { formatCurrency } from '../../lib/format';
@@ -19,6 +19,7 @@ import { tripSkipKey } from '../../logic/tripTotals';
 
 export function ActivityScreen({ household }: { household: Household }) {
   const th = useTheme();
+  const emptyInset = useEmptyStateInset();
   const runtime = useRuntime();
   useStoreVersion();
   const { store } = runtime;
@@ -33,10 +34,13 @@ export function ActivityScreen({ household }: { household: Household }) {
   const spend = periodSpend(trips);
   const filtered = memberFilter !== null || period !== 'latest';
 
-  const editTotal = (e: ActivityTrip) => setEditing(e.total ? targetForTotal(e.total) : targetForTrip(e.trip, tripSkipKey(e.trip)));
+  const editTotal = (e: ActivityTrip) => {
+    const items = e.records.map((r) => ({ name: purchaseItemName(r), quantity: purchaseQuantityText(r) || null }));
+    setEditing(e.total ? targetForTotal(e.total, items) : targetForTrip(e.trip, tripSkipKey(e.trip), items));
+  };
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: th.groupedBackground }} contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ flexGrow: 1, paddingBottom: 32 }} keyboardShouldPersistTaps="handled">
+    <ScrollView style={{ flex: 1, backgroundColor: th.groupedBackground }} contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ flexGrow: 1, paddingBottom: trips.length === 0 ? emptyInset : 32 }} keyboardShouldPersistTaps="handled">
       <ScreenOptions largeTitle title={t('Shopping history')} left={<HouseholdSwitcher />}
         menu={{
           icon: filtered ? 'line.3.horizontal.decrease.circle.fill' : 'line.3.horizontal.decrease.circle', label: t('Filter history'), title: t('Filter history'),

@@ -44,7 +44,7 @@ export class NotificationService implements Notifier {
       { identifier: NotificationIds.addToListAction, buttonTitle: t('Add to list'), options: { opensAppToForeground: false } },
       { identifier: NotificationIds.snoozeAction, buttonTitle: t('Not this week'), options: { opensAppToForeground: false } },
     ]);
-    await Notifications.setNotificationCategoryAsync(NotificationIds.tripCategory, []);
+    if (Platform.OS === 'ios') await Notifications.setNotificationCategoryAsync(NotificationIds.tripCategory, []);
 
     Notifications.addNotificationResponseReceivedListener((response) => {
       const content = response.notification.request.content;

@@ -412,5 +412,8 @@ const de: Record<string, string> = {
   "Couldn't update your data yet": "Deine Daten konnten noch nicht aktualisiert werden",
   "Updating your data…": "Deine Daten werden aktualisiert…",
   "Shopzyy is getting everything ready for you. This only takes a moment.": "Shopzyy bereitet alles für dich vor. Das dauert nur einen Moment.",
+  "Undo last action?": "Letzte Aktion rückgängig machen?",
+  "Added {items}": "Hinzugefügt: {items}",
+  "Ticked off {items}": "Abgehakt: {items}",
 };
 export default de;

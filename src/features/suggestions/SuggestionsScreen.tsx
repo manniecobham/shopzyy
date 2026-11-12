@@ -1,7 +1,7 @@
 import { Glyph, type SymbolName } from '../../components/Glyph';
 import { t as tr } from '../../i18n';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { ScreenOptions } from '../../components/NativeHeader';
+import { ScreenOptions, useEmptyStateInset } from '../../components/NativeHeader';
 import { SwipeRow } from '../../components/SwipeRow';
 import { FormSection, TextButton } from '../../components/ui';
 import { KIND_EXPLANATION, KIND_TITLE, SuggestionEngine, suggestionReason, type Suggestion, type SuggestionKind } from '../../logic/SuggestionEngine';
@@ -21,12 +21,13 @@ export function SuggestionsScreen({ household }: { household: Household }) {
   const list = runtime.list(household.id);
   const member = account.userRecordName ? runtime.store.member(account.userRecordName, household.id) ?? null : null;
 
+  const emptyInset = useEmptyStateInset();
   const suggestions = new SuggestionEngine().suggestions(runtime.store.itemsIn(household.id).map(itemHistory));
   const urgent = suggestions.filter((s) => s.kind !== 'longTimeNoSee');
   const add = (s: Suggestion) => list.addToList(s.itemID, member);
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: t.groupedBackground }} contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ flexGrow: 1, paddingBottom: 32 }} keyboardShouldPersistTaps="handled">
+    <ScrollView style={{ flex: 1, backgroundColor: t.groupedBackground }} contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ flexGrow: 1, paddingBottom: suggestions.length === 0 ? emptyInset : 32 }} keyboardShouldPersistTaps="handled">
       <ScreenOptions largeTitle title={tr('Suggestions')} left={<HouseholdSwitcher />}
         right={urgent.length > 0 ? <View style={{ paddingHorizontal: 12 }}><TextButton title={tr('Add {n} due', { n: urgent.length })} onPress={() => urgent.forEach(add)} color={t.label} style={{ fontSize: 17 }} /></View> : undefined} />
       {suggestions.length === 0 ? (

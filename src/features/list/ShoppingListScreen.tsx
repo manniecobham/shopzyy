@@ -1,7 +1,9 @@
 import { Glyph, type SymbolName } from '../../components/Glyph';
 import { t as tr } from '../../i18n';
-import { useEffect, useMemo, useState } from 'react';
-import { Keyboard, KeyboardAvoidingView, Platform, SectionList, StyleSheet, Text, View } from 'react-native';
+import { useIsFocused } from 'expo-router';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useShake } from '../../lib/useShake';
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, SectionList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenOptions } from '../../components/NativeHeader';
 import { SuggestionEngine } from '../../logic/SuggestionEngine';
@@ -10,7 +12,7 @@ import { makeSections } from '../../logic/listGrouping';
 import { totalMatchesTrip, tripSkipKey } from '../../logic/tripTotals';
 import { LIST_GROUPINGS, groupingIcon, groupingTitle } from '../../models/enums';
 import type { GroceryItem, Household } from '../../models/entities';
-import { itemHistory, purchaseItemName, purchaseMemberName } from '../../models/itemOps';
+import { itemHistory, purchaseItemName, purchaseMemberName, purchaseQuantityText } from '../../models/itemOps';
 import { useAccount, useAppState, useStoreVersion } from '../../runtime/RuntimeProvider';
 import { SkippedTrips } from '../../services/SkippedTrips';
 import { isIOS26, useTheme } from '../../theme/theme';
@@ -43,6 +45,38 @@ export function ShoppingListScreen({ household }: { household: Household }) {
   const [now, setNow] = useState(() => new Date());
   const [skippedKey, setSkippedKey] = useState<string | null>(null);
 
+  const history = useRef<{ label: string; run: () => void }[]>([]);
+  const asking = useRef(false);
+  const record = (label: string, run: () => void) => { history.current = [...history.current.slice(-19), { label, run }]; };
+  const focused = useIsFocused();
+  useShake(() => {
+    const last = history.current[history.current.length - 1];
+    if (!last || asking.current) return;
+    asking.current = true;
+    Alert.alert(tr('Undo last action?'), last.label, [
+      { text: tr('Cancel'), style: 'cancel', onPress: () => { asking.current = false; } },
+      { text: tr('Undo'), onPress: () => { history.current = history.current.slice(0, -1); last.run(); asking.current = false; } },
+    ], { onDismiss: () => { asking.current = false; } });
+  }, focused && !editing && !reordering && !tripTarget);
+
+  const addText = (text: string) => {
+    const before = list.snapshotItems();
+    const added = list.addFromText(text, currentMember).filter((i) => {
+      const b = before.get(i.id);
+      return !b || b.isOnList !== i.isOnList || b.quantity !== i.quantity || b.unitRaw !== i.unitRaw;
+    });
+    if (added.length > 0) record(tr('Added {items}', { items: added.map((i) => i.name).join(', ') }), () => list.undoAdd(added, before));
+  };
+
+  const tickOff = (item: GroceryItem) => {
+    const name = item.name;
+    const purchase = list.markBought(item, currentMember);
+    if (!purchase) return;
+    record(tr('Ticked off {items}', { items: name }), () => {
+      if (store.purchasesIn(household.id).some((p) => p.id === purchase.id)) list.undoPurchase(purchase);
+    });
+  };
+
   const insets = useSafeAreaInsets();
   const [keyboardUp, setKeyboardUp] = useState(false);
   useEffect(() => {
@@ -70,7 +104,7 @@ export function ShoppingListScreen({ household }: { household: Household }) {
       .slice(0, 40);
     const trips = ShoppingTrip.group(mine.map((p) => ({
       householdID: household.id, buyerKey: p.member?.userRecordName ?? null, buyerName: purchaseMemberName(p),
-      purchase: { id: p.id, itemName: purchaseItemName(p), purchasedAt: p.purchasedAt },
+      purchase: { id: p.id, itemName: purchaseItemName(p), quantityText: purchaseQuantityText(p), purchasedAt: p.purchasedAt },
     })));
     return trips[trips.length - 1] ?? null;
   }, [store.version, household.id, prefs.deviceID]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -137,14 +171,14 @@ export function ShoppingListScreen({ household }: { household: Household }) {
             renderSectionHeader={({ section }) => <ListSectionHeader title={section.title} count={section.items.length} collapsed={collapsed.has(section.title)} onToggle={() => toggleSection(section.title)} />}
             renderItem={({ item, index, section }) => (
               <ItemRow item={item} first={index === 0} last={index === section.items.length - 1}
-                onBought={() => list.markBought(item, currentMember)} onEdit={() => setEditing(item)} onRemove={() => list.removeFromList(item)} />
+                onBought={() => tickOff(item)} onEdit={() => setEditing(item)} onRemove={() => list.removeFromList(item)} />
             )}
           />
           <View style={{ marginBottom: tabBarClearance }}>
             {tripAwaitingTotal ? (
               <TripTotalBanner onAdd={() => setTripTarget(targetForTrip(tripAwaitingTotal, tripSkipKey(tripAwaitingTotal)))} onSkip={() => skip(tripSkipKey(tripAwaitingTotal))} />
             ) : null}
-            <SmartAddBar catalog={catalog} onSubmit={(text) => list.addFromText(text, currentMember)} />
+            <SmartAddBar catalog={catalog} onSubmit={addText} />
           </View>
         </KeyboardAvoidingView>
       </View>

@@ -412,5 +412,8 @@ const nl: Record<string, string> = {
   "Couldn't update your data yet": "Je gegevens konden nog niet worden bijgewerkt",
   "Updating your data…": "Je gegevens worden bijgewerkt…",
   "Shopzyy is getting everything ready for you. This only takes a moment.": "Shopzyy maakt alles voor je klaar. Dit duurt maar even.",
+  "Undo last action?": "Laatste actie ongedaan maken?",
+  "Added {items}": "Toegevoegd: {items}",
+  "Ticked off {items}": "Afgevinkt: {items}",
 };
 export default nl;

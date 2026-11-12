@@ -14,6 +14,8 @@ import {
 import type { ServiceEnv } from './ports';
 import type { Entity } from '../models/entities';
 
+export type ItemSnapshot = Pick<GroceryItem, 'isOnList' | 'quantity' | 'unitRaw' | 'addedBy' | 'addedAt' | 'snoozedUntil'>;
+
 const addDays = (d: Date, n: number) => { const r = new Date(d.getTime()); r.setDate(r.getDate() + n); return r; };
 
 export class ShoppingListService {
@@ -34,6 +36,25 @@ export class ShoppingListService {
   get isHouseholdAvailable(): boolean { return !this.store.removedHouseholds.has(this.householdID); }
 
   // MARK: Adding
+
+  snapshotItems(): Map<string, ItemSnapshot> {
+    return new Map(this.store.itemsIn(this.householdID).map((i) => [i.id, {
+      isOnList: i.isOnList, quantity: i.quantity, unitRaw: i.unitRaw, addedBy: i.addedBy, addedAt: i.addedAt, snoozedUntil: i.snoozedUntil,
+    }]));
+  }
+
+  undoAdd(items: GroceryItem[], before: Map<string, ItemSnapshot>): void {
+    if (!this.isHouseholdAvailable) return;
+    const changed: GroceryItem[] = [];
+    for (const item of items) {
+      const prev = before.get(item.id);
+      if (!prev) { this.removeFromList(item); continue; }
+      Object.assign(item, prev);
+      changed.push(item);
+    }
+    if (changed.length > 0) this.save(changed);
+    this.refreshRestockReminders();
+  }
 
   addFromText(input: string, by: HouseholdMember | null, at: Date = new Date()): GroceryItem[] {
     if (!this.isHouseholdAvailable) return [];
@@ -84,8 +105,8 @@ export class ShoppingListService {
 
   // MARK: Buying
 
-  markBought(item: GroceryItem, by: HouseholdMember | null, at: Date = new Date()): void {
-    if (!this.isHouseholdAvailable) return;
+  markBought(item: GroceryItem, by: HouseholdMember | null, at: Date = new Date()): PurchaseRecord | null {
+    if (!this.isHouseholdAvailable) return null;
     const record = makePurchase(at, item.quantity, itemUnit(item), this.env.prefs.deviceID, this.householdID);
     this.store.insertPurchase(record);
     this.store.linkPurchase(record, item, by);
@@ -96,6 +117,7 @@ export class ShoppingListService {
     this.save([record, item]);
     // No alert here: other members get one shopping-trip summary once this person has finished.
     this.refreshRestockReminders();
+    return record;
   }
 
   undoPurchase(record: PurchaseRecord): void {
