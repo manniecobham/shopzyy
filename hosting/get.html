@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Get Shopzyy</title>
+<meta name="description" content="Shopzyy: one shared shopping list for the whole household.">
+<meta property="og:title" content="Get Shopzyy">
+<meta property="og:description" content="One shared shopping list for the whole household.">
+<style>
+  :root { color-scheme: light dark; }
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; font:17px -apple-system,system-ui,sans-serif; background:#1E9E68; color:#fff; text-align:center; }
+  main { padding:32px 24px; max-width:420px; }
+  h1 { font-size:28px; margin:0 0 8px; }
+  p { margin:8px 0 24px; opacity:.92; }
+  a.btn { display:block; background:#fff; color:#12724A; text-decoration:none; font-weight:600; padding:15px; border-radius:14px; margin:10px 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1 id="title">Get Shopzyy</h1>
+  <p id="body">One shared shopping list for the whole household.</p>
+  <a class="btn" id="ios" href="https://apps.apple.com/app/id6823087110">Download on the App Store</a>
+  <a class="btn" id="android" href="https://play.google.com/store/apps/details?id=com.manniedevteam.shopzyy">Get it on Google Play</a>
+</main>
+<script>
+  var APP_STORE_URL = 'https://apps.apple.com/app/id6823087110';
+  var PLAY_URL = 'https://play.google.com/store/apps/details?id=com.manniedevteam.shopzyy';
+  var ua = navigator.userAgent || '';
+  var android = /android/i.test(ua);
+  var ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+  if (android) location.replace(PLAY_URL);
+  else if (ios) location.replace(APP_STORE_URL);
+</script>
+</body>
+</html>

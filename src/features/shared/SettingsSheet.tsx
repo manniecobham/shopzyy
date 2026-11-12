@@ -110,7 +110,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
   const hadOldApp = Platform.OS === 'ios' && !isDemo && prefs.getString(HAD_LEGACY_APP_KEY) === '1';
 
   return (
-    <Sheet visible title={t('Settings')} cancelTitle={t('Done')} onCancel={onClose}>
+    <Sheet visible title={t('Settings')} doneTitle={t('Done')} onCancel={onClose}>
       <FormSection header={t('Profile')} footer={t("Your account is your Shopzyy identity. Households you're in show the profile you set here.")}>
         <FormRow last onPress={() => setEditing(true)} disabled={!account.profile} style={{ gap: 12 }}>
           {account.profile ? <MemberBadge emoji={account.profile.emoji} colorHex={account.profile.colorHex} size={40} /> : null}

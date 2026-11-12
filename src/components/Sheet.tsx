@@ -4,11 +4,13 @@ import { useState as useStateLocal, type ReactNode } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FormRow, FormSection, TextButton } from './ui';
-import { useTheme } from '../theme/theme';
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
+import { isIOS26, useTheme } from '../theme/theme';
 
 /** An iOS page sheet with a Cancel / title / Save bar, like a SwiftUI sheet around a NavigationStack. */
-export function Sheet({ visible, title, onCancel, onSave, saveTitle = tr('Save'), cancelTitle = tr('Cancel'), saveDisabled, children, scroll = true }: {
+export function Sheet({ visible, title, onCancel, onSave, saveTitle = tr('Save'), cancelTitle = tr('Cancel'), doneTitle, saveDisabled, children, scroll = true }: {
   visible: boolean; title: string; onCancel: () => void; onSave?: () => void; saveTitle?: string; cancelTitle?: string;
+  doneTitle?: string;
   saveDisabled?: boolean; children: ReactNode; scroll?: boolean;
 }) {
   const t = useTheme();
@@ -16,10 +18,11 @@ export function Sheet({ visible, title, onCancel, onSave, saveTitle = tr('Save')
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onCancel}>
       <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: t.groupedBackground }}>
         <View style={s.bar}>
-          <View style={s.side}><TextButton title={cancelTitle} onPress={onCancel} /></View>
+          <View style={s.side}>{doneTitle ? null : <BarButton title={cancelTitle} onPress={onCancel} />}</View>
           <Text style={[s.title, { color: t.label }]} numberOfLines={1}>{title}</Text>
           <View style={[s.side, { alignItems: 'flex-end' }]}>
-            {onSave ? <TextButton title={saveTitle} onPress={onSave} disabled={saveDisabled} style={{ fontWeight: '600' }} /> : null}
+            {doneTitle ? <BarButton title={doneTitle} onPress={onCancel} prominent />
+              : onSave ? <BarButton title={saveTitle} onPress={onSave} disabled={saveDisabled} prominent /> : null}
           </View>
         </View>
         {scroll ? (
@@ -27,6 +30,18 @@ export function Sheet({ visible, title, onCancel, onSave, saveTitle = tr('Save')
         ) : children}
       </SafeAreaView>
     </Modal>
+  );
+}
+
+function BarButton({ title, onPress, prominent, disabled }: { title: string; onPress: () => void; prominent?: boolean; disabled?: boolean }) {
+  const t = useTheme();
+  if (!isIOS26 || !isLiquidGlassAvailable()) return <TextButton title={title} onPress={onPress} disabled={disabled} style={prominent ? { fontWeight: '600' } : undefined} />;
+  return (
+    <Pressable accessibilityRole="button" onPress={onPress} disabled={disabled} hitSlop={6} style={({ pressed }) => ({ opacity: disabled ? 0.4 : pressed ? 0.7 : 1 })}>
+      <GlassView glassEffectStyle="regular" isInteractive style={s.capsule}>
+        <Text numberOfLines={1} style={{ fontSize: 17, fontWeight: prominent ? '600' : '400', color: t.accent }}>{title}</Text>
+      </GlassView>
+    </Pressable>
   );
 }
 
@@ -96,8 +111,9 @@ export function PickerRow<T>({ label, value, options, onChange, last, hideLabel 
 }
 
 const s = StyleSheet.create({
-  bar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, height: 52 },
-  side: { width: 80 },
+  bar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 6, height: 60 },
+  side: { width: 104 },
+  capsule: { height: 40, minWidth: 40, paddingHorizontal: 18, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   title: { flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '600' },
   backdrop: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.35)' },
   sheetWrap: { flex: 1, justifyContent: 'flex-end' },

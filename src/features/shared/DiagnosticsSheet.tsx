@@ -15,7 +15,7 @@ export function DiagnosticsSheet({ onClose }: { onClose: () => void }) {
   const entries = AppLog.entries;
 
   return (
-    <Sheet visible title={t('Diagnostics')} cancelTitle={t('Done')} onCancel={onClose}
+    <Sheet visible title={t('Diagnostics')} doneTitle={t('Done')} onCancel={onClose}
       onSave={entries.length > 0 ? () => setMenu(true) : undefined} saveTitle={t('More')}>
       {entries.length === 0 ? (
         <View style={{ alignItems: 'center', gap: 8, paddingTop: 80, paddingHorizontal: 40 }}>

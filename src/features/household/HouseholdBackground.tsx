@@ -1,9 +1,10 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { t } from '../../i18n';
 import { useEffect, useState } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { themeColors, themeEmoji } from '../../models/enums';
 import type { Household } from '../../models/entities';
+import { Glyph } from '../../components/Glyph';
 import { colorFromHex, useTheme } from '../../theme/theme';
 
 export const householdDisplayName = (h: Household) => (h.name === '' ? t('Shared household') : h.name);
@@ -65,16 +66,18 @@ export function ListBackdrop({ household }: { household: Household }) {
   );
 }
 
-/** A list section title on a frosted pill, readable over any background. */
-export function ListSectionHeader({ title, count }: { title: string; count?: number | null }) {
+export function ListSectionHeader({ title, count, collapsed, onToggle }: { title: string; count?: number | null; collapsed?: boolean; onToggle?: () => void }) {
   const th = useTheme();
+  const label = count != null ? t('{title}, {n} items', { title, n: count }) : title;
   return (
     <View style={s.headerWrap}>
-      <View style={[s.pill, { backgroundColor: th.isDark ? 'rgba(44,44,46,0.82)' : 'rgba(255,255,255,0.82)' }]}
-        accessible accessibilityLabel={count != null ? t('{title}, {n} items', { title, n: count }) : title}>
+      <Pressable disabled={!onToggle} onPress={onToggle} accessibilityRole={onToggle ? 'button' : undefined} accessibilityLabel={label}
+        accessibilityState={onToggle ? { expanded: !collapsed } : undefined} hitSlop={8}
+        style={[s.pill, { backgroundColor: th.isDark ? 'rgba(44,44,46,0.82)' : 'rgba(255,255,255,0.82)' }]}>
         <Text style={{ fontSize: 15, fontWeight: '600', color: th.label }}>{title}</Text>
         {count != null ? <Text style={{ fontSize: 15, fontWeight: '600', color: th.secondaryLabel }}>{count}</Text> : null}
-      </View>
+        {onToggle ? <Glyph name={collapsed ? 'chevron.right' : 'chevron.down'} size={13} color={th.secondaryLabel} /> : null}
+      </Pressable>
     </View>
   );
 }
@@ -91,5 +94,5 @@ export function HouseholdThumbnail({ household, size = 26 }: { household: Househ
 
 const s = StyleSheet.create({
   headerWrap: { paddingLeft: 36, paddingRight: 16, paddingTop: 18, paddingBottom: 6, alignItems: 'flex-start' },
-  pill: { flexDirection: 'row', gap: 6, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 999 },
+  pill: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 999 },
 });

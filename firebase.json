@@ -49,6 +49,10 @@
       {
         "source": "/join/**",
         "destination": "/join.html"
+      },
+      {
+        "source": "/download",
+        "destination": "/get.html"
       }
     ],
     "cleanUrls": true

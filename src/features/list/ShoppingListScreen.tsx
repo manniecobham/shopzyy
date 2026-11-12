@@ -37,6 +37,8 @@ export function ShoppingListScreen({ household }: { household: Household }) {
 
   const [editing, setEditing] = useState<GroceryItem | null>(null);
   const [reordering, setReordering] = useState(false);
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
+  const toggleSection = (title: string) => setCollapsed((c) => { const n = new Set(c); if (!n.delete(title)) n.add(title); return n; });
   const [tripTarget, setTripTarget] = useState<TripTotalTarget | null>(null);
   const [now, setNow] = useState(() => new Date());
   const [skippedKey, setSkippedKey] = useState<string | null>(null);
@@ -99,7 +101,7 @@ export function ShoppingListScreen({ household }: { household: Household }) {
 
   const skip = (key: string) => { SkippedTrips.insert(prefs, key); setSkippedKey(key); };
 
-  const data = sections.map((s) => ({ ...s, data: s.items }));
+  const data = sections.map((s) => ({ ...s, data: collapsed.has(s.title) ? [] : s.items }));
 
   return (
     <View style={{ flex: 1, backgroundColor: t.groupedBackground }}>
@@ -137,7 +139,7 @@ export function ShoppingListScreen({ household }: { household: Household }) {
                 </View>
               ) : null}
             </>}
-            renderSectionHeader={({ section }) => <ListSectionHeader title={section.title} count={section.items.length} />}
+            renderSectionHeader={({ section }) => <ListSectionHeader title={section.title} count={section.items.length} collapsed={collapsed.has(section.title)} onToggle={() => toggleSection(section.title)} />}
             renderItem={({ item, index, section }) => (
               <ItemRow item={item} first={index === 0} last={index === section.items.length - 1}
                 onBought={() => list.markBought(item, currentMember)} onEdit={() => setEditing(item)} onRemove={() => list.removeFromList(item)} />

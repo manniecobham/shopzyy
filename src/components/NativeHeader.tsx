@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { useHeaderHeight } from 'expo-router/react-navigation';
 import type { ReactNode } from 'react';
-import { Platform } from 'react-native';
+import { Platform, View } from 'react-native';
 import { useState } from 'react';
 import { ActionMenu, type MenuItem } from './Sheet';
 import { Glyph, type SymbolName } from './Glyph';
@@ -42,31 +42,19 @@ export function ScreenOptions({ title, left, right, menu, largeTitle }: {
     scrollEdgeEffects: isIOS26 ? { top: 'soft' as const, bottom: 'soft' as const } : undefined,
   };
 
-  // Stack.Toolbar.View is only valid in the bottom toolbar on iOS, so custom left/right views go through
-  // headerLeft/headerRight. The native UIMenu toolbar item is used when the right side has nothing custom.
-  if (Platform.OS === 'ios' && menu && !right) {
-    return (
-      <>
-        <Stack.Screen options={{ ...options, headerLeft: left ? () => left : undefined }} />
-        <Stack.Toolbar placement="right"><IosToolbarMenu menu={menu} /></Stack.Toolbar>
-      </>
-    );
-  }
-
   const rightContent = menu || right ? (
-    <>
-      {menu ? <AndroidMenuButton menu={menu} /> : null}
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 18, paddingHorizontal: 6 }}>
+      {menu ? <MenuButton menu={menu} /> : null}
       {right}
-    </>
+    </View>
   ) : null;
   return (
     <Stack.Screen
-      options={{ ...options, headerLeft: left ? () => left : undefined, headerRight: rightContent ? () => <>{rightContent}</> : undefined }}
+      options={{ ...options, headerLeft: left ? () => left : undefined, headerRight: rightContent ? () => rightContent : undefined }}
     />
   );
 }
 
-/** A toolbar menu: native UIMenu on iOS (with the system's glass styling), a bottom action list on Android. */
 export interface HeaderMenu {
   icon: SymbolName;
   /** Accessibility label. */
@@ -76,23 +64,7 @@ export interface HeaderMenu {
   groups: { title?: string; items: MenuItem[] }[];
 }
 
-function IosToolbarMenu({ menu }: { menu: HeaderMenu }) {
-  return (
-    <Stack.Toolbar.Menu icon={menu.icon as never} accessibilityLabel={menu.label} title={menu.title}>
-      {menu.groups.map((g, i) => (
-        <Stack.Toolbar.Menu key={i} inline title={g.title ?? ''}>
-          {g.items.map((item) => (
-            <Stack.Toolbar.MenuAction key={item.title} icon={item.icon as never} isOn={item.checked} destructive={item.destructive} disabled={item.disabled} onPress={item.onPress}>
-              {item.title}
-            </Stack.Toolbar.MenuAction>
-          ))}
-        </Stack.Toolbar.Menu>
-      ))}
-    </Stack.Toolbar.Menu>
-  );
-}
-
-function AndroidMenuButton({ menu }: { menu: HeaderMenu }) {
+function MenuButton({ menu }: { menu: HeaderMenu }) {
   const t = useTheme();
   const [open, setOpen] = useState(false);
   return (
