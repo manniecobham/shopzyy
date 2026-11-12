@@ -50,6 +50,7 @@
         "source": "/join/**",
         "destination": "/join.html"
       }
-    ]
+    ],
+    "cleanUrls": true
   }
 }
