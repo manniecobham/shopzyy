@@ -32,8 +32,8 @@
     de: ['Du wurdest zu einem Haushalt eingeladen', 'Öffne Shopzyy, um beizutreten, oder gib diesen Einladungscode in der App ein.', 'In Shopzyy öffnen', 'Shopzyy laden'],
     it: ['Sei stato invitato in una casa', 'Apri Shopzyy per unirti, oppure inserisci questo codice d’invito nell’app.', 'Apri in Shopzyy', 'Scarica Shopzyy']
   };
-  // Fill in once the App Store listing exists; until then iOS falls back to an App Store search.
-  var APP_STORE_URL = '';
+  // The app's App Store listing; if it is ever left empty, iOS falls back to an App Store search.
+  var APP_STORE_URL = 'https://apps.apple.com/app/id6823087110';
   var PLAY_URL = 'https://play.google.com/store/apps/details?id=com.manniedevteam.shopzyy';
   var lang = (navigator.language || 'en').slice(0, 2).toLowerCase();
   var s = STRINGS[lang] || STRINGS.en;

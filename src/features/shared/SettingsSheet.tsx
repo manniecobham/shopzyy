@@ -1,11 +1,12 @@
 import { Glyph, type SymbolName } from '../../components/Glyph';
 import Constants from 'expo-constants';
 import { useEffect, useState } from 'react';
-import { Alert, Linking, Platform, Switch, Text, View } from 'react-native';
+import { Alert, Linking, Platform, Switch, Text, TextInput, View } from 'react-native';
 import { LANGUAGES, LANGUAGE_NAMES, hasSystemAppLanguage, language, setLanguageOverride, t, tn, type Language } from '../../i18n';
 import { LoadingOverlay } from '../../components/LogoAnimation';
 import { Sheet } from '../../components/Sheet';
-import { FormRow, FormSection, MemberBadge } from '../../components/ui';
+import { FormRow, FormSection, MemberBadge, ProminentButton } from '../../components/ui';
+import { DELETE_CANCELLED } from '../../runtime/AppRuntime';
 import { useAccount, useAppState } from '../../runtime/RuntimeProvider';
 import { ShoppingListService } from '../../services/ShoppingListService';
 import { StorageKeys } from '../../services/storageKeys';
@@ -13,7 +14,7 @@ import { HAD_LEGACY_APP_KEY } from '../../migration/legacyDefaults';
 import { isDemo } from '../../demo/demo';
 import { Brand, useTheme } from '../../theme/theme';
 import { DiagnosticsSheet } from './DiagnosticsSheet';
-import { EditProfileSheet } from './ProfileMenu';
+import { EditProfileSheet } from './EditProfileSheet';
 
 /**
  * App-level settings: things that belong to this person and this device, as opposed to the
@@ -30,6 +31,8 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
   const [editing, setEditing] = useState(false);
   const [diagnostics, setDiagnostics] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [askingPassword, setAskingPassword] = useState(false);
+  const [password, setPassword] = useState('');
   const [importing, setImporting] = useState(false);
   const [picking, setPicking] = useState(false);
   const [, setLangTick] = useState(0);
@@ -44,17 +47,23 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
     if (key === StorageKeys.notifyPurchases) void runtime.push.updateAlerts();
   };
 
+  // Deleting the account needs a fresh sign-in: Apple and Google show their own sheet, email accounts type their password.
+  const runDelete = async (confirmPassword?: string) => {
+    setDeleting(true);
+    const error = await runtime.deleteMyData(confirmPassword);
+    setDeleting(false);
+    if (error === DELETE_CANCELLED) return;
+    if (error) Alert.alert(t("Couldn't delete everything"), error);
+    else onClose();
+  };
+
   const confirmDelete = () => Alert.alert(
     t('Delete all your Shopzyy data?'),
     t("Households you created are deleted for everyone in them. You'll leave households others invited you to. Your account and profile are removed. This can't be undone."),
     [{ text: t('Cancel'), style: 'cancel' }, {
       text: t('Delete my data'), style: 'destructive',
-      onPress: async () => {
-        setDeleting(true);
-        const error = await runtime.deleteMyData();
-        setDeleting(false);
-        if (error) Alert.alert(t("Couldn't delete everything"), error);
-        else onClose();
+      onPress: () => {
+        if (runtime.account.provider === 'password') { setPassword(''); setAskingPassword(true); } else void runDelete();
       },
     }],
   );
@@ -180,6 +189,21 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
         <Text style={{ fontSize: 13, color: th.secondaryLabel }}>{t('Version {version}', { version })}</Text>
         {appEnv !== 'production' ? <Text style={{ fontSize: 13, fontWeight: '600', color: th.orange }}>{t('{env} build · test data only', { env: appEnv[0].toUpperCase() + appEnv.slice(1) })}</Text> : null}
       </View>
+
+      {askingPassword ? (
+        <Sheet visible title={t('Confirm your password')} cancelTitle={t('Cancel')} onCancel={() => setAskingPassword(false)}>
+          <FormSection footer={t("For your security, enter your password to delete your account. This can't be undone.")}>
+            <FormRow last>
+              <TextInput value={password} onChangeText={setPassword} placeholder={t('Password')} placeholderTextColor={th.tertiaryLabel}
+                secureTextEntry autoCapitalize="none" autoCorrect={false} style={{ flex: 1, fontSize: 17, color: th.label }} />
+            </FormRow>
+          </FormSection>
+          <View style={{ paddingHorizontal: 20 }}>
+            <ProminentButton title={t('Delete my data')} disabled={password.length === 0}
+              onPress={() => { const value = password; setAskingPassword(false); setPassword(''); void runDelete(value); }} />
+          </View>
+        </Sheet>
+      ) : null}
 
       {picking ? (
         <Sheet visible title={t('Language')} cancelTitle={t('Cancel')} onCancel={() => setPicking(false)}>

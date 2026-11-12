@@ -4,5 +4,27 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"editor.codeActionsOnSave": {
+			"source.fixAll.eslint": "explicit",
+			"source.organizeImports": "explicit"
+		},
+		"eslint.useFlatConfig": true,
+		"js/ts.preferences.importModuleSpecifier": "relative"
+	},
+	"extensions": {
+		"recommendations": ["dbaeumer.vscode-eslint"]
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "i18n: check translations",
+				"type": "shell",
+				"command": "node scripts/i18n-keys.js",
+				"problemMatcher": [],
+				"detail": "Counts the strings wrapped in t()/tn()/tx() and shows how many each language (es, fr, nl, de, it) covers."
+			}
+		]
+	}
 }

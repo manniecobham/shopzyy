@@ -4,7 +4,7 @@
     "target": {
       "namespace": "android_app",
       "package_name": "com.manniedevteam.shopzyy",
-      "sha256_cert_fingerprints": ["REPLACE_WITH_RELEASE_SHA256"]
+      "sha256_cert_fingerprints": ["A0:38:62:BF:B9:0A:6F:77:64:9D:C3:56:AF:55:BC:F9:F4:A8:84:39:E0:39:F3:AC:D0:F7:40:05:5C:E4:5E:86"]
     }
   }
 ]

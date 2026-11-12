@@ -2,7 +2,7 @@ import { t } from '../i18n';
 import { DataStore } from '../data/DataStore';
 import { FirestoreSync, type SyncStatus } from '../data/sync/FirestoreSync';
 import { Observable } from '../lib/observable';
-import { AccountService } from '../services/AccountService';
+import { AccountService, ReauthCancelled } from '../services/AccountService';
 import { AppPreferences } from '../services/AppPreferences';
 import { HouseholdService } from '../services/HouseholdService';
 import { ShoppingListService } from '../services/ShoppingListService';
@@ -19,7 +19,7 @@ import { NotificationService } from '../services/NotificationService';
 import { PushRegistration } from '../services/PushRegistration';
 import { isDemo, seedDemo } from '../demo/demo';
 import { AppConfigService, appVersion } from '../services/AppConfig';
-import { doc, getFirestore, setDoc } from '@react-native-firebase/firestore';
+import { deleteDoc, doc, getFirestore, setDoc } from '@react-native-firebase/firestore';
 import { getFunctions, httpsCallable } from '@react-native-firebase/functions';
 import { StorageKeys } from '../services/AppPreferences';
 import { AppNotice, UserFacingError } from '../services/UserFacingError';
@@ -28,6 +28,9 @@ import { AppNotice, UserFacingError } from '../services/UserFacingError';
  * Composition root: owns the store, preferences, account and sync, and starts/stops sync as
  * the person signs in and out (the role ShopzyApp + RootView played in the Swift app).
  */
+/** Returned by `deleteMyData` when the person closed the Apple/Google sheet: nothing was deleted and no message is needed. */
+export const DELETE_CANCELLED = 'cancelled';
+
 export class AppRuntime extends Observable {
   readonly prefs = new AppPreferences();
   readonly store = new DataStore();
@@ -127,10 +130,21 @@ export class AppRuntime extends Observable {
    * "Delete my data": owned households are deleted for everyone, joined ones are left, the account
    * is removed and the app returns to the welcome screen.
    */
-  async deleteMyData(): Promise<string | null> {
+  async deleteMyData(password?: string): Promise<string | null> {
+    // Confirm it's them first, so a stale sign-in can never leave the account behind after the data is gone.
     try {
+      await this.account.reauthenticate(password);
+    } catch (error) {
+      if (error instanceof ReauthCancelled) return DELETE_CANCELLED;
+      AppLog.warning('account', "Couldn't confirm the account before deleting", error);
+      return UserFacingError.message(error);
+    }
+    try {
+      const uid = this.account.uid;
       await this.households.deleteMyData();
-      try { await this.account.deleteAccount(); } catch { await this.account.signOut(); } // e.g. needs a recent sign-in
+      await this.push.unregister();
+      if (uid) { try { await deleteDoc(doc(getFirestore(), 'users', uid)); } catch { /* the account is deleted next either way */ } }
+      await this.account.deleteAccount();
       this.account.reset();
       this.prefs.currentHouseholdID = null;
       return null;

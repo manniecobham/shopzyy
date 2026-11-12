@@ -1,6 +1,6 @@
 import {
-  AppleAuthProvider, GoogleAuthProvider, createUserWithEmailAndPassword, deleteUser, getAuth, onAuthStateChanged,
-  sendPasswordResetEmail, signInWithCredential, signInWithEmailAndPassword, signOut,
+  AppleAuthProvider, EmailAuthProvider, GoogleAuthProvider, createUserWithEmailAndPassword, deleteUser, getAuth, onAuthStateChanged,
+  reauthenticateWithCredential, revokeToken, sendPasswordResetEmail, signInWithCredential, signInWithEmailAndPassword, signOut,
 } from '@react-native-firebase/auth';
 import { appleAuth } from '@invertase/react-native-apple-authentication';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
@@ -18,6 +18,12 @@ import { UserFacingError } from './UserFacingError';
  * the iCloud identity is replaced by a Firebase account (Apple, Google or email).
  */
 export type AccountPhase = 'loading' | 'welcome' | 'signIn' | 'needsProfile' | 'ready';
+
+/** The person closed the Apple/Google sheet while confirming it's them; nothing was deleted. */
+export class ReauthCancelled extends Error {}
+
+/** How the current account signs in, which decides how it is re-confirmed before deletion. */
+export type SignInProvider = 'apple' | 'google' | 'password';
 
 /** The person using Shopzyy: their sign-in and their profile. */
 export class AccountService extends Observable {
@@ -163,10 +169,67 @@ export class AccountService extends Observable {
     });
   }
 
-  /** Deletes the Firebase account itself (after the person's household data is deleted). */
+  /** Which method this account signs in with, or null when signed out. */
+  get provider(): SignInProvider | null {
+    const ids = getAuth().currentUser?.providerData.map((p) => p.providerId) ?? [];
+    if (ids.includes('apple.com')) return 'apple';
+    if (ids.includes('google.com')) return 'google';
+    if (ids.includes('password')) return 'password';
+    return null;
+  }
+
+  /** The one-time code Apple issued when the person last confirmed themselves; needed to revoke their Apple token on deletion. */
+  private appleAuthorizationCode: string | null = null;
+
+  /**
+   * Confirms it's really them before something irreversible (Firebase refuses to delete an account that signed in a
+   * while ago). Apple and Google show their own sheet; email accounts pass their password. Throws `ReauthCancelled`
+   * when the sheet is closed.
+   */
+  async reauthenticate(password?: string): Promise<void> {
+    const user = getAuth().currentUser;
+    if (!user) throw new Error('You are signed out.');
+    try {
+      switch (this.provider) {
+        case 'apple': {
+          const response = await appleAuth.performRequest({ requestedOperation: appleAuth.Operation.REFRESH });
+          if (!response.identityToken) throw new Error('Apple did not return an identity token.');
+          await reauthenticateWithCredential(user, AppleAuthProvider.credential(response.identityToken, response.nonce));
+          this.appleAuthorizationCode = response.authorizationCode ?? null;
+          return;
+        }
+        case 'google': {
+          await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+          const result = await GoogleSignin.signIn();
+          if (result.type !== 'success') throw new ReauthCancelled();
+          if (!result.data.idToken) throw new Error('Google did not return an ID token.');
+          await reauthenticateWithCredential(user, GoogleAuthProvider.credential(result.data.idToken));
+          return;
+        }
+        case 'password': {
+          if (!user.email || !password) throw new Error('Enter your password to continue.');
+          await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password));
+          return;
+        }
+        default:
+          throw new Error("Couldn't tell how you signed in. Sign out and back in, then try again.");
+      }
+    } catch (error) {
+      const code = String((error as { code?: unknown })?.code ?? '');
+      if (error instanceof ReauthCancelled || code === '1001' || code.includes('SIGN_IN_CANCELLED') || code === '-5') throw new ReauthCancelled();
+      throw error;
+    }
+  }
+
+  /** Deletes the Firebase account itself (after the person's data is deleted and `reauthenticate` succeeded). Apple requires revoking the Sign in with Apple token too. */
   async deleteAccount(): Promise<void> {
     const user = getAuth().currentUser;
-    if (user) await deleteUser(user);
+    if (!user) return;
+    if (this.appleAuthorizationCode) {
+      try { await revokeToken(getAuth(), this.appleAuthorizationCode); } catch (error) { AppLog.warning('account', "Couldn't revoke the Apple token", error); }
+      this.appleAuthorizationCode = null;
+    }
+    await deleteUser(user);
   }
 
   /**

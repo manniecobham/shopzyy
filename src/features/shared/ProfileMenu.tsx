@@ -1,29 +1,12 @@
 import { useState } from 'react';
 import { t } from '../../i18n';
 import { Alert, Pressable } from 'react-native';
-import { ActionMenu, Sheet } from '../../components/Sheet';
+import { ActionMenu } from '../../components/Sheet';
 import { MemberBadge } from '../../components/ui';
 import type { HouseholdMember } from '../../models/entities';
 import { useAccount, useRuntime } from '../../runtime/RuntimeProvider';
-import { ProfileFormView } from './ProfileFormView';
+import { EditProfileSheet } from './EditProfileSheet';
 import { SettingsSheet } from './SettingsSheet';
-
-/** The form for editing the person's own profile, in a sheet. */
-export function EditProfileSheet({ onClose }: { onClose: () => void }) {
-  const account = useAccount();
-  const { households } = useRuntime();
-  return (
-    <Sheet visible title={t('Your profile')} onCancel={onClose} scroll={false}>
-      {account.profile ? (
-        <ProfileFormView profile={account.profile} submitTitle={t('Save')} onSubmit={(updated) => {
-          account.saveProfile(updated);
-          if (account.userRecordName) households.updateProfile(updated, account.userRecordName);
-          onClose();
-        }} />
-      ) : null}
-    </Sheet>
-  );
-}
 
 /** The person's avatar in the header. Tapping it opens a menu to edit their profile, open settings or delete their data. */
 export function ProfileMenu({ member }: { member: HouseholdMember | null }) {
