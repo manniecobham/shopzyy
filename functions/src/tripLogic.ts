@@ -1,7 +1,7 @@
 
 import { tripSummary, type Lang } from './messages';
 
-export interface TripPurchase { id: string; purchasedAtMs: number; itemID: string | null }
+export interface TripPurchase { id: string; purchasedAtMs: number; itemID: string | null; startsTrip?: boolean }
 
 export const TRIP_MAX_GAP_MS = 60 * 60 * 1000;
 export const TRIP_QUIET_PERIOD_MS = 5 * 60 * 1000;
@@ -29,7 +29,7 @@ export function groupTrips(householdID: string, buyerKey: string, purchases: Tri
   };
   for (const p of sorted) {
     const last = current[current.length - 1];
-    if (last && p.purchasedAtMs - last.purchasedAtMs > TRIP_MAX_GAP_MS) flush();
+    if (last && (p.startsTrip || p.purchasedAtMs - last.purchasedAtMs > TRIP_MAX_GAP_MS)) flush();
     current.push(p);
   }
   flush();

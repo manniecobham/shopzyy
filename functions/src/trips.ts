@@ -11,9 +11,9 @@ const LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
 const ms = (v: unknown): number => (v instanceof Timestamp ? v.toMillis() : typeof v === 'number' ? v : 0);
 
-interface PurchaseDoc { id: string; purchasedAtMs: number; itemID: string | null; originDeviceID: string }
+interface PurchaseDoc { id: string; purchasedAtMs: number; itemID: string | null; originDeviceID: string; startsTrip: boolean }
 const toPurchase = (d: QueryDocumentSnapshot): PurchaseDoc => ({
-  id: d.id, purchasedAtMs: ms(d.get('purchasedAt')), itemID: (d.get('item') as string | null) ?? null, originDeviceID: (d.get('originDeviceID') as string) ?? '',
+  id: d.id, purchasedAtMs: ms(d.get('purchasedAt')), itemID: (d.get('item') as string | null) ?? null, originDeviceID: (d.get('originDeviceID') as string) ?? '', startsTrip: d.get('startsTrip') === true,
 });
 
 async function buyerPurchases(householdID: string, buyerKey: string, sinceMs: number, untilMs?: number): Promise<PurchaseDoc[]> {

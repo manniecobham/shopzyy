@@ -415,5 +415,9 @@ const de: Record<string, string> = {
   "Undo last action?": "Letzte Aktion rückgängig machen?",
   "Added {items}": "Hinzugefügt: {items}",
   "Ticked off {items}": "Abgehakt: {items}",
+  "Start a new trip?": "Neuen Einkauf beginnen?",
+  "You already added a total for your last trip. Add this item to that trip, or start a new one?": "Du hast für deinen letzten Einkauf bereits eine Summe eingetragen. Diesen Artikel dazu hinzufügen oder einen neuen Einkauf beginnen?",
+  "Add to last trip": "Zum letzten Einkauf hinzufügen",
+  "Start new trip": "Neuen Einkauf beginnen",
 };
 export default de;

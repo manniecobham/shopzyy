@@ -75,6 +75,7 @@ export interface PurchaseRecord {
   quantity: number;
   unitRaw: MeasurementUnit | null;
   originDeviceID: string;
+  startsTrip?: boolean;
   item: GroceryItem | null;
   member: HouseholdMember | null;
 }

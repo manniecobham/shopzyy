@@ -1,5 +1,5 @@
 import { ShoppingTrip, TRIP_QUIET_PERIOD_MS, type TripPurchase } from '../src/logic/ShoppingTrip';
-import { totalMatchesTrip } from '../src/logic/tripTotals';
+import { continuesClosedTrip, totalMatchesTrip } from '../src/logic/tripTotals';
 import { makeTripTotal } from '../src/models/factories';
 import { uuid } from '../src/lib/uuid';
 import { NOW } from './testSupport';
@@ -13,6 +13,23 @@ const purchase = (name: string, minutesAgo: number, buyer = '_ada') => ({
 });
 
 describe('Shopping trips', () => {
+  test('the new-trip question is only asked within an hour of a trip that already has a total', () => {
+    const at = (minutesAgo: number) => ShoppingTrip.group([purchase('Milk', minutesAgo)])[0];
+    const totalFor = (trip: ShoppingTrip) => makeTripTotal({ householdID: home, tripKey: trip.id, amount: 10, currencyCode: 'EUR', storeName: null, tripEndedAt: trip.end, enteredBy: '_ada' });
+    const recent = at(30), old = at(61);
+    expect(continuesClosedTrip(recent, [totalFor(recent)], NOW)).toBe(true);
+    expect(continuesClosedTrip(old, [totalFor(old)], NOW)).toBe(false);
+    expect(continuesClosedTrip(recent, [], NOW)).toBe(false);
+    expect(continuesClosedTrip(null, [], NOW)).toBe(false);
+  });
+
+  test('a purchase flagged as starting a trip splits an otherwise continuous trip', () => {
+    const fresh = purchase('Jam', 5);
+    fresh.purchase.startsTrip = true;
+    const trips = ShoppingTrip.group([purchase('Milk', 20), purchase('Eggs', 15), fresh, purchase('Bread', 2)]);
+    expect(trips.map((t) => t.purchases.length)).toEqual([2, 2]);
+  });
+
   test('purchases close together are one trip; a long pause starts another', () => {
     const trips = ShoppingTrip.group([purchase('Milk', 300), purchase('Eggs', 295), purchase('Bread', 30), purchase('Jam', 10)]);
     expect(trips.map((t) => t.purchases.map((p) => p.itemName))).toEqual([['Milk', 'Eggs'], ['Bread', 'Jam']]);

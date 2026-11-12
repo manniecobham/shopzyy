@@ -23,7 +23,7 @@ export function scanForRemotePurchases(env: ServiceEnv, prefs: PrefsLike, now: D
 
   const trips = ShoppingTrip.group(recent.map((r) => ({
     householdID: r.householdID, buyerKey: r.member?.userRecordName ?? null, buyerName: purchaseMemberName(r),
-    purchase: { id: r.id, itemName: purchaseItemName(r), purchasedAt: r.purchasedAt },
+    purchase: { id: r.id, itemName: purchaseItemName(r), startsTrip: r.startsTrip, purchasedAt: r.purchasedAt },
   })));
   const totals = env.store.allTripTotals();
 

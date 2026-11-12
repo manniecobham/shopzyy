@@ -4,6 +4,7 @@ export interface TripPurchase {
   id: string;
   itemName: string;
   quantityText?: string | null;
+  startsTrip?: boolean;
   purchasedAt: Date;
 }
 
@@ -67,7 +68,7 @@ export class ShoppingTrip {
       let current: TripPurchase[] = [];
       for (const e of sorted) {
         const last = current[current.length - 1];
-        if (last && e.purchase.purchasedAt.getTime() - last.purchasedAt.getTime() > TRIP_MAX_GAP_MS) {
+        if (last && (e.purchase.startsTrip || e.purchase.purchasedAt.getTime() - last.purchasedAt.getTime() > TRIP_MAX_GAP_MS)) {
           trips.push(new ShoppingTrip(e.householdID, e.buyerKey, e.buyerName, current));
           current = [];
         }

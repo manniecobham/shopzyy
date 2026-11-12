@@ -105,9 +105,10 @@ export class ShoppingListService {
 
   // MARK: Buying
 
-  markBought(item: GroceryItem, by: HouseholdMember | null, at: Date = new Date()): PurchaseRecord | null {
+  markBought(item: GroceryItem, by: HouseholdMember | null, at: Date = new Date(), startsTrip = false): PurchaseRecord | null {
     if (!this.isHouseholdAvailable) return null;
     const record = makePurchase(at, item.quantity, itemUnit(item), this.env.prefs.deviceID, this.householdID);
+    if (startsTrip) record.startsTrip = true;
     this.store.insertPurchase(record);
     this.store.linkPurchase(record, item, by);
 

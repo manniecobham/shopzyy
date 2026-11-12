@@ -9,4 +9,9 @@ export function totalMatchesTrip(total: TripTotal, trip: ShoppingTrip): boolean 
     && total.tripEndedAt.getTime() <= trip.end.getTime() + TRIP_MAX_GAP_MS;
 }
 
+export function continuesClosedTrip(trip: ShoppingTrip | null, totals: TripTotal[], now: Date): boolean {
+  if (!trip || now.getTime() - trip.end.getTime() > TRIP_MAX_GAP_MS) return false;
+  return totals.some((x) => totalMatchesTrip(x, trip));
+}
+
 export const tripSkipKey = (trip: ShoppingTrip): string => `${trip.id}#${trip.purchases.length}`;

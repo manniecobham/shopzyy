@@ -46,6 +46,7 @@ export const itemDoc = (i: GroceryItem): DocData => ({
 export const purchaseDoc = (p: PurchaseRecord): DocData => ({
   purchasedAt: p.purchasedAt, quantity: p.quantity, unitRaw: p.unitRaw, originDeviceID: p.originDeviceID,
   item: p.item?.id ?? null, member: p.member?.userRecordName ?? null,
+  ...(p.startsTrip ? { startsTrip: true } : {}),
 });
 export const tripTotalDoc = (t: TripTotal): DocData => ({
   tripKey: t.tripKey, amount: t.amount, currencyCode: t.currencyCode, storeName: t.storeName,
@@ -159,6 +160,7 @@ export class DocApplier {
     p.quantity = num(d.quantity, 1);
     p.unitRaw = isMeasurementUnit(str(d.unitRaw)) ? (d.unitRaw as PurchaseRecord['unitRaw']) : null;
     p.originDeviceID = str(d.originDeviceID) ?? '';
+    p.startsTrip = d.startsTrip === true;
     const item = this.resolve(str(d.item), (v) => this.store.item(normalizeUUID(v)), () => (complete = false));
     const member = this.resolve(str(d.member), (v) => this.store.member(v, hid), () => (complete = false));
     this.store.linkPurchase(p, item, member);

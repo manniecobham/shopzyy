@@ -415,5 +415,9 @@ const it: Record<string, string> = {
   "Undo last action?": "Annullare l'ultima azione?",
   "Added {items}": "Aggiunto: {items}",
   "Ticked off {items}": "Spuntato: {items}",
+  "Start a new trip?": "Iniziare una nuova spesa?",
+  "You already added a total for your last trip. Add this item to that trip, or start a new one?": "Hai già inserito il totale della tua ultima spesa. Aggiungere questo articolo a quella spesa o iniziarne una nuova?",
+  "Add to last trip": "Aggiungi all'ultima spesa",
+  "Start new trip": "Inizia nuova spesa",
 };
 export default it;

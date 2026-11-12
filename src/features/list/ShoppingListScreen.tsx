@@ -9,7 +9,7 @@ import { ScreenOptions } from '../../components/NativeHeader';
 import { SuggestionEngine } from '../../logic/SuggestionEngine';
 import { ShoppingTrip } from '../../logic/ShoppingTrip';
 import { makeSections } from '../../logic/listGrouping';
-import { totalMatchesTrip, tripSkipKey } from '../../logic/tripTotals';
+import { continuesClosedTrip, totalMatchesTrip, tripSkipKey } from '../../logic/tripTotals';
 import { LIST_GROUPINGS, groupingIcon, groupingTitle } from '../../models/enums';
 import type { GroceryItem, Household } from '../../models/entities';
 import { itemHistory, purchaseItemName, purchaseMemberName, purchaseQuantityText } from '../../models/itemOps';
@@ -68,9 +68,18 @@ export function ShoppingListScreen({ household }: { household: Household }) {
     if (added.length > 0) record(tr('Added {items}', { items: added.map((i) => i.name).join(', ') }), () => list.undoAdd(added, before));
   };
 
-  const tickOff = (item: GroceryItem) => {
+  const requestTickOff = (item: GroceryItem) => {
+    if (!continuesClosedTrip(myLatestTrip, store.tripTotalsIn(household.id), new Date())) { tickOff(item); return; }
+    Alert.alert(tr('Start a new trip?'), tr('You already added a total for your last trip. Add this item to that trip, or start a new one?'), [
+      { text: tr('Add to last trip'), onPress: () => tickOff(item) },
+      { text: tr('Start new trip'), onPress: () => tickOff(item, true) },
+      { text: tr('Cancel'), style: 'cancel' },
+    ]);
+  };
+
+  const tickOff = (item: GroceryItem, startsTrip = false) => {
     const name = item.name;
-    const purchase = list.markBought(item, currentMember);
+    const purchase = list.markBought(item, currentMember, new Date(), startsTrip);
     if (!purchase) return;
     record(tr('Ticked off {items}', { items: name }), () => {
       if (store.purchasesIn(household.id).some((p) => p.id === purchase.id)) list.undoPurchase(purchase);
@@ -104,7 +113,7 @@ export function ShoppingListScreen({ household }: { household: Household }) {
       .slice(0, 40);
     const trips = ShoppingTrip.group(mine.map((p) => ({
       householdID: household.id, buyerKey: p.member?.userRecordName ?? null, buyerName: purchaseMemberName(p),
-      purchase: { id: p.id, itemName: purchaseItemName(p), quantityText: purchaseQuantityText(p), purchasedAt: p.purchasedAt },
+      purchase: { id: p.id, itemName: purchaseItemName(p), quantityText: purchaseQuantityText(p), startsTrip: p.startsTrip, purchasedAt: p.purchasedAt },
     })));
     return trips[trips.length - 1] ?? null;
   }, [store.version, household.id, prefs.deviceID]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -171,7 +180,7 @@ export function ShoppingListScreen({ household }: { household: Household }) {
             renderSectionHeader={({ section }) => <ListSectionHeader title={section.title} count={section.items.length} collapsed={collapsed.has(section.title)} onToggle={() => toggleSection(section.title)} />}
             renderItem={({ item, index, section }) => (
               <ItemRow item={item} first={index === 0} last={index === section.items.length - 1}
-                onBought={() => tickOff(item)} onEdit={() => setEditing(item)} onRemove={() => list.removeFromList(item)} />
+                onBought={() => requestTickOff(item)} onEdit={() => setEditing(item)} onRemove={() => list.removeFromList(item)} />
             )}
           />
           <View style={{ marginBottom: tabBarClearance }}>

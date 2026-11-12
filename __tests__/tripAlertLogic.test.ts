@@ -8,6 +8,12 @@ const base = Date.UTC(2026, 2, 18, 12);
 const p = (id: string, minsAgo: number): TripPurchase => ({ id, purchasedAtMs: base - minsAgo * 60_000, itemID: id });
 
 describe('push alert trip logic (server copy)', () => {
+  test('a purchase flagged as starting a trip splits the server grouping too', () => {
+    const fresh = { ...p('jam', 5), startsTrip: true };
+    const trips = groupTrips(H, '_ada', [p('milk', 20), p('eggs', 15), fresh, p('bread', 2)]);
+    expect(trips.map((t) => t.purchases.length)).toEqual([2, 2]);
+  });
+
   test('splits on long pauses, like the app', () => {
     const trips = groupTrips(H, '_ada', [p('milk', 300), p('eggs', 295), p('bread', 30), p('jam', 10)]);
     expect(trips.map((t) => t.purchases.map((x) => x.id))).toEqual([['milk', 'eggs'], ['bread', 'jam']]);

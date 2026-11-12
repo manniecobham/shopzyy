@@ -15,7 +15,7 @@ export function groupActivityTrips(records: PurchaseRecord[], totals: TripTotal[
   const byID = new Map(records.map((r) => [r.id, r]));
   const trips = ShoppingTrip.group(records.map((r) => ({
     householdID, buyerKey: r.member?.userRecordName ?? null, buyerName: purchaseMemberName(r),
-    purchase: { id: r.id, itemName: purchaseItemName(r), purchasedAt: r.purchasedAt },
+    purchase: { id: r.id, itemName: purchaseItemName(r), startsTrip: r.startsTrip, purchasedAt: r.purchasedAt },
   })));
   return trips
     .map((trip): ActivityTrip => ({

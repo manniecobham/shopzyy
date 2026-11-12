@@ -415,5 +415,9 @@ const nl: Record<string, string> = {
   "Undo last action?": "Laatste actie ongedaan maken?",
   "Added {items}": "Toegevoegd: {items}",
   "Ticked off {items}": "Afgevinkt: {items}",
+  "Start a new trip?": "Nieuwe boodschappenronde starten?",
+  "You already added a total for your last trip. Add this item to that trip, or start a new one?": "Je hebt al een totaal ingevoerd voor je laatste ronde. Wil je dit artikel daaraan toevoegen of een nieuwe ronde starten?",
+  "Add to last trip": "Aan laatste ronde toevoegen",
+  "Start new trip": "Nieuwe ronde starten",
 };
 export default nl;

@@ -415,5 +415,9 @@ const fr: Record<string, string> = {
   "Undo last action?": "Annuler la dernière action ?",
   "Added {items}": "Ajouté : {items}",
   "Ticked off {items}": "Coché : {items}",
+  "Start a new trip?": "Commencer un nouveau passage ?",
+  "You already added a total for your last trip. Add this item to that trip, or start a new one?": "Vous avez déjà saisi le total de votre dernier passage. Ajouter cet article à ce passage ou en commencer un nouveau ?",
+  "Add to last trip": "Ajouter au dernier passage",
+  "Start new trip": "Nouveau passage",
 };
 export default fr;
