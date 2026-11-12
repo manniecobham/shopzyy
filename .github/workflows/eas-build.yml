@@ -29,6 +29,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm --prefix functions ci
       - run: npx tsc --noEmit
       - run: npx jest
 
