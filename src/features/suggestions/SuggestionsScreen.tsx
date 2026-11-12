@@ -44,7 +44,7 @@ export function SuggestionsScreen({ household }: { household: Household }) {
             const group = suggestions.filter((x) => x.kind === kind);
             if (group.length === 0) return null;
             return (
-              <FormSection key={kind} header={KIND_TITLE[kind]} footer={KIND_EXPLANATION[kind]} first={kind === KINDS.find((k) => suggestions.some((x) => x.kind === k))}>
+              <FormSection key={kind} header={tr(KIND_TITLE[kind])} footer={tr(KIND_EXPLANATION[kind])} first={kind === KINDS.find((k) => suggestions.some((x) => x.kind === k))}>
                 {group.map((sug, i) => (
                   <SwipeRow key={sug.itemID}
                     leading={[{ label: tr('Add'), icon: 'plus', color: t.accent, onPress: () => add(sug) }]}

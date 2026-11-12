@@ -1,4 +1,4 @@
-import { locale, t } from '../i18n';
+import { locale, t, tn } from '../i18n';
 
 /**
  * "2 hours ago", "yesterday", "in 3 days": SwiftUI's `.relative(presentation: .named)` style.
@@ -7,16 +7,16 @@ export function relativeTime(date: Date, now: Date = new Date()): string {
   const diff = (date.getTime() - now.getTime()) / 1000; // seconds, negative = past
   const abs = Math.abs(diff);
   const past = diff < 0;
+  // Spelled out with literal keys (not Intl.RelativeTimeFormat, which Android's Hermes lacks) so each language can word and pluralise it.
   const wrap = (n: number, unit: 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year') => {
-    try {
-      return new Intl.RelativeTimeFormat(locale(), { numeric: 'always' }).format(past ? -n : n, unit);
-    } catch {
-      const label = `${n} ${unit}${n === 1 ? '' : 's'}`; // Intl is always present on Hermes; this is only a safety net.
-      return past ? `${label} ago` : `in ${label}`;
+    switch (unit) {
+      case 'minute': return past ? tn('{n} minute ago', '{n} minutes ago', n) : tn('in {n} minute', 'in {n} minutes', n);
+      case 'hour': return past ? tn('{n} hour ago', '{n} hours ago', n) : tn('in {n} hour', 'in {n} hours', n);
+      case 'day': return past ? tn('{n} day ago', '{n} days ago', n) : tn('in {n} day', 'in {n} days', n);
+      case 'week': return past ? tn('{n} week ago', '{n} weeks ago', n) : tn('in {n} week', 'in {n} weeks', n);
+      case 'month': return past ? tn('{n} month ago', '{n} months ago', n) : tn('in {n} month', 'in {n} months', n);
+      case 'year': return past ? tn('{n} year ago', '{n} years ago', n) : tn('in {n} year', 'in {n} years', n);
     }
-  };
-  const named = (n: -1 | 1, unit: 'day') => {
-    try { return new Intl.RelativeTimeFormat(locale(), { numeric: 'auto' }).format(n, unit); } catch { return n === -1 ? 'yesterday' : 'tomorrow'; }
   };
   if (abs < 45) return t('now');
   if (abs < 90 * 60) return wrap(Math.max(1, Math.round(abs / 60)), 'minute');
@@ -25,8 +25,8 @@ export function relativeTime(date: Date, now: Date = new Date()): string {
   const startOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
   const days = Math.round((startOf(date) - startOf(now)) / 86_400_000);
   if (days === 0) return wrap(Math.max(1, Math.round(abs / 3600)), 'hour');
-  if (days === -1) return named(-1, 'day');
-  if (days === 1) return named(1, 'day');
+  if (days === -1) return t('yesterday');
+  if (days === 1) return t('tomorrow');
   const n = Math.abs(days);
   if (n < 14) return wrap(n, 'day');
   if (n < 60) return wrap(Math.round(n / 7), 'week');

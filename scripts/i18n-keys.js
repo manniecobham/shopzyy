@@ -19,7 +19,7 @@ function files(dir, out = []) {
 
 function keys(root = path.join(__dirname, '..', 'src')) {
   const found = new Set();
-  const one = new RegExp(String.raw`\b(?:t|tx)\(\s*` + lit, 'g');
+  const one = new RegExp(String.raw`\b(?:t|tr|tx)\(\s*` + lit, 'g');
   const two = new RegExp(String.raw`\btn\(\s*` + lit + String.raw`\s*,\s*` + lit, 'g');
   for (const f of files(root)) {
     const src = fs.readFileSync(f, 'utf8');

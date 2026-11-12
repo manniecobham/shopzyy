@@ -43,7 +43,7 @@ export function HouseholdSetupView() {
     <SafeAreaView style={{ flex: 1, backgroundColor: t.groupedBackground }}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 32 }}>
-          <Text style={[s.title, { color: t.label }]}>{tr('Hi, {name}', { name: account.profile?.name ?? tr('there') })}</Text>
+          <Text style={[s.title, { color: t.label }]}>{account.profile?.name ? tr('Hi, {name}', { name: account.profile.name }) : tr('Hi there')}</Text>
 
           <FormSection header={tr('Start a household')} footer={tr("You can invite people from the Household tab once it's created.")}>
             <FormRow>

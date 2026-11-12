@@ -1,13 +1,14 @@
 import { router } from 'expo-router';
 import { NativeTabs } from 'expo-router/native-tabs';
 import { useEffect, useSyncExternalStore } from 'react';
-import { DynamicColorIOS } from 'react-native';
+import { DynamicColorIOS, Platform } from 'react-native';
 import { SuggestionEngine } from '../../logic/SuggestionEngine';
 import { itemHistory } from '../../models/itemOps';
 import { isDemo, startDemoTour } from '../../demo/demo';
 import { useRuntime, useStoreVersion } from '../../runtime/RuntimeProvider';
 import { ShoppingListService } from '../../services/ShoppingListService';
 import { t } from '../../i18n';
+import { useTheme } from '../../theme/theme';
 
 /**
  * The four tabs, all scoped to one household. These are the real system tabs: UITabBar on iOS (Liquid
@@ -33,7 +34,8 @@ export default function TabsLayout() {
     : 0;
 
   // The accent follows light/dark mode on iOS (the original app's AccentColor asset).
-  const accent = DynamicColorIOS({ light: '#1E9E68', dark: '#4ACE90' });
+  const theme = useTheme();
+  const accent = Platform.OS === 'ios' ? DynamicColorIOS({ light: '#1E9E68', dark: '#4ACE90' }) : theme.accent;
 
   return (
     <NativeTabs tintColor={accent}>

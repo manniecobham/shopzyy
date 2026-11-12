@@ -82,3 +82,4 @@ coverage/
 firebase/*/GoogleService-Info.plist
 firebase/*/google-services.json
 scripts/.keys.json
+scripts/.missing.json

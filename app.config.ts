@@ -46,7 +46,7 @@ const config: ExpoConfig = {
   scheme: 'shopzyy',
   version: '1.1.0',
   orientation: 'portrait',
-  // Per-app language (iOS Settings > Apps > Shopzyy > Language; Android 13+ app language) and localised permission prompts.
+  // Localised app name and permission prompts (iOS Info.plist strings; Android ignores them, see withAndroidLintTweaks).
   locales: { es: './locales/es.json', fr: './locales/fr.json', nl: './locales/nl.json', de: './locales/de.json', it: './locales/it.json' },
   icon: './assets/icon.png',
   userInterfaceStyle: 'automatic',
@@ -85,6 +85,8 @@ const config: ExpoConfig = {
   plugins: [
     // Android: resolves the notification-colour clash between expo-notifications and Firebase Messaging. Keep it first.
     './plugins/withNotificationColorMerge',
+    // Android: the iOS-only strings from `locales` above would fail the release lint check.
+    './plugins/withAndroidLintTweaks',
     'expo-router',
     '@react-native-firebase/app',
     '@react-native-firebase/auth',
