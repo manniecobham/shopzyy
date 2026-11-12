@@ -17,19 +17,11 @@ export const NotificationIds = {
   tripPrefix: 'shopzy.trip.',
 } as const;
 
-/**
- * Owns every interaction with the notification centre:
- * - shopping-trip summaries ("Ada went shopping · 6 items"), one per trip,
- * - restock reminders scheduled for 9 AM the day an item is expected to run out, with
- *   "Add to list" / "Not this week" actions.
- */
 export class NotificationService implements Notifier {
   onAddToList: ((itemID: string) => void) | null = null;
   onSnooze: ((itemID: string) => void) | null = null;
-  /** Called when a trip summary is tapped, to show the Activity tab. */
   onOpenActivity: (() => void) | null = null;
 
-  /** The OS allows a limited number of pending local notifications; leave headroom. */
   private readonly maxRestockReminders = 40;
   private readonly reminderHour = 9;
 
@@ -41,8 +33,6 @@ export class NotificationService implements Notifier {
   async configure(): Promise<void> {
     Notifications.setNotificationHandler({
       handleNotification: async (notification) => {
-        // While the app is open the local trip scan already announces trips, so don't show the same
-        // trip twice when the server's push arrives too.
         const isTripPush = (notification.request.trigger as { type?: string } | null)?.type === 'push' && (notification.request.content.data as { kind?: string } | null)?.kind === 'trip';
         return { shouldShowBanner: !isTripPush, shouldShowList: !isTripPush, shouldPlaySound: !isTripPush, shouldSetBadge: false };
       },
@@ -67,7 +57,6 @@ export class NotificationService implements Notifier {
     });
   }
 
-  /** Asks for permission the first time; returns whether notifications are allowed. */
   async requestAuthorization(): Promise<boolean> {
     const current = await Notifications.getPermissionsAsync();
     if (current.granted) return true;
@@ -80,11 +69,6 @@ export class NotificationService implements Notifier {
     return !s.granted && !s.canAskAgain;
   }
 
-  /**
-   * Announces a shopping trip, or updates the announcement if it grew. The request id is the trip
-   * id, so a pending or delivered summary for the same trip is replaced instead of stacked. If the
-   * buyer may still be shopping, delivery waits until the trip has been quiet.
-   */
   async postShoppingTrip(trip: ShoppingTrip, householdName: string | null, totalText: string | null, now: Date): Promise<void> {
     if (!this.purchaseAlertsEnabled) return;
     const identifier = NotificationIds.tripPrefix + trip.id;
@@ -106,7 +90,6 @@ export class NotificationService implements Notifier {
     });
   }
 
-  /** Replaces all pending restock reminders with ones for the given forecasts. */
   async scheduleRestockReminders(forecasts: RestockForecast[], now: Date = new Date()): Promise<void> {
     const pending = await Notifications.getAllScheduledNotificationsAsync();
     await Promise.all(pending.filter((p) => p.identifier.startsWith(NotificationIds.restockPrefix))

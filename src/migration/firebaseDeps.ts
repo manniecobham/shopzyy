@@ -5,7 +5,6 @@ import { ShopzyLegacy } from '../../modules/shopzy-legacy';
 import { AppLog } from '../services/AppLog';
 import type { MigrationDeps } from './MigrationService';
 
-/** The real Firebase + native-module wiring for MigrationService. */
 export function firebaseMigrationDeps(): MigrationDeps {
   const call = <Req, Res>(name: string) => httpsCallable<Req, Res>(getFunctions(), name, { timeout: 120_000 });
   return {

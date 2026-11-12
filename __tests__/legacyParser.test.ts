@@ -2,7 +2,6 @@ import { coreDataDate, parseLegacyStore, toWire } from '../src/migration/legacyP
 import type { LegacyStore } from '../modules/shopzy-legacy';
 import fixture from './fixtures/legacyStore.json';
 
-// A real SwiftData store written by the Swift app's own models, read by the Swift LegacyStoreReader.
 const store = fixture as unknown as LegacyStore;
 const HOME = '11111111-2222-3333-4444-555555555555';
 
@@ -64,7 +63,6 @@ describe('legacy store parsing', () => {
   });
 
   test('record counts add up', () => {
-    // Home: household + member + 2 options + item + purchase + total = 7, plus the empty Office household.
     expect(data.recordCount).toBe(8);
   });
 });

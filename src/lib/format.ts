@@ -1,13 +1,9 @@
 import { locale, t, tn } from '../i18n';
 
-/**
- * "2 hours ago", "yesterday", "in 3 days": SwiftUI's `.relative(presentation: .named)` style.
- */
 export function relativeTime(date: Date, now: Date = new Date()): string {
   const diff = (date.getTime() - now.getTime()) / 1000; // seconds, negative = past
   const abs = Math.abs(diff);
   const past = diff < 0;
-  // Spelled out with literal keys (not Intl.RelativeTimeFormat, which Android's Hermes lacks) so each language can word and pluralise it.
   const wrap = (n: number, unit: 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year') => {
     switch (unit) {
       case 'minute': return past ? tn('{n} minute ago', '{n} minutes ago', n) : tn('in {n} minute', 'in {n} minutes', n);
@@ -34,7 +30,6 @@ export function relativeTime(date: Date, now: Date = new Date()): string {
   return wrap(Math.round(n / 365), 'year');
 }
 
-/** Formats an amount in an ISO 4217 currency, e.g. "€42.50". Falls back to "42.50 EUR". */
 export function formatCurrency(amount: number, code: string): string {
   try {
     return new Intl.NumberFormat(locale(), { style: 'currency', currency: code }).format(amount);
@@ -43,7 +38,6 @@ export function formatCurrency(amount: number, code: string): string {
   }
 }
 
-/** The narrow symbol for a currency ("€", "$", "£"), or the code when unknown. */
 export function currencySymbol(code: string): string {
   try {
     const parts = new Intl.NumberFormat(locale(), { style: 'currency', currency: code, currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).formatToParts(0);
@@ -53,7 +47,6 @@ export function currencySymbol(code: string): string {
   }
 }
 
-/** The device region's currency, used until a household picks one (Swift: Locale.current.currency). */
 export function deviceCurrency(): string {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -64,5 +57,4 @@ export function deviceCurrency(): string {
   }
 }
 
-/** A household's currency for new totals: its choice, else the device's region. */
 export const householdCurrency = (currencyCode: string): string => (currencyCode === '' ? deviceCurrency() : currencyCode);

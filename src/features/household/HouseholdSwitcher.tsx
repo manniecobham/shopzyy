@@ -8,7 +8,6 @@ import { useAccount, useAppState, useStoreVersion } from '../../runtime/RuntimeP
 import { useTheme } from '../../theme/theme';
 import { HouseholdThumbnail, householdDisplayName } from './HouseholdBackground';
 
-/** Header control showing the current household, to switch between households or start a new one. */
 export function HouseholdSwitcher() {
   const th = useTheme();
   const runtime = useAppState();

@@ -16,11 +16,6 @@ import type { Entity } from '../models/entities';
 
 const addDays = (d: Date, n: number) => { const r = new Date(d.getTime()); r.setDate(r.getDate() + n); return r; };
 
-/**
- * The single place that mutates list state for one household. Screens call intent-level
- * methods ("mark bought") and never assemble model changes themselves, which keeps side
- * effects (history, sync, notifications, reminder rescheduling) consistent.
- */
 export class ShoppingListService {
   constructor(
     private readonly env: ServiceEnv,
@@ -31,18 +26,15 @@ export class ShoppingListService {
 
   private get store() { return this.env.store; }
 
-  /** A service for whichever household owns `itemID`, e.g. to handle a notification action. */
   static forItem(itemID: string, env: ServiceEnv): ShoppingListService | null {
     const item = env.store.item(itemID);
     return item ? new ShoppingListService(env, item.householdID) : null;
   }
 
-  /** False once the household was deleted or left on this device. */
   get isHouseholdAvailable(): boolean { return !this.store.removedHouseholds.has(this.householdID); }
 
   // MARK: Adding
 
-  /** Parses free text ("2 kg rice, milk x2") and adds every item it finds. */
   addFromText(input: string, by: HouseholdMember | null, at: Date = new Date()): GroceryItem[] {
     if (!this.isHouseholdAvailable) return [];
     const items = SmartItemParser.parse(input).map((p) => this.add(p, by, at, false));
@@ -50,11 +42,6 @@ export class ShoppingListService {
     return items;
   }
 
-  /**
-   * Reuses the catalog entry when the item is known, so history, category corrections and
-   * usual quantity carry over. Re-adding something already on the list only changes it when a
-   * quantity was typed explicitly.
-   */
   add(parsed: ParsedItem, by: HouseholdMember | null, at: Date = new Date(), saving = true): GroceryItem {
     let item: GroceryItem;
     const existing = this.itemMatching(parsed.name);
@@ -111,7 +98,6 @@ export class ShoppingListService {
     this.refreshRestockReminders();
   }
 
-  /** Reverses an accidental "bought": removes the record and restores the list entry. */
   undoPurchase(record: PurchaseRecord): void {
     if (!this.isHouseholdAvailable) return;
     const item = record.item;
@@ -167,11 +153,6 @@ export class ShoppingListService {
 
   // MARK: Custom categories and rooms
 
-  /**
-   * Returns the choice for a typed name, creating a custom option only when nothing matches.
-   * Typing "kitchen" picks the built-in Kitchen, and an existing custom name is reused, so
-   * the household never sees duplicates.
-   */
   categoryChoiceNamed(name: string): CategoryChoice | null {
     if (!this.isHouseholdAvailable) return null;
     const clean = NameNormalizer.displayName(name);
@@ -210,7 +191,6 @@ export class ShoppingListService {
     ShoppingListService.refreshRestockReminders(this.env, this.engine);
   }
 
-  /** Reminders cover every household: scheduling replaces all pending ones. */
   static refreshRestockReminders(env: ServiceEnv, engine = new SuggestionEngine()): void {
     const forecasts = engine.forecasts(env.store.allItems().map(itemHistory));
     void env.notifier.scheduleRestockReminders(forecasts);
@@ -228,13 +208,11 @@ export class ShoppingListService {
     return item && item.householdID === this.householdID ? item : undefined;
   }
 
-  /** The signed-in person's membership in this household. */
   currentMember(): HouseholdMember | null {
     const key = this.env.prefs.userRecordName;
     return key ? this.store.member(key, this.householdID) ?? null : null;
   }
 
-  /** Commits locally, then schedules `changed` for upload. */
   private save(changed: Entity[] = []): void {
     this.store.commit();
     this.env.sync?.save(changed);

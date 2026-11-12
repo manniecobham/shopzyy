@@ -2,15 +2,6 @@ import type { CustomOption, Entity, GroceryItem, Household, HouseholdMember, Opt
 
 export type EntityKind = 'household' | 'member' | 'option' | 'item' | 'purchase' | 'tripTotal';
 
-/**
- * In-memory mirror of the Swift `ModelContext`: the single source of truth the UI reads.
- * Firestore (offline-persisted) is the sync layer and on-device cache behind it.
- * Relationship delete rules match SwiftData: items cascade to purchases; deleting a member or a
- * custom option nullifies the references to it.
- *
- * Mutations happen on the entity objects, then `commit()` notifies subscribers (a version
- * counter feeds `useSyncExternalStore`). Services call `commit()` where Swift called `context.save()`.
- */
 export class DataStore {
   private households = new Map<string, Household>();
   private members = new Map<string, HouseholdMember>();
@@ -22,7 +13,6 @@ export class DataStore {
   private listeners = new Set<() => void>();
   private _version = 0;
 
-  /** Households removed from this device this session; services refuse changes to them. */
   readonly removedHouseholds = new Set<string>();
 
   // MARK: Observation
@@ -33,7 +23,6 @@ export class DataStore {
     return () => this.listeners.delete(listener);
   };
   getSnapshot = (): number => this._version;
-  /** Equivalent of `context.save()`: tells observers something changed. */
   commit(): void {
     this._version++;
     this.listeners.forEach((l) => l());
@@ -55,7 +44,6 @@ export class DataStore {
     return p;
   }
 
-  /** Sets a purchase's item and member, keeping the item's inverse list in step. */
   linkPurchase(p: PurchaseRecord, item: GroceryItem | null, member: HouseholdMember | null): void {
     if (p.item && p.item !== item) p.item.purchases = p.item.purchases.filter((x) => x !== p);
     p.item = item;
@@ -94,7 +82,6 @@ export class DataStore {
     return this.allTripTotals().find((t) => t.householdID === householdID && t.tripKey === tripKey);
   }
 
-  /** Items that use `option` as their custom category / room. */
   itemsUsing(option: CustomOption): GroceryItem[] {
     return this.allItems().filter((i) => i.customCategory === option || i.customRoom === option);
   }
@@ -136,7 +123,6 @@ export class DataStore {
   deleteTripTotal(t: TripTotal): void { this.totals.delete(t.id); }
   deleteHousehold(h: Household): void { this.households.delete(h.id); }
 
-  /** Everything in one household, e.g. when it's deleted or left. */
   deleteHouseholdData(householdID: string): void {
     for (const p of this.purchasesIn(householdID)) this.purchases.delete(p.id);
     for (const i of this.itemsIn(householdID)) this.items.delete(i.id);

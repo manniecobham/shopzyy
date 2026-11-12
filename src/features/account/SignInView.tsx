@@ -8,10 +8,6 @@ import { useAccount } from '../../runtime/RuntimeProvider';
 import { Brand, useTheme } from '../../theme/theme';
 import { t as tr } from '../../i18n';
 
-/**
- * Replaces the Swift app's "Turn on iCloud" step: Shopzyy has its own account now, so people
- * sign in with Apple (iPhone), Google or an email and password.
- */
 export function SignInView() {
   const t = useTheme();
   const account = useAccount();

@@ -7,7 +7,6 @@ import { FormRow, FormSection, TextButton } from '../../components/ui';
 import { AppLog, LOG_AREA_TITLE, type LogEntry } from '../../services/AppLog';
 import { Brand, useTheme } from '../../theme/theme';
 
-/** Problems the app ran into, in plain language. The technical details stay out of sight: they're sent anonymously to the developer. */
 export function DiagnosticsSheet({ onClose }: { onClose: () => void }) {
   const th = useTheme();
   useSyncExternalStore(AppLog.subscribe, AppLog.getSnapshot);

@@ -13,29 +13,16 @@ import { AppLog } from './AppLog';
 import { demoIdentity, isDemo } from '../demo/demo';
 import { UserFacingError } from './UserFacingError';
 
-/**
- * Where a person is in getting set up. The Swift app's `needsICloud` becomes `signIn`:
- * the iCloud identity is replaced by a Firebase account (Apple, Google or email).
- */
 export type AccountPhase = 'loading' | 'welcome' | 'signIn' | 'needsProfile' | 'ready';
 
-/** The person closed the Apple/Google sheet while confirming it's them; nothing was deleted. */
 export class ReauthCancelled extends Error {}
 
-/** How the current account signs in, which decides how it is re-confirmed before deletion. */
 export type SignInProvider = 'apple' | 'google' | 'password';
 
-/** The person using Shopzyy: their sign-in and their profile. */
 export class AccountService extends Observable {
   phase: AccountPhase = 'loading';
-  /** Firebase uid, or null when signed out. */
   uid: string | null = null;
   email: string | null = null;
-  /**
-   * The stable id other people's data refers to (members, section keys, trip totals). It is the
-   * Firebase uid, except for people migrated from the iOS app, who keep their old CloudKit
-   * record name so everything stored under it still matches.
-   */
   userRecordName: string | null;
   profile: UserProfile | null;
   lastError: string | null = null;
@@ -51,14 +38,12 @@ export class AccountService extends Observable {
 
   private get hasSeenWelcome(): boolean { return this.prefs.getBool(StorageKeys.hasSeenWelcome, false); }
 
-  /** Re-reads identity and profile after the legacy defaults were applied at launch. */
   reloadFromPrefs(): void {
     this.userRecordName = this.prefs.userRecordName;
     this.profile = this.prefs.getJSON<UserProfile>(StorageKeys.profile);
     this.changed();
   }
 
-  /** Starts listening for sign-in changes. Call once at launch, after preferences have loaded. */
   start(): void {
     if (this.started) return;
     this.started = true;
@@ -92,7 +77,6 @@ export class AccountService extends Observable {
     });
   }
 
-  /** Re-checks every requirement. Call when the app becomes active. */
   refresh(): void { this.updatePhase(); }
 
   completeWelcome(): void {
@@ -100,7 +84,6 @@ export class AccountService extends Observable {
     this.updatePhase();
   }
 
-  /** Migration sets the person's old CloudKit record name as their stable key. */
   setUserRecordName(key: string): void {
     this.userRecordName = key;
     this.prefs.userRecordName = key;
@@ -131,7 +114,6 @@ export class AccountService extends Observable {
     });
   }
 
-  /** A name to pre-fill on the profile screen (e.g. from Apple). */
   suggestedName: string | null = null;
 
   async signInWithGoogle(): Promise<void> {
@@ -165,11 +147,10 @@ export class AccountService extends Observable {
   async signOut(): Promise<void> {
     await this.run(async () => {
       await signOut(getAuth());
-      try { await GoogleSignin.signOut(); } catch { /* not signed in with Google */ }
+      try { await GoogleSignin.signOut(); } catch {}
     });
   }
 
-  /** Which method this account signs in with, or null when signed out. */
   get provider(): SignInProvider | null {
     const ids = getAuth().currentUser?.providerData.map((p) => p.providerId) ?? [];
     if (ids.includes('apple.com')) return 'apple';
@@ -178,14 +159,8 @@ export class AccountService extends Observable {
     return null;
   }
 
-  /** The one-time code Apple issued when the person last confirmed themselves; needed to revoke their Apple token on deletion. */
   private appleAuthorizationCode: string | null = null;
 
-  /**
-   * Confirms it's really them before something irreversible (Firebase refuses to delete an account that signed in a
-   * while ago). Apple and Google show their own sheet; email accounts pass their password. Throws `ReauthCancelled`
-   * when the sheet is closed.
-   */
   async reauthenticate(password?: string): Promise<void> {
     const user = getAuth().currentUser;
     if (!user) throw new Error('You are signed out.');
@@ -221,7 +196,6 @@ export class AccountService extends Observable {
     }
   }
 
-  /** Deletes the Firebase account itself (after the person's data is deleted and `reauthenticate` succeeded). Apple requires revoking the Sign in with Apple token too. */
   async deleteAccount(): Promise<void> {
     const user = getAuth().currentUser;
     if (!user) return;
@@ -232,10 +206,6 @@ export class AccountService extends Observable {
     await deleteUser(user);
   }
 
-  /**
-   * Forgets everything about this person on this device, after their household data was
-   * deleted, and returns to the welcome screen.
-   */
   reset(): void {
     this.profile = null;
     this.lastError = null;

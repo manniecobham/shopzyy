@@ -7,10 +7,6 @@ import { isHouseholdGone, type ServiceEnv } from './ports';
 
 export type RemovalOutcome = 'removed' | 'alreadyGone';
 
-/**
- * Creates, joins, leaves and deletes households, and keeps this person's member record in
- * each one up to date. Like ShoppingListService, screens call these intent-level methods.
- */
 export class HouseholdService {
   constructor(private readonly env: ServiceEnv) {}
   private get store() { return this.env.store; }
@@ -18,7 +14,6 @@ export class HouseholdService {
   households(): Household[] { return this.store.allHouseholds(); }
   household(id: string): Household | undefined { return this.store.household(id); }
 
-  /** Creates a household owned by this person, with them as its first member. */
   create(name: string, userRecordName: string, profile: UserProfile, at: Date = new Date()): Household {
     const clean = NameNormalizer.displayName(name);
     const household = this.store.insertHousehold(makeHousehold({
@@ -47,7 +42,6 @@ export class HouseholdService {
     this.persist(household);
   }
 
-  /** Saves a new section order for the current grouping, keeping the order of other groupings intact. */
   setSectionOrder(keys: string[], household: Household): void {
     if (!this.isLive(household)) return;
     const reordered = new Set(keys);
@@ -55,14 +49,12 @@ export class HouseholdService {
     this.persist(household);
   }
 
-  /** Sets the currency for shopping totals. An empty code goes back to the device's region. */
   setCurrency(code: string, household: Household): void {
     if (!this.isLive(household) || household.currencyCode === code) return;
     household.currencyCode = code;
     this.persist(household);
   }
 
-  /** Records what a shopping trip cost. Replaces an earlier total for the same trip. */
   saveTripTotal(a: {
     tripKey: string; householdID: string; endedAt: Date; amount: number; currencyCode: string;
     storeName: string | null; by: string | null;
@@ -99,7 +91,6 @@ export class HouseholdService {
     this.persist(household);
   }
 
-  /** Uses a photo as the banner. `image` should already be downscaled; focus (0…1) picks what stays visible when cropped. */
   setCustomImage(image: string | null, household: Household, focusX = 0.5, focusY = 0.5): void {
     if (!this.isLive(household)) return;
     household.customImage = image;
@@ -108,7 +99,6 @@ export class HouseholdService {
     this.persist(household);
   }
 
-  /** Adds this person's member record if the household doesn't have one yet, or refreshes it when their profile changed. */
   ensureMembership(household: Household, userRecordName: string, profile: UserProfile): HouseholdMember {
     const existing = this.store.member(userRecordName, household.id);
     if (existing) {
@@ -126,15 +116,10 @@ export class HouseholdService {
     return member;
   }
 
-  /** Applies an edited profile to this person's membership in every household. */
   updateProfile(profile: UserProfile, userRecordName: string): void {
     for (const h of this.households()) this.ensureMembership(h, userRecordName, profile);
   }
 
-  /**
-   * The owner deletes the household for everyone; anyone else just leaves it. Checks the
-   * server first, so removing a household that no longer exists just tidies this device.
-   */
   async remove(household: Household): Promise<RemovalOutcome> {
     const id = household.id;
     if (!this.isLive(household)) return 'alreadyGone';
@@ -166,7 +151,6 @@ export class HouseholdService {
     return 'removed';
   }
 
-  /** Asks the server whether a household still exists. If not, it's removed from this device and false is returned. */
   async verify(household: Household): Promise<boolean> {
     if (!this.isLive(household)) return false;
     const sync = this.env.sync;
@@ -175,12 +159,10 @@ export class HouseholdService {
     return false;
   }
 
-  /** False once the household was deleted on this device. Every change goes through this check first. */
   isLive(household: Household): boolean {
     return this.store.isLiveHousehold(household.id) && this.store.household(household.id) === household;
   }
 
-  /** Deletes everything this person has: owned households go for everyone, joined ones are left. */
   async deleteMyData(): Promise<void> {
     for (const h of this.households()) await this.remove(h);
     await this.env.sync?.sendNow();
@@ -189,7 +171,6 @@ export class HouseholdService {
     await this.env.notifier.removeAll();
   }
 
-  /** Deletes a household and everything in it from this device only. */
   purgeLocal(householdID: string): void {
     this.store.removedHouseholds.add(householdID);
     this.store.deleteHouseholdData(householdID);
@@ -200,7 +181,6 @@ export class HouseholdService {
     ShoppingListService.refreshRestockReminders(this.env);
   }
 
-  /** Removes every household from this device, e.g. after signing out. */
   eraseEverything(): void {
     this.store.eraseEverything();
     this.store.commit();

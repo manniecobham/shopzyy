@@ -1,14 +1,10 @@
-// Built-in vocabularies. Raw values double as stored/synced field values, so
-// never rename one (the iOS app and Firestore documents share them).
 
 import { t } from '../i18n';
 
-/** No-op marker so the string extractor finds catalog keys in constant tables; they're translated at lookup. */
 const tx = (s: string) => s;
 
 // MARK: ItemCategory -----------------------------------------------------------
 
-/** Declared in the order you typically walk a supermarket, so `aisleOrder` is a route through the store. */
 export const ITEM_CATEGORIES = [
   'produce', 'bakery', 'dairy', 'meat', 'seafood', 'pantry', 'frozen', 'beverages',
   'snacks', 'household', 'personalCare', 'baby', 'pets', 'other',
@@ -33,7 +29,6 @@ const CATEGORY_INFO: Record<ItemCategory, { title: string; emoji: string }> = {
 };
 
 export const categoryTitle = (c: ItemCategory) => t(CATEGORY_INFO[c].title);
-/** Untranslated name, so typing the English word still matches the built-in. */
 export const categoryTitleEnglish = (c: ItemCategory) => CATEGORY_INFO[c].title;
 export const categoryEmoji = (c: ItemCategory) => CATEGORY_INFO[c].emoji;
 export const aisleOrder = (c: ItemCategory) => ITEM_CATEGORIES.indexOf(c);
@@ -81,7 +76,6 @@ const GROUPING_INFO: Record<ListGrouping, { title: string; icon: GroupingSymbol 
 };
 
 export const groupingTitle = (g: ListGrouping) => t(GROUPING_INFO[g].title);
-/** The SF Symbol name the iOS app uses (see components/Glyph for the Android stand-ins). */
 export const groupingIcon = (g: ListGrouping) => GROUPING_INFO[g].icon;
 export const isListGrouping = (raw: string | null | undefined): raw is ListGrouping =>
   !!raw && (LIST_GROUPINGS as readonly string[]).includes(raw);
@@ -103,7 +97,6 @@ const THEME_INFO: Record<HouseholdTheme, { title: string; emoji: string; colors:
 
 export const themeTitle = (theme: HouseholdTheme) => t(THEME_INFO[theme].title);
 export const themeEmoji = (theme: HouseholdTheme) => THEME_INFO[theme].emoji;
-/** Gradient stops; empty for `none`, which uses the system grouped background. */
 export const themeColors = (theme: HouseholdTheme) => THEME_INFO[theme].colors;
 export const isHouseholdTheme = (raw: string | null | undefined): raw is HouseholdTheme =>
   !!raw && (HOUSEHOLD_THEMES as readonly string[]).includes(raw);
@@ -141,7 +134,6 @@ const UNIT_ALIASES: Record<string, MeasurementUnit> = {};
   for (const unit of MEASUREMENT_UNITS) for (const word of table[unit]) UNIT_ALIASES[word] = unit;
 }
 
-/** Recognises the many ways people type units ("kg", "kilos", "litres", "tins"). */
 export function unitFromToken(token: string): MeasurementUnit | null {
   const key = token.toLowerCase().replace(/^[\p{P}\s]+|[\p{P}\s]+$/gu, '');
   return Object.prototype.hasOwnProperty.call(UNIT_ALIASES, key) ? UNIT_ALIASES[key] : null;
@@ -150,7 +142,6 @@ export function unitFromToken(token: string): MeasurementUnit | null {
 const MEASURED: readonly MeasurementUnit[] = ['kilogram', 'gram', 'pound', 'ounce', 'liter', 'milliliter'];
 const isMeasured = (u: MeasurementUnit) => MEASURED.includes(u);
 
-/** Canonical token the parser round-trips, used when rebuilding input text. */
 export function unitInputToken(u: MeasurementUnit): string {
   switch (u) {
     case 'kilogram': return 'kg';
@@ -163,7 +154,6 @@ export function unitInputToken(u: MeasurementUnit): string {
   }
 }
 
-/** Count words for the unit kinds that are spelled out; abbreviations (kg, L…) are never translated. */
 const UNIT_WORDS: Record<MeasurementUnit, { one: string; many: string }> = {
   kilogram: { one: tx('kg'), many: tx('kg') }, gram: { one: tx('g'), many: tx('g') }, pound: { one: tx('lb'), many: tx('lb') },
   ounce: { one: tx('oz'), many: tx('oz') }, liter: { one: tx('L'), many: tx('L') }, milliliter: { one: tx('mL'), many: tx('mL') },
@@ -190,13 +180,11 @@ function pluralLabel(u: MeasurementUnit, quantity: number): string {
   return t(UNIT_WORDS[u].many);
 }
 
-/** Locale-independent formatting ("1.5", "2") so it can be fed back through SmartItemParser. */
 export function plainQuantity(value: number): string {
   if (Math.round(value) === value && Math.abs(value) < 1_000_000) return String(Math.trunc(value));
   return value.toFixed(2).replace(/\.?0+$/, '');
 }
 
-/** Human-readable amount, or null for the unremarkable "1 of something". */
 export function describeQuantity(quantity: number, unit: MeasurementUnit | null | undefined): string | null {
   const number = plainQuantity(quantity);
   if (!unit || unit === 'piece') return quantity === 1 ? null : `×${number}`;

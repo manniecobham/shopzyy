@@ -1,6 +1,3 @@
-// expo-notifications and Firebase Messaging both set `com.google.firebase.messaging.default_notification_color`
-// in the Android manifest, and the manifest merger refuses to pick one. This makes ours (the brand green) win.
-// Listed first in `plugins`: mods run last-registered-first, so this one sees the entries expo-notifications adds.
 const { withAndroidManifest } = require('expo/config-plugins');
 
 module.exports = function withNotificationColorMerge(config) {

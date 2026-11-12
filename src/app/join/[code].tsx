@@ -5,7 +5,6 @@ import { AppNotice } from '../../services/UserFacingError';
 import { useAppState } from '../../runtime/RuntimeProvider';
 import { t } from '../../i18n';
 
-/** Opens from a shopzyy://join/<code> invite link: joins now if signed in, otherwise after sign-in. */
 export default function JoinRoute() {
   const { code } = useLocalSearchParams<{ code: string }>();
   const runtime = useAppState();

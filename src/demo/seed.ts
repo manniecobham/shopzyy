@@ -5,15 +5,12 @@ import type { ItemCategory, MeasurementUnit } from '../models/enums';
 import type { ServiceEnv } from '../services/ports';
 import { ShoppingListService } from '../services/ShoppingListService';
 
-// DEVELOPMENT ONLY. Sample data for demo mode. Production bundles replace this file with seed.stub.ts (metro.config.js).
-
 export const DEMO_HOUSEHOLD_ID = '5B0B7B8E-3C55-4C1E-9D3E-6A1F1D2C0001';
 export const DEMO_USER_KEY = 'preview-user';
 export const DEMO_PROFILE = { name: 'Ama', emoji: '👩🏾', colorHex: '#34C759' };
 
 interface Habit { name: string; category: ItemCategory; everyDays: number; purchases: number; lastBoughtDaysAgo: number; quantity?: number; unit?: MeasurementUnit }
 
-// Same habits as SampleData.swift, shaped so every suggestion kind appears: overdue, due now, not bought in a while.
 const HABITS: Habit[] = [
   { name: 'Milk', category: 'dairy', everyDays: 7, purchases: 6, lastBoughtDaysAgo: 11, quantity: 2, unit: 'carton' },
   { name: 'Bread', category: 'bakery', everyDays: 4, purchases: 8, lastBoughtDaysAgo: 4, unit: 'loaf' },
@@ -26,7 +23,6 @@ const HABITS: Habit[] = [
   { name: 'Dish soap', category: 'household', everyDays: 0, purchases: 1, lastBoughtDaysAgo: 40 },
 ];
 
-/** Seeds the demo household. Returns its id. */
 export function seedDemo(env: ServiceEnv, now: Date = new Date()): string {
   const { store } = env;
   const hid = DEMO_HOUSEHOLD_ID;
@@ -80,7 +76,6 @@ export function seedDemo(env: ServiceEnv, now: Date = new Date()): string {
   return hid;
 }
 
-/** Cycles through the tabs on a timer so every screen can be screenshotted without touching the app. */
 export function startDemoTour(go: (path: string) => void, firstDelayMs = 25_000, stepMs = 25_000): void {
   const stops = ['/suggestions', '/activity', '/household', '/'];
   stops.forEach((path, i) => setTimeout(() => go(path), firstDelayMs + i * stepMs));

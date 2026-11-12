@@ -1,17 +1,13 @@
 import { Platform, useColorScheme } from 'react-native';
 import { tx } from '../i18n';
 
-/** True on iOS 26+, where the system draws bars with Liquid Glass and grouped lists use larger corners. */
 export const isIOS26 = Platform.OS === 'ios' && parseInt(String(Platform.Version), 10) >= 26;
-/** Corner radius of grouped-list cards (SwiftUI Form / List): larger since iOS 26. */
 export const CARD_RADIUS = isIOS26 ? 26 : 10;
 
-/** Brand strings, shared with the splash and welcome screens. */
 export const Brand = {
   appName: 'Shopzyy',
   maker: 'MannieDev',
   tagline: tx('Hyping your shopping experience'),
-  /** Same green as the launch background so the system launch screen hands over without a jump. */
   launchColor: '#1E9E68',
 } as const;
 
@@ -49,7 +45,6 @@ export function useTheme(): Palette {
   return useColorScheme() === 'dark' ? dark : light;
 }
 
-/** Accepts "#RRGGBB" or "RRGGBB"; falls back to gray for malformed input (Color(hex:) in Swift). */
 export function colorFromHex(hex: string, alpha = 1): string {
   const digits = hex.replace(/^#+|#+$/g, '');
   if (!/^[0-9a-fA-F]{6}$/.test(digits)) return alpha === 1 ? '#8E8E93' : `rgba(142,142,147,${alpha})`;

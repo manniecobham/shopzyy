@@ -6,22 +6,14 @@ export interface TripPurchase {
   purchasedAt: Date;
 }
 
-/** Swift's `Date.distantPast` (0001-01-01T00:00:00Z). */
 export const DISTANT_PAST = new Date(-62_135_769_600_000);
 
-/** Purchases further apart than this start a new trip (ms). */
 export const TRIP_MAX_GAP_MS = 60 * 60 * 1000;
-/** A trip must be quiet this long (ms) before it's announced to the others. */
 export const TRIP_QUIET_PERIOD_MS = 5 * 60 * 1000;
 
-/**
- * A run of purchases one person made in one household without a long pause.
- * Times in this file are Dates; durations are milliseconds (Swift used seconds).
- */
 export class ShoppingTrip {
   constructor(
     readonly householdID: string,
-    /** Member record name, or null when the buyer isn't known. */
     readonly buyerKey: string | null,
     readonly buyerName: string,
     readonly purchases: TripPurchase[],
@@ -30,18 +22,12 @@ export class ShoppingTrip {
   get start(): Date { return this.purchases[0]?.purchasedAt ?? DISTANT_PAST; }
   get end(): Date { return this.purchases[this.purchases.length - 1]?.purchasedAt ?? DISTANT_PAST; }
 
-  /** Stable while the trip grows, so a later notification replaces the earlier one. */
   get id(): string {
     return `${this.householdID}.${this.buyerKey ?? 'someone'}.${Math.trunc(this.start.getTime() / 1000)}`;
   }
 
   get announceAt(): Date { return new Date(this.end.getTime() + TRIP_QUIET_PERIOD_MS); }
 
-  /**
-   * How long the shopper's own trip must be quiet before they're asked what it cost, in
-   * seconds. Three times the median gap between tick-offs, kept within 15…45 s; gaps over
-   * two minutes say nothing about pace and are ignored.
-   */
   get promptDelay(): number {
     const gaps: number[] = [];
     for (let i = 1; i < this.purchases.length; i++) {
@@ -57,7 +43,6 @@ export class ShoppingTrip {
 
   get title(): string { return t('{name} went shopping', { name: this.buyerName }); }
 
-  /** "6 items · Milk, Eggs, Bread and 3 more", with the total after it when known. */
   body(maxNames = 3, total: string | null = null): string {
     const names = this.purchases.map((p) => p.itemName);
     const count = tn('{n} item', '{n} items', names.length);
@@ -67,7 +52,6 @@ export class ShoppingTrip {
     return total ? `${summary} · ${total}` : summary;
   }
 
-  /** Splits purchases into trips per household and buyer. */
   static group(entries: { householdID: string; buyerKey: string | null; buyerName: string; purchase: TripPurchase }[]): ShoppingTrip[] {
     const byBuyer = new Map<string, typeof entries>();
     for (const e of entries) {

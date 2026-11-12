@@ -6,7 +6,6 @@ import type { PurchaseHistory } from '../logic/SuggestionEngine';
 import { NameNormalizer } from '../logic/NameNormalizer';
 import type { GroceryItem, HouseholdMember, PurchaseRecord } from './entities';
 
-/** Who a list item is for: someone in the household, or anyone else by name. */
 export type ItemRecipient = { kind: 'member'; member: HouseholdMember } | { kind: 'named'; name: string };
 
 export const recipientName = (r: ItemRecipient) => (r.kind === 'member' ? r.member.name : r.name);
@@ -19,7 +18,6 @@ export const sameRecipient = (a: ItemRecipient | null, b: ItemRecipient | null) 
 
 export const itemCategory = (i: GroceryItem) => (isItemCategory(i.categoryRaw) ? i.categoryRaw : 'other');
 
-/** The category shown to people: the household's own if chosen, else the built-in aisle. */
 export function getCategoryChoice(i: GroceryItem): CategoryChoice {
   return i.customCategory ? custom(i.customCategory) : builtIn(itemCategory(i));
 }
@@ -89,7 +87,6 @@ export function putOnList(i: GroceryItem, quantity: number, unit: MeasurementUni
   i.snoozedUntil = null;
 }
 
-/** Clears everything about this trip's list entry: who added it, who was asked to buy it, who it's for, the note. */
 export function takeOffList(i: GroceryItem): void {
   i.isOnList = false;
   i.addedBy = null;
@@ -104,5 +101,4 @@ export const purchaseQuantityText = (p: PurchaseRecord) => describeQuantity(p.qu
 export const purchaseItemName = (p: PurchaseRecord) => p.item?.name ?? t('an item');
 export const purchaseMemberName = (p: PurchaseRecord) => p.member?.name ?? t('Someone');
 
-/** Quantity as plain text for editing ("1.5", "2"). */
 export const plainQty = (q: number): string => plainQuantity(q);

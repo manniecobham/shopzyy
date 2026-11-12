@@ -10,7 +10,6 @@ export interface SwipeAction {
   onPress: () => void;
 }
 
-/** A row with tappable swipe actions on either side (SwiftUI `.swipeActions`). */
 export function SwipeRow({ leading = [], trailing = [], children }: { leading?: SwipeAction[]; trailing?: SwipeAction[]; children: ReactNode }) {
   const ref = useRef<SwipeableMethods>(null);
   const render = (actions: SwipeAction[]) => (

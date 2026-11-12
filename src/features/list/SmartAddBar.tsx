@@ -13,10 +13,6 @@ import { colorFromHex, useTheme } from '../../theme/theme';
 
 const SEPARATORS = /[,;\n+]/;
 
-/**
- * The single entry point for adding items. Understands quantities and units, several items
- * at once, and autocompletes from what the household has bought before.
- */
 export function SmartAddBar({ catalog, onSubmit }: { catalog: GroceryItem[]; onSubmit: (text: string) => void }) {
   const t = useTheme();
   const input = useRef<React.ComponentRef<typeof TextInput>>(null);
@@ -52,7 +48,6 @@ export function SmartAddBar({ catalog, onSubmit }: { catalog: GroceryItem[]; onS
     input.current?.focus();
   };
 
-  /** Swaps the partially typed last item for the chosen one, keeping any quantity already typed ("2 kg chi" → "2 kg Chicken breast"), then adds. */
   const complete = (match: AutocompleteCandidate) => {
     const parts = [...segments];
     let prefix = '';

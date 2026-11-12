@@ -13,7 +13,6 @@ import { HouseholdSwitcher } from '../household/HouseholdSwitcher';
 
 const KINDS: SuggestionKind[] = ['overdue', 'dueSoon', 'longTimeNoSee'];
 
-/** What the household probably needs, grouped by how urgent it is. */
 export function SuggestionsScreen({ household }: { household: Household }) {
   const t = useTheme();
   const runtime = useRuntime();

@@ -1,4 +1,3 @@
-/** Minimal observable base for services: `useSyncExternalStore(obs.subscribe, obs.getSnapshot)`. */
 export class Observable {
   private listeners = new Set<() => void>();
   private _v = 0;

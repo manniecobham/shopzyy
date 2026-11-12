@@ -6,14 +6,7 @@ import { Brand } from '../../theme/theme';
 
 const LOGO_SIZE = 240;
 
-/**
- * Shown at launch while Shopzyy checks the account and opens the household. It sits on the same
- * brand green as the native launch screen, so the hand-over is seamless, and plays the animated
- * logo once. `onFinish` fires when the animation ends (or if it can't play), so the app never
- * cuts it off halfway.
- */
 export function SplashView({ onFinish }: { onFinish?: () => void }) {
-  // The wordmark and tagline arrive just after the logo lands (the animation's basket pops in over ~0.6 s).
   const wordmark = useRef(new Animated.Value(0)).current;
   const tagline = useRef(new Animated.Value(0)).current;
   useEffect(() => {

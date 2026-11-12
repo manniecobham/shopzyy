@@ -7,7 +7,6 @@ import { useAccount, useRuntime } from '../../runtime/RuntimeProvider';
 import { useTheme } from '../../theme/theme';
 import { t as tr } from '../../i18n';
 
-/** Shown when the person isn't in any household yet: create one, or join with an invite. */
 export function HouseholdSetupView() {
   const t = useTheme();
   const account = useAccount();

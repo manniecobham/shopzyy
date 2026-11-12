@@ -12,8 +12,6 @@ import { AppNotice } from '../services/UserFacingError';
 import { useTheme } from '../theme/theme';
 
 export default function RootLayout() {
-  // Remounts the tree when the language changes (the phone's, or the in-app override on Android < 13), so every
-  // `t()` call re-reads it without each component subscribing.
   const lang = useSyncExternalStore(subscribeLanguage, language);
   useEffect(() => {
     const sub = AppState.addEventListener('change', (s) => { if (s === 'active') refreshLanguage(); });
@@ -30,7 +28,6 @@ export default function RootLayout() {
   );
 }
 
-/** Chooses between onboarding and the tabs, keeps the splash up briefly, and surfaces app-wide notices. */
 function Shell() {
   const t = useTheme();
   const runtime = useAppState();
@@ -38,8 +35,6 @@ function Shell() {
   useStoreVersion();
   const noticeVersion = useSyncExternalStore(AppNotice.subscribe, AppNotice.getSnapshot);
 
-  // The splash plays its logo animation to the end, even when loading is instant, so it reads as a deliberate
-  // brand moment. A hard cap keeps a stuck animation from ever blocking the app.
   const [animationDone, setAnimationDone] = useState(false);
   useEffect(() => { const id = setTimeout(() => setAnimationDone(true), 3500); return () => clearTimeout(id); }, []);
   const showsSplash = !animationDone || !runtime.ready || account.phase === 'loading';

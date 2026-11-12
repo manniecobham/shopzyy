@@ -6,11 +6,6 @@ import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 import { MESSAGES, normalizeLang, tripSummary, tripTitle, type Lang } from './messages';
 import { TRIP_MAX_GAP_MS, TRIP_QUIET_PERIOD_MS, groupTrips, totalMatchesTrip, tripContaining, type Trip } from './tripLogic';
 
-// Background "someone went shopping" alerts: the server counterpart of the app's ActivityMonitor,
-// for when the app isn't running. One push per trip, sent once the buyer has been quiet for five
-// minutes; a later push for the same trip (more items, or a total) replaces the earlier one.
-// Like the original app, only the device that made the purchase is skipped.
-
 const db = getFirestore();
 const LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
@@ -27,7 +22,6 @@ async function buyerPurchases(householdID: string, buyerKey: string, sinceMs: nu
   return (await q.get()).docs.map(toPurchase);
 }
 
-/** When a purchase is ticked off, check again once the trip has been quiet. */
 export const onPurchaseCreated = onDocumentCreated('households/{householdID}/purchases/{purchaseID}', async (event) => {
   const data = event.data?.data();
   if (!data?.member) return; // buyer unknown: nothing meaningful to announce
@@ -37,7 +31,6 @@ export const onPurchaseCreated = onDocumentCreated('households/{householdID}/pur
   );
 });
 
-/** Runs five minutes after each purchase; only the task for a trip's *latest* purchase announces it. */
 export const sendTripAlert = onTaskDispatched<{ householdID: string; purchaseID: string; purchasedAtMs: number }>(
   { retryConfig: { maxAttempts: 3, minBackoffSeconds: 30 }, rateLimits: { maxConcurrentDispatches: 10 } },
   async (req) => {
@@ -55,7 +48,6 @@ export const sendTripAlert = onTaskDispatched<{ householdID: string; purchaseID:
   },
 );
 
-/** A shopping total arrived or changed: refresh the trip's notification so it shows what it cost. */
 export const onTripTotalWritten = onDocumentWritten('households/{householdID}/tripTotals/{totalID}', async (event) => {
   const data = event.data?.after.data();
   if (!data) return;

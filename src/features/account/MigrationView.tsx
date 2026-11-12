@@ -6,7 +6,6 @@ import { useAccount, useAppState } from '../../runtime/RuntimeProvider';
 import { useTheme } from '../../theme/theme';
 import { t as tr } from '../../i18n';
 
-/** Shown for a moment on the first launch after updating from the original app, while their data is brought across to the new account (worded generically on purpose so it doesn't worry anyone). */
 export function MigrationView() {
   const t = useTheme();
   const runtime = useAppState();

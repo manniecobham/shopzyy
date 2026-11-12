@@ -1,17 +1,11 @@
-// Push notification text in the six supported languages. Pure and dependency-free so it is unit-tested
-// from the app's Jest suite. Each device stores its language beside its push token
-// (users/{uid}/devices/{deviceID}.language); anything unknown falls back to English.
 
 export const LANGS = ['en', 'es', 'fr', 'nl', 'de', 'it'] as const;
 export type Lang = (typeof LANGS)[number];
 
 export interface Messages {
-  /** "{name} went shopping" */
   wentShopping: string;
   itemOne: string;
-  /** "{n} items" */
   itemOther: string;
-  /** "{shown} and {rest} more" */
   andMore: string;
   someone: string;
   anItem: string;
@@ -27,7 +21,6 @@ export const MESSAGES: Record<Lang, Messages> = {
   it: { wentShopping: '{name} è andato/a a fare la spesa', itemOne: '1 articolo', itemOther: '{n} articoli', andMore: '{shown} e altri {rest}', someone: 'Qualcuno', anItem: 'un articolo', sharedHousehold: 'Casa condivisa' },
 };
 
-/** Normalises a stored language ("fr", "fr-CA", undefined) to a supported one. */
 export function normalizeLang(raw: unknown): Lang {
   const code = typeof raw === 'string' ? raw.toLowerCase().split(/[-_]/)[0] : '';
   return (LANGS as readonly string[]).includes(code) ? (code as Lang) : 'en';
@@ -37,7 +30,6 @@ const fill = (text: string, params: Record<string, string | number>) => text.rep
 
 export const tripTitle = (name: string, lang: Lang = 'en') => fill(MESSAGES[lang].wentShopping, { name });
 
-/** "6 items · Milk, Eggs, Bread and 3 more", with the total after it when known. */
 export function tripSummary(names: string[], maxNames = 3, total: string | null = null, lang: Lang = 'en'): string {
   const m = MESSAGES[lang];
   const count = names.length === 1 ? m.itemOne : fill(m.itemOther, { n: names.length });

@@ -3,11 +3,6 @@ import { SymbolView } from 'expo-symbols';
 import { Pressable, type AccessibilityRole, type StyleProp, type ViewStyle } from 'react-native';
 import { useTheme } from '../theme/theme';
 
-/**
- * Every icon in the app, by its SF Symbol name (the same symbols the original iOS app uses), with the
- * Material Symbol that stands in for it on Android. Using SF Symbols means the icons match iOS exactly,
- * including the system's own look on iOS 26.
- */
 const ICONS = {
   'apple.logo': 'phone_iphone',
   'arrow.triangle.2.circlepath': 'sync',
@@ -61,20 +56,17 @@ const ICONS = {
 } as const;
 
 export type SymbolName = keyof typeof ICONS;
-/** Brand logos aren't SF Symbols; they come from the icon font. */
 type BrandName = 'logo-google';
 
 export function Glyph({ name, size = 22, color, style, onPress, accessibilityLabel, accessibilityRole, hitSlop, weight }: {
   name: SymbolName | BrandName;
   size?: number;
-  /** Defaults to the accent colour. */
   color?: string;
   style?: StyleProp<ViewStyle>;
   onPress?: () => void;
   accessibilityLabel?: string;
   accessibilityRole?: AccessibilityRole;
   hitSlop?: number;
-  /** SF Symbol weight (iOS), e.g. 'semibold' or 'bold'. */
   weight?: 'regular' | 'medium' | 'semibold' | 'bold';
 }) {
   const t = useTheme();

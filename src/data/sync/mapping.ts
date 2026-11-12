@@ -52,7 +52,6 @@ export const tripTotalDoc = (t: TripTotal): DocData => ({
   tripEndedAt: t.tripEndedAt, enteredBy: t.enteredBy, createdAt: t.createdAt,
 });
 
-/** Document id of a member within its household (the person's user key). */
 export const memberKey = (m: HouseholdMember) => m.userRecordName;
 
 // MARK: Document → store (port of CloudRecordStore.apply)
@@ -60,15 +59,9 @@ export const memberKey = (m: HouseholdMember) => m.userRecordName;
 export type ApplyResult = 'applied' | 'missingReferences' | 'ignored';
 
 export interface ApplyContext {
-  /** The signed-in Firebase uid, to decide `isOwnedByMe`. */
   uid: string | null;
 }
 
-/**
- * Writes fetched documents into the DataStore. Never touches sync, so server data can't echo back.
- * Order-independent where possible: references that haven't arrived yet make the result
- * 'missingReferences' so the caller can apply the same document again later.
- */
 export class DocApplier {
   constructor(private readonly store: DataStore, private readonly ctx: ApplyContext) {}
 
@@ -190,7 +183,6 @@ export class DocApplier {
     return 'applied';
   }
 
-  /** Deletes the local model for a document another device deleted. */
   remove(kind: SubCollection, householdID: string, key: string): void {
     const hid = normalizeUUID(householdID);
     const s = this.store;
@@ -203,7 +195,6 @@ export class DocApplier {
     }
   }
 
-  /** Looks up a referenced model; flags the document incomplete when the reference is set but the target hasn't arrived. */
   private resolve<T>(key: string | null, lookup: (k: string) => T | undefined, markIncomplete: () => void): T | null {
     if (key === null) return null;
     const target = lookup(key);

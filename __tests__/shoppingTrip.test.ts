@@ -43,11 +43,11 @@ describe('Shopping totals and prompts', () => {
   };
 
   test('the shopper is asked for the total within seconds, following their pace', () => {
-    expect(trip([]).promptDelay).toBe(30); // one item: a sensible default
-    expect(trip([2, 3, 2]).promptDelay).toBe(15); // quick tick-offs: never under 15 s
-    expect(trip([8, 10, 9]).promptDelay).toBe(27); // three times the typical gap
-    expect(trip([60, 80, 70]).promptDelay).toBe(45); // slow shoppers: never over 45 s
-    expect(trip([5, 600, 5]).promptDelay).toBe(15); // a long pause between aisles isn't pace
+    expect(trip([]).promptDelay).toBe(30);
+    expect(trip([2, 3, 2]).promptDelay).toBe(15);
+    expect(trip([8, 10, 9]).promptDelay).toBe(27);
+    expect(trip([60, 80, 70]).promptDelay).toBe(45);
+    expect(trip([5, 600, 5]).promptDelay).toBe(15);
     const slow = trip([10]);
     expect(slow.promptDelay * 1000).toBeLessThan(TRIP_QUIET_PERIOD_MS);
     expect(slow.promptAt.getTime()).toBe(slow.end.getTime() + slow.promptDelay * 1000);

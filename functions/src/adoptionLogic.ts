@@ -4,13 +4,11 @@ export interface UserDoc { migrationState?: string; appVersion?: string; platfor
 
 const safe = (s: string | undefined) => (s ?? 'unknown').replace(/[^A-Za-z0-9_]/g, '_');
 
-/** Counter keys one user document contributes to. */
 function keysOf(u: UserDoc | undefined): string[] {
   if (!u) return [];
   return ['users', `state.${safe(u.migrationState)}`, `version.${safe(u.appVersion)}`, `platform.${safe(u.platform)}`];
 }
 
-/** How the live counters change when a user document goes from `before` to `after`. */
 export function adoptionDelta(before: UserDoc | undefined, after: UserDoc | undefined): Record<string, number> {
   const delta: Record<string, number> = {};
   for (const k of keysOf(after)) delta[k] = (delta[k] ?? 0) + 1;
@@ -19,7 +17,6 @@ export function adoptionDelta(before: UserDoc | undefined, after: UserDoc | unde
   return delta;
 }
 
-/** Turns dotted keys into the nested object Firestore's merge-set expects: {"state.done": 1} → {state: {done: 1}}. */
 export function nest(flat: Record<string, number>, wrap: (n: number) => unknown): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [dotted, n] of Object.entries(flat)) {
@@ -32,9 +29,7 @@ export function nest(flat: Record<string, number>, wrap: (n: number) => unknown)
 }
 
 export interface ReadinessInput {
-  /** People whose data has been moved to Firebase. */
   migrated: number;
-  /** Developer's estimate of the old app's active users (e.g. from App Store Connect), or null if unset. */
   estimate: number | null;
   firstMigratedAtMs: number | null;
   migratedLast7d: number;
@@ -44,19 +39,13 @@ export interface ReadinessInput {
 export interface Readiness {
   percent: number | null;
   daysSinceFirst: number | null;
-  /** True once it is reasonable to stop shipping the migration code. */
   ready: boolean;
-  /** What is still missing, in plain words. */
   reasons: string[];
 }
 
 export const READY_PERCENT = 99;
 export const READY_DAYS = 90;
 
-/**
- * Drop the migration once nearly everyone has moved AND enough time has passed AND new migrations
- * have dried up: people who skip updates for months are the ones who would lose data.
- */
 export function readiness(i: ReadinessInput): Readiness {
   const percent = i.estimate && i.estimate > 0 ? Math.min(100, Math.round((i.migrated / i.estimate) * 1000) / 10) : null;
   const daysSinceFirst = i.firstMigratedAtMs === null ? null : Math.floor((i.nowMs - i.firstMigratedAtMs) / 86_400_000);

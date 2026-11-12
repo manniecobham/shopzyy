@@ -10,14 +10,11 @@ import type { Household, TripTotal } from '../../models/entities';
 import { useAccount, useRuntime } from '../../runtime/RuntimeProvider';
 import { useTheme } from '../../theme/theme';
 
-/** What the total sheet needs to know about a trip, whether it's brand new or being edited from Activity. */
 export interface TripTotalTarget {
   tripKey: string;
   householdID: string;
   endedAt: Date;
-  /** Identifies this trip as it stands now: skipping hides the banner until more items are ticked off. */
   skipKey: string;
-  /** "6 items · Milk, Eggs, Bread and 3 more", when known. */
   summary: string | null;
   existing: TripTotal | null;
 }
@@ -29,7 +26,6 @@ export const targetForTotal = (total: TripTotal): TripTotalTarget => ({
   tripKey: total.tripKey, householdID: total.householdID, endedAt: total.tripEndedAt, skipKey: total.tripKey, summary: null, existing: total,
 });
 
-/** A slim banner above the add bar, shown once this person's shopping has gone quiet: "Done shopping? Add what it cost." */
 export function TripTotalBanner({ onAdd, onSkip }: { onAdd: () => void; onSkip: () => void }) {
   const t = useTheme();
   return (
@@ -42,7 +38,6 @@ export function TripTotalBanner({ onAdd, onSkip }: { onAdd: () => void; onSkip: 
   );
 }
 
-/** "How much was this shop?": the total and, optionally, the store. */
 export function TripTotalSheet({ target, household, onSkip, onClose }: {
   target: TripTotalTarget; household: Household; onSkip: () => void; onClose: () => void;
 }) {

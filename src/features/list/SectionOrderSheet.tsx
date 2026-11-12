@@ -11,10 +11,6 @@ import { useRuntime } from '../../runtime/RuntimeProvider';
 import { useTheme } from '../../theme/theme';
 import { householdDisplayName } from '../household/HouseholdBackground';
 
-/**
- * Lets the household arrange the list's sections, e.g. to follow the aisles of the store they
- * use. Saved for everyone in the household. (Arrows instead of the iOS drag handles.)
- */
 export function SectionOrderSheet({ household, sections, onClose }: { household: Household; sections: ListSection[]; onClose: () => void }) {
   const t = useTheme();
   const { households } = useRuntime();

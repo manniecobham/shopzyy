@@ -2,7 +2,6 @@ import type { LegacyDefaults } from '../../modules/shopzy-legacy';
 import { normalizeUUID } from '../lib/uuid';
 import { StorageKeys } from '../services/storageKeys';
 
-/** The slice of AppPreferences this needs, so it can be tested without AsyncStorage. */
 export interface PrefsWriter {
   getString(key: string): string | null;
   setString(key: string, value: string | null): void;
@@ -11,15 +10,8 @@ export interface PrefsWriter {
 }
 
 export const LEGACY_APPLIED_KEY = 'shopzy.legacyDefaultsApplied';
-/** Set (and kept) on phones that had the original Swift app, so only they are offered "Import from the old Shopzy app". */
 export const HAD_LEGACY_APP_KEY = 'shopzy.hadLegacyApp';
 
-/**
- * Carries the old app's settings into the new app's preferences, exactly once (the first launch
- * after the update): who they are, their profile, which household was open, notification choices,
- * and this install's device id, so purchases made on this phone before the update are still
- * recognised as "mine". Returns true if anything was applied.
- */
 export function applyLegacyDefaults(prefs: PrefsWriter, d: LegacyDefaults): boolean {
   if (prefs.getString(LEGACY_APPLIED_KEY)) return false;
   prefs.setString(LEGACY_APPLIED_KEY, '1');
@@ -34,7 +26,7 @@ export function applyLegacyDefaults(prefs: PrefsWriter, d: LegacyDefaults): bool
     try {
       const p = JSON.parse(d.profile) as { name?: string; emoji?: string; colorHex?: string };
       if (p.name) prefs.setJSON(StorageKeys.profile, { name: p.name, emoji: p.emoji ?? '🙂', colorHex: p.colorHex ?? '#34C759' });
-    } catch { /* they'll set a profile again */ }
+    } catch {}
   }
   if (d.currentHouseholdID) prefs.setString(StorageKeys.currentHouseholdID, normalizeUUID(d.currentHouseholdID));
   if (d.deviceID) prefs.setString(StorageKeys.deviceID, d.deviceID);

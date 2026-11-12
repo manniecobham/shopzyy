@@ -6,7 +6,6 @@ import { FullScreenLoader } from '../components/LogoAnimation';
 import { useAccount, useAppState, useStoreVersion } from '../runtime/RuntimeProvider';
 import { t } from '../i18n';
 
-/** Walks a person through what Shopzyy needs (welcome → sign in → profile → a household). Mirrors the Swift RootView. */
 export default function Onboarding() {
   const runtime = useAppState();
   const account = useAccount();
@@ -16,7 +15,6 @@ export default function Onboarding() {
     case 'welcome': return <WelcomeView onStart={() => account.completeWelcome()} />;
     case 'signIn': return <SignInView />;
     case 'needsProfile': return <ProfileSetupView />;
-    // Wait for the first households to arrive so a returning person doesn't flash the "create a household" screen.
     case 'ready': return runtime.initialSyncDone ? <HouseholdSetupView /> : <FullScreenLoader message={t('Getting your lists…')} />;
     default: return null;
   }

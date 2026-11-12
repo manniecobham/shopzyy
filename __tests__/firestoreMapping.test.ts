@@ -8,7 +8,6 @@ import { NOW, daysAgo } from './testSupport';
 
 const householdID = uuid();
 
-/** Writes `source` entities through the doc mapping into a fresh store, like another device would. */
 function roundTrip() {
   const source = new DataStore();
   const household = source.insertHousehold(makeHousehold({ id: householdID, name: 'Home', ownerRecordName: '_ada', isOwnedByMe: true }));

@@ -5,10 +5,8 @@ import { CARD_RADIUS, colorFromHex, useTheme } from '../theme/theme';
 
 export type IconName = SymbolName;
 
-/** A grouped-list section like SwiftUI's `Section` inside a `Form`. */
 export function FormSection({ header, footer, children, first }: { header?: string; footer?: ReactNode; children: ReactNode; first?: boolean }) {
   const t = useTheme();
-  // SwiftUI Form spacing: sections sit ~35 pt apart (less when a header takes some of it); the first one hugs the large title.
   const marginTop = first ? (header ? 11 : 0) : header ? 28 : 35;
   return (
     <View style={{ marginTop }}>
@@ -19,7 +17,6 @@ export function FormSection({ header, footer, children, first }: { header?: stri
   );
 }
 
-/** One row in a FormSection; draws the hairline separator between rows. */
 export function FormRow({ children, last, style, onPress, disabled }: {
   children: ReactNode; last?: boolean; style?: StyleProp<ViewStyle>; onPress?: () => void; disabled?: boolean;
 }) {
@@ -36,7 +33,6 @@ export function FormRow({ children, last, style, onPress, disabled }: {
   );
 }
 
-/** `.borderedProminent` button: filled accent, white label. */
 export function ProminentButton({ title, onPress, disabled, busy, style }: {
   title: string; onPress: () => void; disabled?: boolean; busy?: boolean; style?: StyleProp<ViewStyle>;
 }) {
@@ -54,7 +50,6 @@ export function ProminentButton({ title, onPress, disabled, busy, style }: {
   );
 }
 
-/** Plain text button in the accent colour. */
 export function TextButton({ title, onPress, destructive, disabled, style, color }: {
   title: string; onPress: () => void; destructive?: boolean; disabled?: boolean; style?: StyleProp<TextStyle>; color?: string;
 }) {
@@ -68,7 +63,6 @@ export function TextButton({ title, onPress, destructive, disabled, style, color
   );
 }
 
-/** The member's emoji on a tinted circle. */
 export function MemberBadge({ emoji, colorHex, size = 28 }: { emoji?: string | null; colorHex?: string | null; size?: number }) {
   return (
     <View style={{ width: size, height: size, borderRadius: size / 2, alignItems: 'center', justifyContent: 'center', backgroundColor: colorFromHex(colorHex ?? '#8E8E93', 0.22) }}>

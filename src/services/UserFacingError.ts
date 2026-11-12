@@ -2,7 +2,6 @@ import { Observable } from '../lib/observable';
 import { t } from '../i18n';
 import { isHouseholdGone } from './ports';
 
-/** Thrown when someone tries to change a household that was deleted, or that they were removed from. */
 export class HouseholdUnavailableError extends Error {
   readonly householdGone = true;
   constructor(message = t('This household no longer exists. It may have been deleted by its owner.')) {
@@ -13,10 +12,6 @@ export class HouseholdUnavailableError extends Error {
 
 const codeOf = (e: unknown): string => String((e as { code?: unknown } | null)?.code ?? '').replace(/^(auth|functions|firestore)\//, '');
 
-/**
- * Turns technical errors into short, plain messages for people. The technical details go to
- * AppLog instead of the screen.
- */
 export const UserFacingError = {
   message(error: unknown): string {
     if (error instanceof HouseholdUnavailableError) return error.message;
@@ -56,10 +51,6 @@ export const UserFacingError = {
   isHouseholdGone,
 };
 
-/**
- * A one-off message shown by the root screen, for events that outlive the screen that caused
- * them, e.g. "This household was deleted by its owner."
- */
 export interface NoticeMessage { id: number; title: string; detail: string }
 
 class AppNoticeCenter extends Observable {

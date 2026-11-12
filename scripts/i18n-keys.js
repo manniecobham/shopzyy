@@ -1,6 +1,3 @@
-// Lists every translatable English string (t / tn / tx calls) and reports which languages miss it.
-//   node scripts/i18n-keys.js            -> summary
-//   node scripts/i18n-keys.js --json     -> keys as JSON (for translators)
 const fs = require('node:fs');
 const path = require('node:path');
 

@@ -5,10 +5,6 @@ import type { Preferences } from './ports';
 import { StorageKeys } from './storageKeys';
 export { StorageKeys };
 
-/**
- * Per-person values the Swift app kept in UserDefaults. Reads are synchronous from a
- * memory cache filled once at launch (`load`), writes go through to AsyncStorage.
- */
 export class AppPreferences implements Preferences {
   private cache = new Map<string, string>();
   private loaded = false;

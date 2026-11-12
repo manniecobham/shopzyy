@@ -24,11 +24,6 @@ import { getFunctions, httpsCallable } from '@react-native-firebase/functions';
 import { StorageKeys } from '../services/AppPreferences';
 import { AppNotice, UserFacingError } from '../services/UserFacingError';
 
-/**
- * Composition root: owns the store, preferences, account and sync, and starts/stops sync as
- * the person signs in and out (the role ShopzyApp + RootView played in the Swift app).
- */
-/** Returned by `deleteMyData` when the person closed the Apple/Google sheet: nothing was deleted and no message is needed. */
 export const DELETE_CANCELLED = 'cancelled';
 
 export class AppRuntime extends Observable {
@@ -38,11 +33,9 @@ export class AppRuntime extends Observable {
   readonly env: ServiceEnv;
   readonly households: HouseholdService;
   syncStatus: SyncStatus = { state: 'idle' };
-  /** The one-time move from the original iOS app's data. Sync waits until it is done. */
   migration: { state: 'idle' | 'running' | 'failed' | 'done'; message: string | null; progress: { done: number; total: number } | null } =
     { state: 'idle', message: null, progress: null };
   private migrationUID: string | null = null;
-  /** False from the moment sync starts until the first households arrive (or a short timeout), so we show a loader instead of flashing "create a household". */
   initialSyncDone = false;
   private initialSyncTimer: ReturnType<typeof setTimeout> | null = null;
   ready = false;
@@ -61,7 +54,6 @@ export class AppRuntime extends Observable {
     this.account.subscribe(() => this.onAccountChanged());
   }
 
-  /** Loads preferences, then starts watching the sign-in state. */
   async start(): Promise<void> {
     await this.prefs.load();
     if (isDemo) {
@@ -75,10 +67,7 @@ export class AppRuntime extends Observable {
       return;
     }
     await AppLog.load();
-    // First launch after updating from the original iOS app: adopt who they were and their settings,
-    // so they skip the welcome and profile screens and only need to sign in.
     if (Platform.OS === 'ios') {
-      // Only when this build can actually read them: otherwise "nothing found" would be remembered forever.
       if (ShopzyLegacy.isAvailable) {
         const legacy = await ShopzyLegacy.readDefaults().catch(() => ({}));
         applyLegacyDefaults(this.prefs, legacy);
@@ -96,7 +85,6 @@ export class AppRuntime extends Observable {
     this.account.start();
     this.ready = true;
     this.changed();
-    // Whenever the app comes back to the foreground: catch up on trips, reminders and queued error reports.
     AppState.addEventListener('change', (state) => {
       if (state !== 'active') return;
       this.account.refresh();
@@ -107,7 +95,6 @@ export class AppRuntime extends Observable {
     });
   }
 
-  /** Wired here (not in a screen) so "Add to list" works even when a notification action wakes the app in the background. */
   private wireNotifications(): void {
     const n = this.notifications;
     void n.configure();
@@ -118,7 +105,6 @@ export class AppRuntime extends Observable {
 
   scanActivity(): void { scanForRemotePurchases(this.env, this.prefs); }
 
-  /** Restarts the listeners, e.g. from "Sync now" in Settings. */
   restartSync(): void {
     const uid = this.account.uid;
     this.stopSync();
@@ -126,12 +112,7 @@ export class AppRuntime extends Observable {
     this.changed();
   }
 
-  /**
-   * "Delete my data": owned households are deleted for everyone, joined ones are left, the account
-   * is removed and the app returns to the welcome screen.
-   */
   async deleteMyData(password?: string): Promise<string | null> {
-    // Confirm it's them first, so a stale sign-in can never leave the account behind after the data is gone.
     try {
       await this.account.reauthenticate(password);
     } catch (error) {
@@ -143,7 +124,7 @@ export class AppRuntime extends Observable {
       const uid = this.account.uid;
       await this.households.deleteMyData();
       await this.push.unregister();
-      if (uid) { try { await deleteDoc(doc(getFirestore(), 'users', uid)); } catch { /* the account is deleted next either way */ } }
+      if (uid) { try { await deleteDoc(doc(getFirestore(), 'users', uid)); } catch {} }
       await this.account.deleteAccount();
       this.account.reset();
       this.prefs.currentHouseholdID = null;
@@ -156,7 +137,6 @@ export class AppRuntime extends Observable {
 
   // MARK: Selection and invites
 
-  /** The household shown now: the saved choice if it still exists, else the first one. */
   get currentHousehold() {
     const all = this.store.allHouseholds();
     return all.find((h) => h.id === this.prefs.currentHouseholdID) ?? all[0] ?? null;
@@ -167,7 +147,6 @@ export class AppRuntime extends Observable {
     this.changed();
   }
 
-  /** Joins the household behind an invite code. Resolves to an error message, or null on success. */
   async joinHousehold(code: string): Promise<string | null> {
     try {
       const result = await httpsCallable<{ code: string }, { householdID: string }>(getFunctions(), 'joinHousehold')({ code: code.trim() });
@@ -179,7 +158,6 @@ export class AppRuntime extends Observable {
     }
   }
 
-  /** Asks for a shareable invite code for a household this person belongs to. */
   async createInvite(householdID: string): Promise<{ code: string } | { error: string }> {
     try {
       const result = await httpsCallable<{ householdID: string }, { code: string }>(getFunctions(), 'createInvite')({ householdID });
@@ -189,7 +167,6 @@ export class AppRuntime extends Observable {
     }
   }
 
-  /** An invite link opened before the person was signed in is kept and redeemed once they're ready. */
   async handleInviteLink(code: string): Promise<string | null> {
     if (this.account.phase === 'ready') return this.joinHousehold(code);
     this.prefs.setString(StorageKeys.pendingInvite, code);
@@ -209,7 +186,6 @@ export class AppRuntime extends Observable {
     return new ShoppingListService(this.env, householdID);
   }
 
-  /** Sync starts as soon as someone is signed in, before the profile is set, so a person setting up a new device sees their households arrive. */
   private onAccountChanged(): void {
     if (isDemo) { this.changed(); return; }
     const { phase, uid } = this.account;
@@ -245,11 +221,9 @@ export class AppRuntime extends Observable {
     this.changed();
   }
 
-  /** Moves the old app's data to Firebase (iPhone only). Safe to retry. */
   async runMigration(uid: string, options: { force?: boolean } = {}): Promise<MigrationResult | null> {
     if (this.migration.state === 'running') return null;
     const marker = `shopzy.migrated.${uid}`;
-    // The migration can be switched off remotely (config/app.migrationEnabled) once it is no longer wanted.
     if (!options.force && (Platform.OS !== 'ios' || this.prefs.getString(marker) || !this.appConfig.migrationEnabled)) {
       this.migration = { state: 'done', message: null, progress: null };
       this.onAccountChanged();
@@ -265,7 +239,6 @@ export class AppRuntime extends Observable {
       // Keep the identity the data is filed under (the old CloudKit user key).
       if (result.userRecordName && result.userRecordName !== this.account.userRecordName) this.account.setUserRecordName(result.userRecordName);
       if (result.state === 'done' && result.households > 0) this.prefs.setString(HAD_LEGACY_APP_KEY, '1');
-      // Remember only results we can trust: a "nothing to move" from a build without the reader must be re-checked next launch.
       if (result.state !== 'none' || result.reliable) this.prefs.setString(marker, '1');
       this.migration = { state: 'done', message: null, progress: null };
       this.onAccountChanged();
@@ -278,7 +251,6 @@ export class AppRuntime extends Observable {
     }
   }
 
-  /** Settings → "Import from the old Shopzy app": runs the migration again, ignoring what was recorded before. */
   async importFromOldApp(): Promise<MigrationResult | null> {
     const uid = this.account.uid;
     if (!uid) return null;
@@ -287,7 +259,6 @@ export class AppRuntime extends Observable {
 
   private versionReportedFor: string | null = null;
 
-  /** Once per launch: record which app version and platform this person is on (feeds the adoption counters). */
   private reportVersion(uid: string): void {
     if (this.versionReportedFor === uid) return;
     this.versionReportedFor = uid;

@@ -6,7 +6,6 @@ import { Sheet } from '../../components/Sheet';
 import { useTheme } from '../../theme/theme';
 import { FocusedImage } from './HouseholdBackground';
 
-/** Shown right after a photo is picked: choose which part of it stays visible on the list before it's applied. */
 export function PhotoPositionSheet({ base64, onUse, onCancel }: { base64: string; onUse: (x: number, y: number) => void; onCancel: () => void }) {
   const th = useTheme();
   const uri = `data:image/jpeg;base64,${base64}`;
@@ -18,8 +17,6 @@ export function PhotoPositionSheet({ base64, onUse, onCancel }: { base64: string
   const start = useRef(focus);
   useMemo(() => { Image.getSize(uri, (w, h) => { size.current = { w, h }; }, () => {}); }, [uri]);
 
-  // Dragging moves the photo with the finger, so the focal point moves the opposite way,
-  // in proportion to how much of the photo is cropped off.
   const pan = useMemo(() => PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onPanResponderGrant: () => { start.current = focusRef.current; },

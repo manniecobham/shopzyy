@@ -5,7 +5,6 @@ import { ProminentButton } from '../../components/ui';
 import { useAppState } from '../../runtime/RuntimeProvider';
 import { useTheme } from '../../theme/theme';
 
-/** Blocks the app when this build is older than the minimum version you set in `config/app`. */
 export function UpdateRequiredView() {
   const th = useTheme();
   const { appConfig } = useAppState();

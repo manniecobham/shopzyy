@@ -5,7 +5,6 @@ export interface ParsedItem {
   name: string;
   quantity: number;
   unit: MeasurementUnit | null;
-  /** False when no number was typed, so callers can fall back to the item's usual quantity. */
   hasExplicitQuantity: boolean;
 }
 
@@ -23,7 +22,6 @@ function number(text: string): number | null {
   return Number.isFinite(value) && value > 0 ? value : null;
 }
 
-/** "3", "1.5", "500g", "2kg", "2x", "two", "a" */
 function leadingQuantity(token: string): { value: number; unit: MeasurementUnit | null } | null {
   const lower = token.toLowerCase();
   if (Object.prototype.hasOwnProperty.call(NUMBER_WORDS, lower)) return { value: NUMBER_WORDS[lower], unit: null };
@@ -39,7 +37,6 @@ function leadingQuantity(token: string): { value: number; unit: MeasurementUnit 
   return unit ? { value, unit } : null;
 }
 
-/** "x3", "×3", "3x" as the last word, or "x 3" as the last two. Mutates `words`. */
 function trailingMultiplier(words: string[]): number | null {
   if (words.length <= 1) return null;
   const last = words[words.length - 1].toLowerCase();
@@ -60,12 +57,6 @@ function trailingMultiplier(words: string[]): number | null {
   return null;
 }
 
-/**
- * Turns free text into structured items:
- *   "2 kg chicken breast, milk x2; a dozen eggs" → [2 kg Chicken breast] [2 × Milk] [12 × Eggs]
- * Items are separated by commas, semicolons, new lines or "+". "and" is deliberately
- * not a separator, so "mac and cheese" stays one item.
- */
 export const SmartItemParser = {
   parse(input: string): ParsedItem[] {
     return input

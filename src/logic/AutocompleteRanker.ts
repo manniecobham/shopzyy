@@ -7,10 +7,6 @@ export interface AutocompleteCandidate {
   isOnList: boolean;
 }
 
-/**
- * Ranks known items against a partial query: exact > prefix > word-prefix > substring,
- * nudged up by how often the household buys the item and down if already on the list.
- */
 export function rankAutocomplete(query: string, candidates: AutocompleteCandidate[], limit = 6): AutocompleteCandidate[] {
   const needle = fold(query.trim());
   if (!needle) return [];

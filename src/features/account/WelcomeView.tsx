@@ -4,7 +4,6 @@ import { Icon, ProminentButton, type IconName } from '../../components/ui';
 import { Brand, useTheme } from '../../theme/theme';
 import { t as tr } from '../../i18n';
 
-/** First launch: what Shopzyy is, before signing in and setting up a profile. */
 export function WelcomeView({ onStart }: { onStart: () => void }) {
   const t = useTheme();
   return (

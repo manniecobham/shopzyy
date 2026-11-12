@@ -8,7 +8,6 @@ import { useAccount, useRuntime } from '../../runtime/RuntimeProvider';
 import { EditProfileSheet } from './EditProfileSheet';
 import { SettingsSheet } from './SettingsSheet';
 
-/** The person's avatar in the header. Tapping it opens a menu to edit their profile, open settings or delete their data. */
 export function ProfileMenu({ member }: { member: HouseholdMember | null }) {
   const account = useAccount();
   const runtime = useRuntime();

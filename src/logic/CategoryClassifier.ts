@@ -53,15 +53,10 @@ const KEYWORDS: [ItemCategory, string[]][] = [
   ['pets', ['dog food', 'cat food', 'cat litter', 'litter', 'pet food', 'kibble']],
 ];
 
-/** Longest keyword first (stable), so "peanut butter" beats "butter" and "ice cream" beats "cream". */
 const RANKED: [string, ItemCategory][] = KEYWORDS.flatMap(([category, words]) =>
   words.map((w): [string, ItemCategory] => [NameNormalizer.key(w), category]),
 ).sort((a, b) => b[0].length - a[0].length);
 
-/**
- * Guesses an aisle for a new item from keywords. Only the cold-start guess: once a
- * user corrects an item's category the correction lives on the item.
- */
 export const CategoryClassifier = {
   classify(name: string): ItemCategory {
     const padded = ` ${NameNormalizer.key(name)} `;

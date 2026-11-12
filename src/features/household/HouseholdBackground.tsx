@@ -10,14 +10,12 @@ import { colorFromHex, useTheme } from '../../theme/theme';
 export const householdDisplayName = (h: Household) => (h.name === '' ? t('Shared household') : h.name);
 const imageUri = (h: Household) => (h.customImage ? `data:image/jpeg;base64,${h.customImage}` : null);
 
-/** The household's chosen photo, or its mood template. */
 export function HouseholdBackground({ household, emojiSize = 44 }: { household: Household; emojiSize?: number | null }) {
   const uri = imageUri(household);
   if (uri) return <FocusedImage uri={uri} focusX={household.imageFocusX} focusY={household.imageFocusY} />;
   return <HouseholdThemeArt theme={household.themeRaw} emojiSize={emojiSize} />;
 }
 
-/** A photo filled into its container, anchored at a focal point (0…1 from left / top). */
 export function FocusedImage({ uri, focusX = 0.5, focusY = 0.5 }: { uri: string; focusX?: number; focusY?: number }) {
   const [box, setBox] = useState<{ w: number; h: number } | null>(null);
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
@@ -37,7 +35,6 @@ export function FocusedImage({ uri, focusX = 0.5, focusY = 0.5 }: { uri: string;
   return <View style={[StyleSheet.absoluteFill, { overflow: 'hidden' }]} onLayout={(e) => setBox({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}>{frame}</View>;
 }
 
-/** A mood template: gradient plus a large, softly tilted emoji. */
 export function HouseholdThemeArt({ theme, emojiSize = 44 }: { theme: Household['themeRaw']; emojiSize?: number | null }) {
   const th = useTheme();
   const colors = themeColors(theme);
@@ -52,7 +49,6 @@ export function HouseholdThemeArt({ theme, emojiSize = 44 }: { theme: Household[
   );
 }
 
-/** Fills the screen behind the shopping list with the household's mood or photo, softened so rows stay readable. */
 export function ListBackdrop({ household }: { household: Household }) {
   const th = useTheme();
   const washed = household.customImage !== null || household.themeRaw !== 'none';
@@ -82,7 +78,6 @@ export function ListSectionHeader({ title, count, collapsed, onToggle }: { title
   );
 }
 
-/** A small round preview of the household background, for the switcher. */
 export function HouseholdThumbnail({ household, size = 26 }: { household: Household; size?: number }) {
   const th = useTheme();
   return (

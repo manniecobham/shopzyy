@@ -11,7 +11,6 @@ import type { GroceryItem } from '../../models/entities';
 import { getRecipient, getRoomChoice, itemQuantityText, lastPurchase, recipientName } from '../../models/itemOps';
 import { CARD_RADIUS, useTheme } from '../../theme/theme';
 
-/** One item on the list: check circle, name and amount, who it's for, and who added it. Swipe right to buy, left to remove. */
 export function ItemRow({ item, first, last, onBought, onEdit, onRemove }: {
   item: GroceryItem; first: boolean; last: boolean; onBought: () => void; onEdit: () => void; onRemove: () => void;
 }) {

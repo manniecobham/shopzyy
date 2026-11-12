@@ -16,10 +16,6 @@ import { Brand, useTheme } from '../../theme/theme';
 import { DiagnosticsSheet } from './DiagnosticsSheet';
 import { EditProfileSheet } from './EditProfileSheet';
 
-/**
- * App-level settings: things that belong to this person and this device, as opposed to the
- * household's own settings (name, background, members), which stay on the Household tab.
- */
 export function SettingsSheet({ onClose }: { onClose: () => void }) {
   const th = useTheme();
   const runtime = useAppState();
@@ -47,7 +43,6 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
     if (key === StorageKeys.notifyPurchases) void runtime.push.updateAlerts();
   };
 
-  // Deleting the account needs a fresh sign-in: Apple and Google show their own sheet, email accounts type their password.
   const runDelete = async (confirmPassword?: string) => {
     setDeleting(true);
     const error = await runtime.deleteMyData(confirmPassword);
@@ -88,7 +83,6 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
     }],
   );
 
-  /** iOS and Android 13+ keep the per-app language in system settings; older Android picks it in-app. */
   const openLanguage = () => {
     if (!hasSystemAppLanguage) { setPicking(true); return; }
     if (Platform.OS === 'android') {
@@ -106,7 +100,6 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
   const syncColor = sync.state === 'idle' ? th.green : sync.state === 'syncing' ? th.secondaryLabel : th.orange;
   const version = Constants.expoConfig?.version ?? '1.0';
   const appEnv = (Constants.expoConfig?.extra?.appEnv as string | undefined) ?? 'development';
-  // Only people who had the original Swift app are offered the import (everyone else has nothing to import).
   const hadOldApp = Platform.OS === 'ios' && !isDemo && prefs.getString(HAD_LEGACY_APP_KEY) === '1';
 
   return (

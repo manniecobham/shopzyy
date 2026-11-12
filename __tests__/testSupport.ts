@@ -1,7 +1,6 @@
 import { SuggestionEngine, type PurchaseHistory } from '../src/logic/SuggestionEngine';
 import { uuid } from '../src/lib/uuid';
 
-/** A fixed Wednesday noon (UTC), so tests never depend on the real date. */
 export const NOW = new Date(Date.UTC(2026, 2, 18, 12));
 
 export const daysAgo = (days: number) => new Date(NOW.getTime() - days * 86_400_000);

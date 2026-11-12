@@ -53,7 +53,6 @@ export function HouseholdScreen({ household }: { household: Household }) {
     const asset = result.assets[0];
     setPreparingPhoto(true);
     try {
-    // Shrink to banner size before it's stored and synced, so every member downloads ~150 KB instead of a full-resolution picture.
     let ctx = ImageManipulator.ImageManipulator.manipulate(asset.uri);
     if (asset.width > BANNER_WIDTH) ctx = ctx.resize({ width: BANNER_WIDTH });
     const image = await (await ctx.renderAsync()).saveAsync({ format: ImageManipulator.SaveFormat.JPEG, compress: 0.75, base64: true });
@@ -122,7 +121,6 @@ export function HouseholdScreen({ household }: { household: Household }) {
         </FormSection>
 
         <FormSection header={t('Background')} footer={t('Pick a mood or use your own photo. Everyone in the household sees it at the top of the list.')}>
-          {/* Three rows, like the Swift Form: the preview, the theme grid and the photo actions, each with its own separator. */}
           <FormRow style={{ paddingHorizontal: 16, paddingVertical: 8 }}><View style={[s.preview, { flex: 1 }]}><HouseholdBackground household={household} /></View></FormRow>
           <FormRow style={{ paddingHorizontal: 20, paddingVertical: 18 }}>
             <View style={[s.grid, { flex: 1 }]}>

@@ -5,7 +5,6 @@ import { purchaseItemName, purchaseMemberName } from '../models/itemOps';
 import { StorageKeys } from './storageKeys';
 import type { ServiceEnv } from './ports';
 
-/** Added to a trip's purchase count in `announcedTrips` once its total is in the summary. */
 const TOTAL_MARKER = 100_000;
 const LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
@@ -14,15 +13,6 @@ interface PrefsLike {
   setJSON(key: string, value: unknown): void;
 }
 
-/**
- * Tells people when someone else in their household went shopping. Rather than one alert per
- * item, purchases from other devices are grouped into shopping trips; each trip gets a single
- * notification, delivered once the buyer has stopped ticking items off for a while. If more
- * purchases arrive later, the notification is replaced with the updated summary.
- *
- * Runs when the app becomes active and whenever the sync applies changes from the server. Only
- * recent purchases count, so the first sync on a new phone doesn't replay history.
- */
 export function scanForRemotePurchases(env: ServiceEnv, prefs: PrefsLike, now: Date = new Date()): void {
   const cutoff = now.getTime() - LOOKBACK_MS;
   const recent = env.store.allPurchases().filter((p) => p.purchasedAt.getTime() > cutoff && p.originDeviceID !== env.prefs.deviceID);
@@ -37,8 +27,6 @@ export function scanForRemotePurchases(env: ServiceEnv, prefs: PrefsLike, now: D
   })));
   const totals = env.store.allTripTotals();
 
-  // Trip id → what was already announced (purchase count, plus a marker once the total is included),
-  // so an unchanged trip isn't announced again on every scan, but is refreshed when its total arrives.
   const announced = prefs.getJSON<Record<string, number>>(StorageKeys.announcedTrips) ?? {};
   for (const trip of trips) {
     const total = totals.find((t) => totalMatchesTrip(t, trip)) ?? null;

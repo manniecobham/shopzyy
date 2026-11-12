@@ -4,7 +4,6 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { suggestionReason, suggestionShortReason, type Suggestion } from '../../logic/SuggestionEngine';
 import { useTheme } from '../../theme/theme';
 
-/** Horizontal one-tap shortcuts for items the household is likely to need. */
 export function SuggestionStrip({ suggestions, onAdd }: { suggestions: Suggestion[]; onAdd: (s: Suggestion) => void }) {
   const t = useTheme();
   return (

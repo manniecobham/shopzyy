@@ -11,7 +11,6 @@ import type { OptionKind } from '../../models/entities';
 import { useRuntime, useStoreVersion } from '../../runtime/RuntimeProvider';
 import { useTheme } from '../../theme/theme';
 
-/** Lists the household's own categories and rooms. Built-in ones are always available and aren't shown here. */
 export function CustomOptionsSheet({ householdID, onClose }: { householdID: string; onClose: () => void }) {
   const th = useTheme();
   const runtime = useRuntime();

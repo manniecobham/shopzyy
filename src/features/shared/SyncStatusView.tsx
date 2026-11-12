@@ -4,10 +4,6 @@ import { Text, View } from 'react-native';
 import { useAppState } from '../../runtime/RuntimeProvider';
 import { useTheme } from '../../theme/theme';
 
-/**
- * A quiet notice when changes aren't reaching the server, so nobody wonders why the rest of
- * the household can't see what they just added. Shows nothing while sync is working normally.
- */
 export function SyncStatusView() {
   const th = useTheme();
   const { syncStatus } = useAppState();

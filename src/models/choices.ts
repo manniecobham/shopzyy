@@ -1,7 +1,6 @@
 import { ITEM_CATEGORIES, HOUSE_ROOMS, aisleOrder, categoryEmoji, categoryTitle, roomEmoji, roomTitle, type HouseRoom, type ItemCategory } from './enums';
 import type { CustomOption } from './entities';
 
-/** A built-in value or one the household created. Selection and list-section key. */
 export type OptionChoice<B> = { kind: 'builtIn'; value: B } | { kind: 'custom'; option: CustomOption };
 export type CategoryChoice = OptionChoice<ItemCategory>;
 export type RoomChoice = OptionChoice<HouseRoom>;
@@ -26,7 +25,6 @@ export const roomChoiceTitle = (c: RoomChoice) => (c.kind === 'builtIn' ? roomTi
 export const roomChoiceEmoji = (c: RoomChoice) => (c.kind === 'builtIn' ? roomEmoji(c.value) : CUSTOM_EMOJI.room);
 export const roomChoiceLabel = (c: RoomChoice) => `${roomChoiceEmoji(c)}  ${roomChoiceTitle(c)}`;
 
-/** Store-walking order: built-in aisles first, the household's own next, "Other" last. */
 export function categorySortRank(c: CategoryChoice): number {
   if (c.kind === 'custom') return ITEM_CATEGORIES.length - 1;
   return c.value === 'other' ? ITEM_CATEGORIES.length : aisleOrder(c.value);

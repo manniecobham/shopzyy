@@ -1,4 +1,3 @@
-/** Same keys as the Swift app's UserDefaults. */
 export const StorageKeys = {
   currentHouseholdID: 'shopzy.currentHouseholdID',
   userRecordName: 'shopzy.userRecordName',

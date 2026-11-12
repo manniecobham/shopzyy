@@ -1,6 +1,5 @@
 import { requireOptionalNativeModule } from 'expo-modules-core';
 
-/** Raw rows as read from the old Swift app's store. See `LegacyStoreReader.swift` for what is decoded natively. */
 export type LegacyRow = Record<string, string | number | string[] | null>;
 export interface LegacyStore {
   households: LegacyRow[];
@@ -14,7 +13,6 @@ export interface LegacyDefaults {
   userRecordName?: string;
   currentHouseholdID?: string;
   deviceID?: string;
-  /** JSON of the old `UserProfile`. */
   profile?: string;
   hasSeenWelcome?: boolean;
   notifyPurchases?: boolean;
@@ -32,7 +30,6 @@ interface Native {
 const native = requireOptionalNativeModule<Native>('ShopzyLegacy');
 
 export const ShopzyLegacy = {
-  /** False on Android, and on an iOS build that was made without this native module. */
   isAvailable: native !== null,
   readStore: async (): Promise<LegacyStore | null> => (native ? native.readStore() : null),
   readDefaults: async (): Promise<LegacyDefaults> => (native ? native.readDefaults() : {}),

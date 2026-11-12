@@ -17,7 +17,6 @@ import { HouseholdSwitcher } from '../household/HouseholdSwitcher';
 import { TripTotalSheet, targetForTotal, targetForTrip, type TripTotalTarget } from '../list/TripTotal';
 import { tripSkipKey } from '../../logic/tripTotals';
 
-/** Shopping history: one row per trip, with who went, what it cost and, when opened, what was bought. Starts with the latest few trips; the filter menu widens it. */
 export function ActivityScreen({ household }: { household: Household }) {
   const th = useTheme();
   const runtime = useRuntime();

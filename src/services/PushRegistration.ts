@@ -6,11 +6,6 @@ import { deviceLanguageField } from './DeviceLanguage';
 import { StorageKeys } from './storageKeys';
 import { AppLog } from './AppLog';
 
-/**
- * Lets the server reach this phone when the app isn't running (background "Ada went shopping"
- * alerts). Each install stores its push token at `users/{uid}/devices/{deviceID}`; the alert
- * functions read those. `alerts` mirrors the "Shopping trip alerts" switch in Settings.
- */
 export class PushRegistration {
   private uid: string | null = null;
   private unsubscribe: (() => void) | null = null;
@@ -20,7 +15,6 @@ export class PushRegistration {
   private get alertsEnabled() { return this.prefs.getBool(StorageKeys.notifyPurchases, true); }
   private ref(uid: string) { return doc(getFirestore(), 'users', uid, 'devices', this.prefs.deviceID); }
 
-  /** Registers this install for `uid`. Safe to call repeatedly. */
   async register(uid: string): Promise<void> {
     if (this.uid === uid) return;
     this.stop();
@@ -37,7 +31,6 @@ export class PushRegistration {
     }
   }
 
-  /** Called when the "Shopping trip alerts" switch changes. */
   async updateAlerts(): Promise<void> {
     const uid = this.uid;
     if (!uid) return;
@@ -48,7 +41,6 @@ export class PushRegistration {
     }
   }
 
-  /** Signing out: stop sending alerts for this person to this phone. */
   async unregister(): Promise<void> {
     const uid = this.uid;
     this.stop();
@@ -56,7 +48,7 @@ export class PushRegistration {
     try {
       await deleteDoc(this.ref(uid));
       await deleteToken(getMessaging());
-    } catch { /* offline: the server drops the token the first time a send fails */ }
+    } catch {}
   }
 
   private stop(): void {

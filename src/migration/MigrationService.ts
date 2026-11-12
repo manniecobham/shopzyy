@@ -4,19 +4,13 @@ import { parseLegacyStore, toWire, type DocEntry, type LegacyHouseholdSnapshot }
 export interface MigrationDeps {
   readStore(): Promise<LegacyStore | null>;
   readDefaults(): Promise<LegacyDefaults>;
-  /** The person's `users/{uid}` document, or null. */
   getUserDoc(uid: string): Promise<{ migrationState?: string; legacyUserKey?: string } | null>;
   setUserDoc(uid: string, data: Record<string, unknown>): Promise<void>;
-  /** `claimLegacyHousehold` Cloud Function. */
   claim(payload: Record<string, unknown>): Promise<{ created: boolean }>;
-  /** `importLegacyRecords` Cloud Function. */
   importRecords(payload: { householdID: string; kind: 'items' | 'purchases' | 'tripTotals'; docs: unknown[] }): Promise<{ created: number }>;
-  /** False when this build has no native reader, so "no old data" can't be trusted. */
   legacyAvailable: boolean;
-  /** A plain-language line for Settings → Diagnostics. */
   log?(message: string): void;
   appVersion: string;
-  /** Which Firebase project this build talks to: "development" or "production". */
   environment: string;
   now(): Date;
 }
@@ -24,15 +18,12 @@ export interface MigrationDeps {
 export type MigrationState = 'alreadyDone' | 'none' | 'done';
 
 export interface MigrationOptions {
-  /** Re-run even if this person is already marked done. Safe: the server only ever creates what is missing. */
   force?: boolean;
 }
 
 export interface MigrationResult {
   state: MigrationState;
-  /** False when "nothing to move" can't be trusted (no native reader in this build), so it must not be remembered. */
   reliable: boolean;
-  /** The person's old CloudKit user key, which stays their key inside the migrated data. */
   userRecordName: string | null;
   defaults: LegacyDefaults;
   households: number;
@@ -43,13 +34,6 @@ export interface MigrationProgress { done: number; total: number }
 
 const CHUNK = { items: 400, purchases: 500, tripTotals: 400 } as const;
 
-/**
- * One-time move of a person's data from the original iOS app (CloudKit, mirrored in the local
- * SwiftData store) to Firebase. Runs on the first launch after the update, once the person has
- * signed in. Safe to repeat: the server only ever creates what is missing, so an interrupted run
- * resumes where it stopped and a late run can never overwrite newer data. The old data is only
- * read, never changed or deleted.
- */
 export class MigrationService {
   constructor(private readonly deps: MigrationDeps) {}
 
@@ -74,8 +58,6 @@ export class MigrationService {
       return { state: 'alreadyDone', reliable: true, userRecordName: existing.legacyUserKey ?? userKey, defaults: {}, households: 0, records: 0 };
     }
 
-    // Nothing on this phone to move. A "none" recorded earlier (e.g. by a build that couldn't read the old data) is
-    // NOT final when old data is present, which is why this check comes before honouring it.
     if (!hasLegacy) {
       if (!existing && reliable) {
         await this.deps.setUserDoc(uid, { migrationState: 'none', checkedAt: this.deps.now(), appVersion: this.deps.appVersion });
@@ -99,7 +81,6 @@ export class MigrationService {
 
     await this.deps.setUserDoc(uid, {
       migrationState: 'done', migratedAt: this.deps.now(), appVersion: this.deps.appVersion, legacyUserKey: userKey, households: moved,
-      // Which backend received it. The old app's data is whichever CloudKit environment that build used (Xcode = Development, TestFlight/App Store = Production).
       migratedInto: this.deps.environment,
     });
     this.deps.log?.(`Moved ${moved} household(s) to your account.`);

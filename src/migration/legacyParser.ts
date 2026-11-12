@@ -9,7 +9,6 @@ import type { CustomOption, GroceryItem, Household, HouseholdMember } from '../m
 import { makeHousehold, makeItem, makeMember, makeOption, makePurchase, makeTripTotal } from '../models/factories';
 import type { LegacyRow, LegacyStore } from '../../modules/shopzy-legacy';
 
-/** Seconds between the Unix epoch and Core Data's reference date (2001-01-01 UTC). */
 const CORE_DATA_EPOCH = 978_307_200;
 export const coreDataDate = (seconds: unknown): Date | null =>
   typeof seconds === 'number' && Number.isFinite(seconds) ? new Date((seconds + CORE_DATA_EPOCH) * 1000) : null;
@@ -21,14 +20,12 @@ const pk = (v: unknown): number | null => (typeof v === 'number' ? v : null);
 
 export type DocEntry = { id: string; data: DocData };
 
-/** Everything one household needs in Firestore, ready to upload. */
 export interface LegacyHouseholdSnapshot {
   householdID: string;
   name: string;
   isOwnedByMe: boolean;
   ownerRecordName: string;
   household: DocData;
-  /** Base64 JPEG banner, if the household had a photo. */
   banner: string | null;
   members: DocEntry[];
   options: DocEntry[];
@@ -39,18 +36,9 @@ export interface LegacyHouseholdSnapshot {
 
 export interface LegacyData {
   households: LegacyHouseholdSnapshot[];
-  /** Total records across all households (for progress and the migration log). */
   recordCount: number;
 }
 
-/**
- * Turns the rows read from the old SwiftData store into Firestore-ready snapshots, going through
- * the same entity types and document mapping the live sync uses, so the shapes cannot drift.
- *
- * Tolerant of every store version the old app shipped (V1 → V3): columns a version didn't have
- * (`ZIMAGEFOCUSX/Y`, `ZCURRENCYCODE`, the whole `ZTRIPTOTAL` table) simply read as missing and get
- * the same defaults the old SwiftData lightweight migration gave them.
- */
 export function parseLegacyStore(rows: LegacyStore): LegacyData {
   const store = new DataStore();
   const owned = new Map<string, boolean>();
@@ -164,7 +152,6 @@ export function parseLegacyStore(rows: LegacyStore): LegacyData {
     store.insertTripTotal(t);
   }
 
-  // Orphaned purchases (their item was deleted) have no meaning without it: the Swift app cascaded them away.
   for (const p of store.allPurchases()) if (!p.item) store.deletePurchase(p);
 
   let recordCount = 0;

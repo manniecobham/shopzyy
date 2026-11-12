@@ -7,7 +7,6 @@ import { FormRow, FormSection, TextButton } from './ui';
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { isIOS26, useTheme } from '../theme/theme';
 
-/** An iOS page sheet with a Cancel / title / Save bar, like a SwiftUI sheet around a NavigationStack. */
 export function Sheet({ visible, title, onCancel, onSave, saveTitle = tr('Save'), cancelTitle = tr('Cancel'), doneTitle, saveDisabled, children, scroll = true }: {
   visible: boolean; title: string; onCancel: () => void; onSave?: () => void; saveTitle?: string; cancelTitle?: string;
   doneTitle?: string;
@@ -54,7 +53,6 @@ export interface MenuItem {
   onPress: () => void;
 }
 
-/** A bottom action list: the SwiftUI `Menu` / `Picker` popovers. */
 export function ActionMenu({ visible, title, sections, onClose }: {
   visible: boolean; title?: string; sections: MenuItem[][]; onClose: () => void;
 }) {
@@ -90,7 +88,6 @@ export function ActionMenu({ visible, title, sections, onClose }: {
   );
 }
 
-/** A form row that shows the current value and opens a list to change it (SwiftUI `Picker`). */
 export function PickerRow<T>({ label, value, options, onChange, last, hideLabel }: {
   label: string; value: T; options: { title: string; value: T }[]; onChange: (v: T) => void; last?: boolean; hideLabel?: boolean;
 }) {

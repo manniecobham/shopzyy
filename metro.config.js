@@ -3,7 +3,6 @@ const path = require('node:path');
 
 const config = getDefaultConfig(__dirname);
 
-// Demo mode's sample data must never ship in production: production bundles get an empty stub instead.
 if (process.env.APP_ENV === 'production') {
   const original = config.resolver.resolveRequest;
   config.resolver.resolveRequest = (context, moduleName, platform) => {

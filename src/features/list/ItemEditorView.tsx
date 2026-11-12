@@ -19,7 +19,6 @@ import { useTheme } from '../../theme/theme';
 
 type RecipientPick = 'nobody' | 'someoneElse' | `member:${string}`;
 
-/** Edits a list item. Changes are drafted locally and committed on Save, so cancelling never leaves half-edited state behind. */
 export function ItemEditorView({ item, householdID, onClose }: { item: GroceryItem; householdID: string; onClose: () => void }) {
   const t = useTheme();
   const runtime = useRuntime();
@@ -125,7 +124,6 @@ export function ItemEditorView({ item, householdID, onClose }: { item: GroceryIt
   );
 }
 
-/** PickerRow compares with Object.is; room choices are objects, so match by identity of the choice. */
 function PickerRowChoice({ label, value, options, onChange }: { label: string; value: RoomChoice | null; options: { title: string; value: RoomChoice | null }[]; onChange: (v: RoomChoice | null) => void }) {
   const current = options.find((o) => (o.value === null ? value === null : sameChoice(o.value, value))) ?? options[0];
   return <PickerRow label={label} value={current.value} options={options} onChange={onChange} />;

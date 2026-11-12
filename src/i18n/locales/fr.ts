@@ -1,4 +1,3 @@
-/** French translations, keyed by the English text. */
 const fr: Record<string, string> = {
   "Account": "Compte",
   "Activity": "Activité",

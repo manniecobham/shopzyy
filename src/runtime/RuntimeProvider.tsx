@@ -15,20 +15,17 @@ export function useRuntime(): AppRuntime {
   return r;
 }
 
-/** Re-renders when anything in the store changes (the equivalent of SwiftData's @Query). */
 export function useStoreVersion(): number {
   const { store } = useRuntime();
   return useSyncExternalStore(store.subscribe, store.getSnapshot);
 }
 
-/** Re-renders on sign-in/profile changes. */
 export function useAccount() {
   const { account } = useRuntime();
   useSyncExternalStore(account.subscribe, account.getSnapshot);
   return account;
 }
 
-/** Re-renders on runtime changes (ready flag, sync status). */
 export function useAppState() {
   const runtime = useRuntime();
   useSyncExternalStore(runtime.subscribe, runtime.getSnapshot);

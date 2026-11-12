@@ -10,16 +10,11 @@ import { ShoppingListService } from '../../services/ShoppingListService';
 import { t } from '../../i18n';
 import { useTheme } from '../../theme/theme';
 
-/**
- * The four tabs, all scoped to one household. These are the real system tabs: UITabBar on iOS (Liquid
- * Glass on iOS 26) with the same SF Symbols the original app used, and Material navigation on Android.
- */
 export default function TabsLayout() {
   const runtime = useRuntime();
   useStoreVersion();
   useSyncExternalStore(runtime.subscribe, runtime.getSnapshot);
 
-  // Once per launch, when the tabs first appear: ask for notification permission, schedule reminders, catch up on trips.
   useEffect(() => {
     if (isDemo) { startDemoTour((path) => router.navigate(path as never)); return; } // demo recordings shouldn't show the permission prompt
     void runtime.notifications.requestAuthorization().then(() => {

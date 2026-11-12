@@ -3,7 +3,6 @@ import { t as tr } from '../i18n';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTheme } from '../theme/theme';
 
-/** A small text prompt, the cross-platform stand-in for SwiftUI's `.alert` with a TextField. */
 export function Prompt({ visible, title, message, placeholder, confirmTitle, onConfirm, onCancel }: {
   visible: boolean; title: string; message?: string; placeholder?: string; confirmTitle: string;
   onConfirm: (text: string) => void; onCancel: () => void;

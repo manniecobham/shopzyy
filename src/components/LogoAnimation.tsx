@@ -3,18 +3,12 @@ import { Component, useEffect, useRef, useState, type ReactNode } from 'react';
 import { AccessibilityInfo, ActivityIndicator, Modal, StyleSheet, Text, View } from 'react-native';
 import { Brand, useTheme } from '../theme/theme';
 
-/**
- * The animated Shopzyy logo (assets/animations/splash-logo.json, 60 fps).
- *   frames   0–100  the intro: basket pops in, stripes and handle draw, sparkle spins in
- *   frames 100–150  a seamless loop: the sparkle pulses and little stars twinkle
- */
 const SOURCE = require('../../assets/animations/splash-logo.json');
 const LOOP_FROM = 100;
 const LOOP_TO = 150;
 
 export type LogoMode = 'once' | 'intro-then-loop' | 'loop';
 
-/** True when the person asked the OS to reduce motion: then the logo holds still. */
 function useReduceMotion(): boolean {
   const [reduce, setReduce] = useState(false);
   useEffect(() => {
@@ -25,11 +19,6 @@ function useReduceMotion(): boolean {
   return reduce;
 }
 
-/**
- * The logo on a transparent background (it is white, so put it on a green surface; `LogoLoader`
- * does that for you). If the native Lottie view isn't in this build, or the file can't play, it
- * falls back to a plain spinner and still calls `onFinish`, so nothing waits on it forever.
- */
 export function LogoAnimation({ size, mode = 'once', onFinish }: { size: number; mode?: LogoMode; onFinish?: () => void }) {
   const reduceMotion = useReduceMotion();
   return (
@@ -75,14 +64,12 @@ function SpinnerFallback({ size, onFinish }: { size: number; onFinish?: () => vo
   return <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}><ActivityIndicator color="#fff" /></View>;
 }
 
-/** Catches the render error React Native throws when a native view isn't compiled into this build. */
 class LottieBoundary extends Component<{ children: ReactNode; fallback: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
   render() { return this.state.failed ? this.props.fallback : this.props.children; }
 }
 
-/** The logo on a brand-green tile, like the app icon: the loading indicator for anywhere on a light or dark screen. */
 export function LogoLoader({ size = 96, mode = 'intro-then-loop', label = 'Loading' }: { size?: number; mode?: LogoMode; label?: string }) {
   return (
     <View
@@ -97,7 +84,6 @@ export function LogoLoader({ size = 96, mode = 'intro-then-loop', label = 'Loadi
   );
 }
 
-/** A whole screen waiting for something: the loader and a line of text. */
 export function FullScreenLoader({ message }: { message?: string }) {
   const t = useTheme();
   return (
@@ -108,7 +94,6 @@ export function FullScreenLoader({ message }: { message?: string }) {
   );
 }
 
-/** Covers the screen while an action finishes (joining a household, deleting data…). Blocks taps underneath. */
 export function LoadingOverlay({ visible, message }: { visible: boolean; message?: string }) {
   const t = useTheme();
   if (!visible) return null;

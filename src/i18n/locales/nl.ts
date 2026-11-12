@@ -1,4 +1,3 @@
-/** Dutch translations, keyed by the English text. */
 const nl: Record<string, string> = {
   "Account": "Account",
   "Activity": "Activiteit",

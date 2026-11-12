@@ -1,4 +1,3 @@
-/** Italian translations, keyed by the English text. */
 const it: Record<string, string> = {
   "Account": "Account",
   "Activity": "Attività",

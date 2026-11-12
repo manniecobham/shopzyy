@@ -13,7 +13,6 @@ export const LOG_AREA_TITLE: Record<LogArea, string> = {
   sync: tx('Syncing'), sharing: tx('Invites'), household: tx('Household'), list: tx('Shopping list'), account: tx('Account'), storage: tx('Saving'),
 };
 
-/** One error or warning the app ran into. Technical details only: never names, list items, household names, emails or other personal data. */
 export interface LogEntry {
   id: string;
   date: number; // ms since epoch
@@ -32,17 +31,10 @@ export interface LogEntry {
 const KEY = 'shopzy.errorLog';
 const MAX_ENTRIES = 500;
 
-/**
- * Records errors so they can be fixed. Every entry is kept on the device (Settings → Diagnostics)
- * and uploaded anonymously to the `errorLogs` Firestore collection, which only the developer can
- * read (in the Firebase console). The upload carries no user identity.
- */
 class AppLogService extends Observable {
-  /** Newest first. */
   entries: LogEntry[] = [];
   private loaded = false;
   private uploading = false;
-  /** Off in tests and demo mode. */
   uploadsEnabled = true;
 
   async load(): Promise<void> {
@@ -52,7 +44,7 @@ class AppLogService extends Observable {
       const raw = await AsyncStorage.getItem(KEY);
       if (raw) this.entries = [...(JSON.parse(raw) as LogEntry[]), ...this.entries].slice(0, MAX_ENTRIES);
       this.changed();
-    } catch { /* start empty */ }
+    } catch {}
   }
 
   info(area: LogArea, message: string): void { this.record('info', area, message); }
@@ -65,7 +57,6 @@ class AppLogService extends Observable {
     this.changed();
   }
 
-  /** Sends entries that haven't reached Firestore yet. Safe to call often. */
   async uploadPending(): Promise<void> {
     if (!this.uploadsEnabled || this.uploading) return;
     const pending = this.entries.filter((e) => !e.isUploaded).slice(0, 25);

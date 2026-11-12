@@ -8,7 +8,6 @@ import type { UserProfile } from '../../models/entities';
 import { EMOJI_CHOICES, MEMBER_PALETTE } from '../../models/factories';
 import { colorFromHex, useTheme } from '../../theme/theme';
 
-/** Edits how the signed-in person appears to their households: name, avatar and colour. Used during setup and from the Household tab. */
 export function ProfileFormView({ profile, submitTitle, onSubmit }: {
   profile: UserProfile; submitTitle: string; onSubmit: (profile: UserProfile) => void;
 }) {

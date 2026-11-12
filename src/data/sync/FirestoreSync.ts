@@ -16,16 +16,12 @@ import { APPLY_ORDER, HOUSEHOLDS, type SubCollection } from './schema';
 export type SyncStatus =
   | { state: 'idle' }
   | { state: 'syncing' }
-  /** No connection. Changes are kept and sent when it's back. */
   | { state: 'offline' }
   | { state: 'failed'; message: string };
 
 export interface SyncHooks {
-  /** Server changes were applied to the store (ActivityMonitor scan, reminder refresh). */
   onRemoteChange?: () => void;
-  /** A household vanished from the server: deleted by its owner, or this person was removed. */
   onHouseholdRemoved?: (name: string) => void;
-  /** After a fetch settles, e.g. to make sure this person has a member record everywhere. */
   onFetched?: () => void;
   onStatus?: (status: SyncStatus) => void;
 }
@@ -33,20 +29,11 @@ export interface SyncHooks {
 const codeOf = (e: unknown): string => String((e as { code?: unknown })?.code ?? '');
 const isOffline = (e: unknown) => ['unavailable', 'firestore/unavailable', 'deadline-exceeded'].includes(codeOf(e).replace('functions/', ''));
 
-/**
- * Keeps the DataStore and Firestore in step (the Firebase replacement for CloudSyncEngine).
- *
- * Local writes go through the services, which call `save` / `delete`; Firestore's offline
- * persistence queues them when there is no connection. Incoming changes are applied through
- * `DocApplier`, which never writes back, and snapshots that only reflect our own pending
- * writes are skipped so an in-flight local edit is never overwritten by an older echo.
- */
 export class FirestoreSync implements SyncBackend {
   private readonly db: Firestore = getFirestore();
   private readonly applier: DocApplier;
   private householdListener: Unsubscribe | null = null;
   private readonly perHousehold = new Map<string, Unsubscribe[]>();
-  /** Documents whose references hadn't arrived yet, retried after each batch. */
   private readonly incomplete = new Map<string, { kind: SubCollection; householdID: string; key: string; data: DocData }>();
   private readonly lastBanner = new Map<string, string | null>();
   private _status: SyncStatus = { state: 'idle' };
@@ -69,7 +56,6 @@ export class FirestoreSync implements SyncBackend {
 
   // MARK: Lifecycle
 
-  /** Starts listening. Safe to call repeatedly. */
   start(): void {
     if (this.householdListener) return;
     this.setStatus({ state: 'syncing' });
@@ -177,7 +163,6 @@ export class FirestoreSync implements SyncBackend {
     }
   }
 
-  /** Removes a household that no longer exists on the server from this device. */
   private purge(householdID: string): void {
     this.store.removedHouseholds.add(householdID);
     this.store.deleteHouseholdData(householdID);
@@ -221,7 +206,6 @@ export class FirestoreSync implements SyncBackend {
     if (target) await deleteDoc(target.ref);
   }
 
-  /** Asks the server whether a household still exists, before acting on it. */
   async availability(household: Household): Promise<'available' | 'gone' | 'unknown'> {
     try {
       const snap = await getDocFromServer(doc(this.db, HOUSEHOLDS, household.id));

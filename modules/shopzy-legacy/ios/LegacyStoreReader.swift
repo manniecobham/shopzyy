@@ -1,17 +1,6 @@
 import Foundation
 import SQLite3
 
-/// Reads what the original Swift Shopzy app stored on this device: the SwiftData store
-/// (`Shopzy-v2.store`, a Core Data SQLite file) and a few UserDefaults. **Read-only**: the store is
-/// copied to a temporary folder first, so the original files (and the CloudKit data they mirror)
-/// are never touched.
-///
-/// The result is plain JSON-compatible dictionaries; interpretation lives in TypeScript where it is
-/// unit-tested. Only the byte-level decoding that needs Apple APIs happens here:
-///  - UUID BLOBs (16 bytes)            → "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
-///  - `ZSECTIONORDER` (NSKeyedArchiver) → [String]
-///  - `ZCUSTOMIMAGE` (Core Data external binary: 0x01 + bytes, or 0x02 + file name) → base64 string
-/// Dates stay as Core Data seconds since 2001-01-01; relationships stay as Z_PK integers.
 public enum LegacyStoreReader {
     public static let storeName = "Shopzy-v2.store"
 
@@ -28,7 +17,6 @@ public enum LegacyStoreReader {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appendingPathComponent(storeName)
     }
 
-    /// nil when the app has no old store (a fresh install).
     public static func readDefaultStore() -> [String: Any]? {
         guard let url = defaultStoreURL(), FileManager.default.fileExists(atPath: url.path) else { return nil }
         return read(storeURL: url)
@@ -103,7 +91,6 @@ public enum LegacyStoreReader {
         case "ZCUSTOMIMAGE":
             return decodeExternalBinary(data, externalDir: externalDir) ?? NSNull()
         default:
-            // Every other BLOB is a UUID (ZID, ZHOUSEHOLDID).
             return uuidString(data) ?? NSNull()
         }
     }
@@ -116,7 +103,6 @@ public enum LegacyStoreReader {
         return "\(a)-\(b)-\(c)-\(d)-\(e)"
     }
 
-    /// SwiftData stores `[String]` as an NSKeyedArchiver archive of an NSArray.
     static func decodeStringArray(_ data: Data) -> [String] {
         if data.isEmpty { return [] }
         if let array = try? NSKeyedUnarchiver.unarchivedArrayOfObjects(ofClass: NSString.self, from: data) {
@@ -126,7 +112,6 @@ public enum LegacyStoreReader {
         return []
     }
 
-    /// Core Data external binary storage: 0x01 + the bytes inline, or 0x02 + the name of a file in `_EXTERNAL_DATA`.
     static func decodeExternalBinary(_ data: Data, externalDir: URL) -> String? {
         guard let flag = data.first else { return nil }
         let body = data.dropFirst()
@@ -144,7 +129,6 @@ public enum LegacyStoreReader {
 
     // MARK: UserDefaults
 
-    /// The settings the old app kept in UserDefaults (same app container, same bundle id).
     public static func readDefaults() -> [String: Any] {
         let d = UserDefaults.standard
         var out: [String: Any] = [:]

@@ -4,13 +4,10 @@ import type { ListGrouping } from '../models/enums';
 import type { GroceryItem } from '../models/entities';
 import { getCategoryChoice, getRecipient, getRoomChoice } from '../models/itemOps';
 
-/** One section of the list, e.g. "🥛 Dairy" or "Assigned to Ada". */
 export interface ListSection {
-  /** Stable across devices, so a household's custom order syncs. */
   key: string;
   title: string;
   items: GroceryItem[];
-  /** Order used when the household hasn't arranged this section themselves. */
   defaultRank: number;
 }
 
@@ -47,10 +44,6 @@ function headerFor(item: GroceryItem, grouping: ListGrouping): Header {
 
 const time = (d: Date | null) => (d ? d.getTime() : Number.NEGATIVE_INFINITY);
 
-/**
- * Groups list items, honouring the household's saved section order first and falling back
- * to the built-in order for sections it hasn't placed.
- */
 export function makeSections(items: GroceryItem[], grouping: ListGrouping, order: string[] = []): ListSection[] {
   const groups = new Map<string, { header: Header; items: GroceryItem[] }>();
   for (const item of items) {

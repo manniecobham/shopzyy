@@ -24,7 +24,6 @@ async function memberUIDs(householdID: string): Promise<string[]> {
 
 const newCode = () => Array.from({ length: CODE_LENGTH }, () => ALPHABET[randomInt(ALPHABET.length)]).join('');
 
-/** A member creates an invite code (shared as a link: shopzyy://join/<code>). */
 export const createInvite = onCall(async (req) => {
   const uid = requireAuth(req.auth?.uid);
   const householdID = String(req.data?.householdID ?? '');
@@ -44,7 +43,6 @@ export const createInvite = onCall(async (req) => {
   throw new HttpsError('internal', "Couldn't create an invite. Try again.");
 });
 
-/** Joins the household behind an invite code. Idempotent for existing members. */
 export const joinHousehold = onCall(async (req) => {
   const uid = requireAuth(req.auth?.uid);
   const code = String(req.data?.code ?? '').trim().toUpperCase();
@@ -64,7 +62,6 @@ export const joinHousehold = onCall(async (req) => {
   return { householdID, name: (household.get('name') as string) ?? '' };
 });
 
-/** A member leaves a household someone else owns. */
 export const leaveHousehold = onCall(async (req) => {
   const uid = requireAuth(req.auth?.uid);
   const householdID = String(req.data?.householdID ?? '');
@@ -76,7 +73,6 @@ export const leaveHousehold = onCall(async (req) => {
   return { ok: true };
 });
 
-/** The owner deletes a household, and everything in it, for everyone. */
 export const deleteHousehold = onCall(async (req) => {
   const uid = requireAuth(req.auth?.uid);
   const householdID = String(req.data?.householdID ?? '');
@@ -92,14 +88,6 @@ export const deleteHousehold = onCall(async (req) => {
 });
 
 // MARK: Migration from the original iOS app (CloudKit → Firebase)
-//
-// Every member's phone holds a full copy of their households (CloudKit mirrored it locally), so any
-// member can upload a household the first time; later members only join it. Rules that keep this safe:
-//  - nobody can overwrite data that already exists (documents are created only if missing), so a
-//    member migrating late with an old copy can never undo newer edits;
-//  - joining needs the household's id AND a member key from its member list, neither of which a
-//    non-member has; each old identity (CloudKit user key) can be claimed by one Firebase account only;
-//  - claims close LEGACY_WINDOW_DAYS after the household was first imported.
 
 const LEGACY_WINDOW_MS = 180 * 24 * 60 * 60 * 1000;
 const UUID_RE = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/;
@@ -107,7 +95,6 @@ const UUID_RE = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/
 type Wire = unknown;
 type DocEntry = { id: string; data: Record<string, Wire> };
 
-/** Revives the client's `{ __date: ms }` markers into Firestore Timestamps. */
 function revive(value: Wire): Wire {
   if (Array.isArray(value)) return value.map(revive);
   if (value && typeof value === 'object') {
@@ -129,7 +116,6 @@ const validEntries = (v: Wire, max: number): DocEntry[] => {
   });
 };
 
-/** Writes only the documents that don't exist yet, in batches. Returns how many were created. */
 async function createMissing(parent: string, entries: DocEntry[]): Promise<number> {
   let created = 0;
   for (let i = 0; i < entries.length; i += 400) {
@@ -147,11 +133,6 @@ async function createMissing(parent: string, entries: DocEntry[]): Promise<numbe
   return created;
 }
 
-/**
- * Claims a household from the old app for the signed-in person. If the household isn't in Firebase
- * yet, it is created from the uploaded snapshot (household, members, custom options, banner);
- * items, purchases and totals follow through `importLegacyRecords`.
- */
 export const claimLegacyHousehold = onCall({ memory: '512MiB', timeoutSeconds: 120 }, async (req) => {
   const uid = requireAuth(req.auth?.uid);
   const householdID = String(req.data?.householdID ?? '').toUpperCase();
@@ -207,7 +188,6 @@ export const claimLegacyHousehold = onCall({ memory: '512MiB', timeoutSeconds: 1
   return { created: false };
 });
 
-/** Adds items, purchases and trip totals to a legacy household. Existing documents are never overwritten. */
 export const importLegacyRecords = onCall({ memory: '512MiB', timeoutSeconds: 120 }, async (req) => {
   const uid = requireAuth(req.auth?.uid);
   const householdID = String(req.data?.householdID ?? '').toUpperCase();

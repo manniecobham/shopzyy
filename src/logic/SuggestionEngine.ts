@@ -28,7 +28,6 @@ export interface Suggestion {
   itemID: string;
   name: string;
   kind: SuggestionKind;
-  /** Relative urgency within a kind; higher is more urgent. */
   score: number;
   daysSinceLastPurchase: number;
   typicalIntervalDays: number | null;
@@ -59,11 +58,8 @@ export interface RestockForecast {
 
 export interface PurchasePattern {
   lastPurchase: Date;
-  /** Distinct days with a purchase (several purchases on one day count once). */
   purchaseDays: number;
-  /** null until there is enough history to call it a habit. */
   expectedIntervalDays: number | null;
-  /** 0…1. 1 means perfectly regular; derived from the coefficient of variation. */
   regularity: number;
 }
 
@@ -91,7 +87,6 @@ const DEFAULTS: EngineConfiguration = {
 
 const DAY_MS = 86_400_000;
 const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-/** Whole calendar days between two dates (DST-safe). */
 const daysBetween = (a: Date, b: Date) => Math.round((startOfDay(b).getTime() - startOfDay(a).getTime()) / DAY_MS);
 const addDays = (d: Date, n: number) => {
   const r = new Date(d.getTime());
@@ -106,15 +101,6 @@ export function median(values: number[]): number {
   return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
 }
 
-/**
- * Learns each item's buying rhythm and decides what to suggest. Uses the device's local
- * calendar (Swift's `Calendar.current`); tests pin the time zone.
- *
- * For items with a habit (≥ 2 gaps): expected gap = mean of the median gap and an
- * exponentially weighted gap; urgency = days since last ÷ expected gap; score is damped by
- * irregularity and thin history. Items far past their rhythm, or bought too rarely to have
- * one, become gentle "not bought in a while" nudges.
- */
 export class SuggestionEngine {
   readonly configuration: EngineConfiguration;
 
@@ -135,7 +121,6 @@ export class SuggestionEngine {
       .slice(0, this.configuration.maxResults);
   }
 
-  /** When each habitual item is next expected to run out, for scheduling reminders. */
   forecasts(histories: PurchaseHistory[], now: Date = new Date()): RestockForecast[] {
     const today = startOfDay(now);
     const out: RestockForecast[] = [];

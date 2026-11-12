@@ -1,4 +1,3 @@
-/** Spanish translations, keyed by the English text. */
 const es: Record<string, string> = {
   "Account": "Cuenta",
   "Activity": "Actividad",

@@ -43,8 +43,6 @@ export function ShoppingListScreen({ household }: { household: Household }) {
   const [now, setNow] = useState(() => new Date());
   const [skippedKey, setSkippedKey] = useState<string | null>(null);
 
-  // The native tab bar floats over this screen (Liquid Glass on iOS 26, the standard bar below it), so the add bar sits above it;
-  // while the keyboard is up the tab bar is hidden behind it and the bar needs no gap.
   const insets = useSafeAreaInsets();
   const [keyboardUp, setKeyboardUp] = useState(false);
   useEffect(() => {
@@ -65,7 +63,6 @@ export function ShoppingListScreen({ household }: { household: Household }) {
     [catalog, store.version], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  // The trip this person is currently doing, or just finished: built from purchases made on this device.
   const myLatestTrip = useMemo(() => {
     const mine = store.purchasesIn(household.id)
       .filter((p) => p.originDeviceID === prefs.deviceID)
@@ -78,8 +75,6 @@ export function ShoppingListScreen({ household }: { household: Household }) {
     return trips[trips.length - 1] ?? null;
   }, [store.version, household.id, prefs.deviceID]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Set once the trip has been quiet for `promptDelay` (seconds, not the minutes other members wait),
-  // and only while it has no total and hasn't been skipped.
   const tripAwaitingTotal = (() => {
     const trip = myLatestTrip;
     if (!trip) return null;
