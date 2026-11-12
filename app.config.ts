@@ -10,7 +10,9 @@ import type { ExpoConfig } from 'expo/config';
  */
 const APP_ENV = process.env.APP_ENV === 'production' ? 'production' : 'development';
 /** Where invite links live: Firebase Hosting on each project's default domain. */
-const LINK_HOST = APP_ENV === 'production' ? 'shopzyy-19bc2.web.app' : 'shopzyy-8e62c.web.app';
+const LINK_HOST = APP_ENV === 'production' ? 'shopzyy.manniedev.com' : 'shopzyy-8e62c.web.app';
+/** Every domain that serves the link files; builds already out in the world use the first Firebase address, so it stays verified too. */
+const LINK_HOSTS = APP_ENV === 'production' ? ['shopzyy.manniedev.com', 'shopzyy-19bc2.web.app'] : ['shopzyy-8e62c.web.app'];
 const FIREBASE_DIR = `./firebase/${APP_ENV}`;
 
 // Demo mode (sample data, no sign-in) is for development only. Refuse to build a production app with it.
@@ -63,7 +65,7 @@ const config: ExpoConfig = {
       usesNonExemptEncryption: false
     },
     entitlements: { 'com.apple.developer.applesignin': ['Default'] },
-    associatedDomains: [`applinks:${LINK_HOST}`],
+    associatedDomains: LINK_HOSTS.map((h) => `applinks:${h}`),
   },
   android: {
     package: 'com.manniedevteam.shopzyy',
@@ -78,7 +80,7 @@ const config: ExpoConfig = {
     intentFilters: [{
       action: 'VIEW',
       autoVerify: true,
-      data: [{ scheme: 'https', host: LINK_HOST, pathPrefix: '/join' }],
+      data: LINK_HOSTS.map((host) => ({ scheme: 'https', host, pathPrefix: '/join' })),
       category: ['BROWSABLE', 'DEFAULT'],
     }],
   },
