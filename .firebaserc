@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "development",
+    "development": "shopzyy-8e62c",
+    "production": "shopzyy-19bc2"
+  }
+}

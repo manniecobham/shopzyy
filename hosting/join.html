@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Join on Shopzyy</title>
+<style>
+  :root { color-scheme: light dark; --green:#1E9E68; }
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; font:17px -apple-system,system-ui,sans-serif; background:#1E9E68; color:#fff; text-align:center; }
+  main { padding:32px 24px; max-width:420px; }
+  h1 { font-size:28px; margin:0 0 8px; }
+  p { margin:8px 0 24px; opacity:.92; }
+  a.btn { display:block; background:#fff; color:#12724A; text-decoration:none; font-weight:600; padding:15px; border-radius:14px; margin:10px 0; }
+  .code { font:600 26px ui-monospace,Menlo,monospace; letter-spacing:3px; background:rgba(255,255,255,.18); display:inline-block; padding:8px 16px; border-radius:12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1 id="title"></h1>
+  <p id="body"></p>
+  <div class="code" id="code"></div>
+  <p></p>
+  <a class="btn" id="open"></a>
+  <a class="btn" id="store"></a>
+</main>
+<script>
+  var STRINGS = {
+    en: ['You’re invited to a household', 'Open Shopzyy to join, or enter this invite code in the app.', 'Open in Shopzyy', 'Get Shopzyy'],
+    es: ['Te han invitado a un hogar', 'Abre Shopzyy para unirte o introduce este código de invitación en la app.', 'Abrir en Shopzyy', 'Descargar Shopzyy'],
+    fr: ['Vous êtes invité(e) dans un foyer', 'Ouvrez Shopzyy pour rejoindre, ou saisissez ce code d’invitation dans l’app.', 'Ouvrir dans Shopzyy', 'Obtenir Shopzyy'],
+    nl: ['Je bent uitgenodigd voor een huishouden', 'Open Shopzyy om mee te doen, of voer deze uitnodigingscode in de app in.', 'Openen in Shopzyy', 'Download Shopzyy'],
+    de: ['Du wurdest zu einem Haushalt eingeladen', 'Öffne Shopzyy, um beizutreten, oder gib diesen Einladungscode in der App ein.', 'In Shopzyy öffnen', 'Shopzyy laden'],
+    it: ['Sei stato invitato in una casa', 'Apri Shopzyy per unirti, oppure inserisci questo codice d’invito nell’app.', 'Apri in Shopzyy', 'Scarica Shopzyy']
+  };
+  // The app's App Store listing; if it is ever left empty, iOS falls back to an App Store search.
+  var APP_STORE_URL = 'https://apps.apple.com/app/id6823087110';
+  var PLAY_URL = 'https://play.google.com/store/apps/details?id=com.manniedevteam.shopzyy';
+  var lang = (navigator.language || 'en').slice(0, 2).toLowerCase();
+  var s = STRINGS[lang] || STRINGS.en;
+  document.documentElement.lang = STRINGS[lang] ? lang : 'en';
+  var code = decodeURIComponent((location.pathname.split('/')[2] || '')).replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  document.title = s[0];
+  document.getElementById('title').textContent = s[0];
+  document.getElementById('body').textContent = s[1];
+  document.getElementById('code').textContent = code;
+  document.getElementById('open').textContent = s[2];
+  document.getElementById('open').href = 'shopzyy://join/' + code;
+  var android = /android/i.test(navigator.userAgent);
+  var store = document.getElementById('store');
+  store.textContent = s[3];
+  store.href = android ? PLAY_URL : (APP_STORE_URL || 'https://apps.apple.com/search?term=Shopzyy');
+</script>
+</body>
+</html>

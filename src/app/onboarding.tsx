@@ -1,0 +1,21 @@
+import { HouseholdSetupView } from '../features/account/HouseholdSetupView';
+import { ProfileSetupView } from '../features/account/ProfileSetupView';
+import { SignInView } from '../features/account/SignInView';
+import { WelcomeView } from '../features/account/WelcomeView';
+import { FullScreenLoader } from '../components/LogoAnimation';
+import { useAccount, useAppState, useStoreVersion } from '../runtime/RuntimeProvider';
+import { t } from '../i18n';
+
+export default function Onboarding() {
+  const runtime = useAppState();
+  const account = useAccount();
+  useStoreVersion();
+  if (!runtime.ready) return null;
+  switch (account.phase) {
+    case 'welcome': return <WelcomeView onStart={() => account.completeWelcome()} />;
+    case 'signIn': return <SignInView />;
+    case 'needsProfile': return <ProfileSetupView />;
+    case 'ready': return runtime.initialSyncDone ? <HouseholdSetupView /> : <FullScreenLoader message={t('Getting your lists…')} />;
+    default: return null;
+  }
+}

@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function household(hid) { return get(/databases/$(database)/documents/households/$(hid)); }
+    function isMember(hid) { return signedIn() && request.auth.uid in household(hid).data.memberUIDs; }
+
+    // One document per household. Membership is only changed by Cloud Functions
+    // (joinHousehold / leaveHousehold), and deleting happens only in deleteHousehold.
+    match /households/{hid} {
+      allow read: if signedIn() && request.auth.uid in resource.data.memberUIDs;
+      allow create: if signedIn()
+        && request.resource.data.ownerUID == request.auth.uid
+        && request.resource.data.memberUIDs == [request.auth.uid];
+      allow update: if signedIn()
+        && request.auth.uid in resource.data.memberUIDs
+        && request.resource.data.ownerUID == resource.data.ownerUID
+        && request.resource.data.memberUIDs == resource.data.memberUIDs;
+      allow delete: if false;
+
+      // members, options, items, purchases, tripTotals, assets/banner
+      match /{collection}/{docId} {
+        allow read, write: if isMember(hid);
+      }
+    }
+
+    // Invite codes are created and redeemed by Cloud Functions only.
+    match /invites/{code} {
+      allow read, write: if false;
+    }
+
+    // Anonymous error reports: signed-in apps may add them; only the developer reads them (console).
+    match /errorLogs/{id} {
+      allow create: if signedIn() && request.resource.data.keys().hasOnly([
+        'id', 'date', 'level', 'area', 'message', 'errorDomain', 'errorCode', 'errorDetail', 'appVersion', 'osVersion', 'deviceModel'
+      ]);
+      allow read, update, delete: if false;
+    }
+
+    // Old-identity claims for the CloudKit migration are handled by Cloud Functions only.
+    match /legacyUsers/{key} {
+      allow read, write: if false;
+    }
+
+    // App-wide settings you edit in the console: minimum version, store links, migration switch.
+    // Public so the update check works before anyone signs in; nothing sensitive belongs here.
+    match /config/{doc} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Live adoption counters and the daily migration-readiness report (console only).
+    match /stats/{doc} {
+      allow read, write: if false;
+    }
+
+    // Per-person data, e.g. migrationState.
+    match /users/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+
+      // This person's devices and their push tokens (read by the alert functions only).
+      match /devices/{deviceID} {
+        allow read, write: if signedIn() && request.auth.uid == uid;
+      }
+    }
+  }
+}

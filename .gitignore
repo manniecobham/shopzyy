@@ -1,0 +1,85 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+/.claude/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+# generated native folders
+/ios
+/android
+
+# AI / agent tooling (keep out of git)
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+.cursor/
+.cursorrules
+.aider*
+.windsurf/
+.github/copilot-instructions.md
+
+# Firebase config (per-environment, download from the Firebase console)
+GoogleService-Info.plist
+google-services.json
+
+# Cloud Functions build output
+functions/lib/
+
+# Firebase CLI: cache, logs and service-account keys (never commit keys)
+.firebase/
+firebase-debug.log*
+firestore-debug.log
+ui-debug.log
+functions/*.local
+serviceAccount*.json
+*-adminsdk-*.json
+
+# Build artifacts
+*.apk
+*.aab
+*.ipa
+*.app
+*.dSYM.zip
+.eas/
+.vscode/*.local
+coverage/
+
+# Per-environment Firebase client files (development / production)
+firebase/*/GoogleService-Info.plist
+firebase/*/google-services.json
+scripts/.keys.json
+scripts/.missing.json

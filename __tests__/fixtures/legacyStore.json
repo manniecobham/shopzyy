@@ -1,0 +1,146 @@
+{
+ "households": [
+  {
+   "ZCKSYSTEMFIELDS": null,
+   "ZCREATEDAT": 816103536.902352,
+   "ZCURRENCYCODE": "",
+   "ZCUSTOMIMAGE": "QUJDREVGRw==",
+   "ZGROUPINGRAW": "category",
+   "ZID": "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE",
+   "ZIMAGEFOCUSX": 0.5,
+   "ZIMAGEFOCUSY": 0.5,
+   "ZISOWNEDBYME": 0,
+   "ZNAME": "Office",
+   "ZOWNERRECORDNAME": "_other",
+   "ZSECTIONORDER": [],
+   "ZTHEMERAW": "sunny",
+   "ZZONEOWNERNAME": "_other",
+   "Z_ENT": 3,
+   "Z_OPT": 1,
+   "Z_PK": 1
+  },
+  {
+   "ZCKSYSTEMFIELDS": null,
+   "ZCREATEDAT": 816103536.901357,
+   "ZCURRENCYCODE": "GBP",
+   "ZCUSTOMIMAGE": "BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBw==",
+   "ZGROUPINGRAW": "room",
+   "ZID": "11111111-2222-3333-4444-555555555555",
+   "ZIMAGEFOCUSX": 0.2,
+   "ZIMAGEFOCUSY": 0.7,
+   "ZISOWNEDBYME": 1,
+   "ZNAME": "Home",
+   "ZOWNERRECORDNAME": "_owner123",
+   "ZSECTIONORDER": [
+    "category:dairy",
+    "room:kitchen"
+   ],
+   "ZTHEMERAW": "party",
+   "ZZONEOWNERNAME": "__defaultOwner__",
+   "Z_ENT": 3,
+   "Z_OPT": 1,
+   "Z_PK": 2
+  }
+ ],
+ "items": [
+  {
+   "ZADDEDAT": 721692800,
+   "ZADDEDBY": 1,
+   "ZASSIGNEDTO": 1,
+   "ZCATEGORYRAW": "dairy",
+   "ZCKSYSTEMFIELDS": null,
+   "ZCREATEDAT": 816103536.926145,
+   "ZCUSTOMCATEGORY": 1,
+   "ZCUSTOMROOM": 2,
+   "ZFORMEMBER": 1,
+   "ZFORNAME": "kids",
+   "ZHOUSEHOLDID": "11111111-2222-3333-4444-555555555555",
+   "ZID": "1C7D43D3-031A-480A-BA3C-1B89443D3413",
+   "ZISONLIST": 1,
+   "ZNAME": "Milk",
+   "ZNORMALIZEDNAME": "milk",
+   "ZNOTE": "low fat",
+   "ZPREFERREDQUANTITY": 1,
+   "ZPREFERREDUNITRAW": null,
+   "ZQUANTITY": 2,
+   "ZROOMRAW": null,
+   "ZSNOOZEDUNTIL": 821692800,
+   "ZUNITRAW": "liter",
+   "Z_ENT": 2,
+   "Z_OPT": 1,
+   "Z_PK": 1
+  }
+ ],
+ "members": [
+  {
+   "ZCKSYSTEMFIELDS": null,
+   "ZCOLORHEX": "#0A84FF",
+   "ZCREATEDAT": 816103536.926005,
+   "ZEMOJI": "\ud83d\udc69\ud83c\udffe",
+   "ZHOUSEHOLDID": "11111111-2222-3333-4444-555555555555",
+   "ZID": "98F18534-B36D-4630-8635-4FE758ABFF56",
+   "ZNAME": "Ada",
+   "ZUSERRECORDNAME": "_owner123",
+   "Z_ENT": 4,
+   "Z_OPT": 1,
+   "Z_PK": 1
+  }
+ ],
+ "options": [
+  {
+   "ZCKSYSTEMFIELDS": null,
+   "ZCREATEDAT": 816103536.926103,
+   "ZHOUSEHOLDID": "11111111-2222-3333-4444-555555555555",
+   "ZID": "D69E7611-D977-4B38-9526-9FA478FDBDF3",
+   "ZKINDRAW": "category",
+   "ZNAME": "Fridge",
+   "Z_ENT": 1,
+   "Z_OPT": 1,
+   "Z_PK": 1
+  },
+  {
+   "ZCKSYSTEMFIELDS": null,
+   "ZCREATEDAT": 816103536.926134,
+   "ZHOUSEHOLDID": "11111111-2222-3333-4444-555555555555",
+   "ZID": "271326AC-9B7D-4D6B-A95E-FB6C34958EF7",
+   "ZKINDRAW": "room",
+   "ZNAME": "Patio",
+   "Z_ENT": 1,
+   "Z_OPT": 1,
+   "Z_PK": 2
+  }
+ ],
+ "purchases": [
+  {
+   "ZCKSYSTEMFIELDS": null,
+   "ZHOUSEHOLDID": "11111111-2222-3333-4444-555555555555",
+   "ZID": "0DE1E3BB-809E-4F0F-957F-AD1FE0034F80",
+   "ZITEM": 1,
+   "ZMEMBER": 1,
+   "ZORIGINDEVICEID": "dev-1",
+   "ZPURCHASEDAT": 711692800,
+   "ZQUANTITY": 1,
+   "ZUNITRAW": "liter",
+   "Z_ENT": 5,
+   "Z_OPT": 1,
+   "Z_PK": 1
+  }
+ ],
+ "tripTotals": [
+  {
+   "ZAMOUNT": 12.3,
+   "ZCKSYSTEMFIELDS": null,
+   "ZCREATEDAT": 816103536.927349,
+   "ZCURRENCYCODE": "GBP",
+   "ZENTEREDBY": "_owner123",
+   "ZHOUSEHOLDID": "11111111-2222-3333-4444-555555555555",
+   "ZID": "F306D96D-AE22-4599-9E88-2A35E9421054",
+   "ZSTORENAME": "Tesco",
+   "ZTRIPENDEDAT": 711692900,
+   "ZTRIPKEY": "trip-1",
+   "Z_ENT": 6,
+   "Z_OPT": 1,
+   "Z_PK": 1
+  }
+ ]
+}

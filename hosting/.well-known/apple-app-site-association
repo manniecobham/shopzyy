@@ -1,0 +1,7 @@
+{
+  "applinks": {
+    "details": [
+      { "appIDs": ["Y84J47YA7Q.com.manniedev-team.shopzy"], "components": [{ "/": "/join/*", "comment": "Household invites" }] }
+    ]
+  }
+}

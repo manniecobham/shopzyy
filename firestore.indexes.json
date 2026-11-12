@@ -1,0 +1,33 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "purchases",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "member",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "purchasedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "migrationState",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "migratedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

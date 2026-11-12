@@ -1,0 +1,243 @@
+import { CategoryClassifier } from '../logic/CategoryClassifier';
+import { NameNormalizer } from '../logic/NameNormalizer';
+import { SmartItemParser, type ParsedItem } from '../logic/SmartItemParser';
+import { SuggestionEngine } from '../logic/SuggestionEngine';
+import { sameName } from '../lib/text';
+import { builtIn, custom, type CategoryChoice, type RoomChoice } from '../models/choices';
+import { HOUSE_ROOMS, ITEM_CATEGORIES, categoryTitle, categoryTitleEnglish, roomTitle, roomTitleEnglish, type MeasurementUnit } from '../models/enums';
+import type { CustomOption, GroceryItem, HouseholdMember, OptionKind, PurchaseRecord } from '../models/entities';
+import { makeItem, makeOption, makePurchase } from '../models/factories';
+import {
+  itemHistory, itemPreferredUnit, itemUnit, purchaseCount, putOnList, renameItem, setCategoryChoice,
+  setRecipient, setRoomChoice, takeOffList, type ItemRecipient,
+} from '../models/itemOps';
+import type { ServiceEnv } from './ports';
+import type { Entity } from '../models/entities';
+
+export type ItemSnapshot = Pick<GroceryItem, 'isOnList' | 'quantity' | 'unitRaw' | 'addedBy' | 'addedAt' | 'snoozedUntil'>;
+
+const addDays = (d: Date, n: number) => { const r = new Date(d.getTime()); r.setDate(r.getDate() + n); return r; };
+
+export class ShoppingListService {
+  constructor(
+    private readonly env: ServiceEnv,
+    readonly householdID: string,
+    private readonly classifier = CategoryClassifier,
+    private readonly engine = new SuggestionEngine(),
+  ) {}
+
+  private get store() { return this.env.store; }
+
+  static forItem(itemID: string, env: ServiceEnv): ShoppingListService | null {
+    const item = env.store.item(itemID);
+    return item ? new ShoppingListService(env, item.householdID) : null;
+  }
+
+  get isHouseholdAvailable(): boolean { return !this.store.removedHouseholds.has(this.householdID); }
+
+  // MARK: Adding
+
+  snapshotItems(): Map<string, ItemSnapshot> {
+    return new Map(this.store.itemsIn(this.householdID).map((i) => [i.id, {
+      isOnList: i.isOnList, quantity: i.quantity, unitRaw: i.unitRaw, addedBy: i.addedBy, addedAt: i.addedAt, snoozedUntil: i.snoozedUntil,
+    }]));
+  }
+
+  undoAdd(items: GroceryItem[], before: Map<string, ItemSnapshot>): void {
+    if (!this.isHouseholdAvailable) return;
+    const changed: GroceryItem[] = [];
+    for (const item of items) {
+      const prev = before.get(item.id);
+      if (!prev) { this.removeFromList(item); continue; }
+      Object.assign(item, prev);
+      changed.push(item);
+    }
+    if (changed.length > 0) this.save(changed);
+    this.refreshRestockReminders();
+  }
+
+  addFromText(input: string, by: HouseholdMember | null, at: Date = new Date()): GroceryItem[] {
+    if (!this.isHouseholdAvailable) return [];
+    const items = SmartItemParser.parse(input).map((p) => this.add(p, by, at, false));
+    this.save(items);
+    return items;
+  }
+
+  add(parsed: ParsedItem, by: HouseholdMember | null, at: Date = new Date(), saving = true): GroceryItem {
+    let item: GroceryItem;
+    const existing = this.itemMatching(parsed.name);
+    if (existing) {
+      item = existing;
+      if (existing.isOnList) {
+        if (!parsed.hasExplicitQuantity) return existing;
+        if (itemUnit(existing) === parsed.unit) {
+          existing.quantity += parsed.quantity;
+        } else {
+          existing.quantity = parsed.quantity;
+          existing.unitRaw = parsed.unit;
+        }
+      } else {
+        putOnList(
+          existing,
+          parsed.hasExplicitQuantity ? parsed.quantity : existing.preferredQuantity,
+          parsed.hasExplicitQuantity ? parsed.unit : itemPreferredUnit(existing),
+          by,
+          at,
+        );
+      }
+    } else {
+      item = makeItem(parsed.name, this.classifier.classify(parsed.name), this.householdID, at);
+      this.store.insertItem(item);
+      putOnList(item, parsed.quantity, parsed.unit, by, at);
+    }
+    if (saving) this.save([item]);
+    return item;
+  }
+
+  addToList(itemID: string, by: HouseholdMember | null = null): void {
+    if (!this.isHouseholdAvailable) return;
+    const item = this.itemWithID(itemID);
+    if (!item) return;
+    if (!item.isOnList) putOnList(item, item.preferredQuantity, itemPreferredUnit(item), by ?? this.currentMember(), new Date());
+    this.save([item]);
+    this.refreshRestockReminders();
+  }
+
+  // MARK: Buying
+
+  markBought(item: GroceryItem, by: HouseholdMember | null, at: Date = new Date(), startsTrip = false): PurchaseRecord | null {
+    if (!this.isHouseholdAvailable) return null;
+    const record = makePurchase(at, item.quantity, itemUnit(item), this.env.prefs.deviceID, this.householdID);
+    if (startsTrip) record.startsTrip = true;
+    this.store.insertPurchase(record);
+    this.store.linkPurchase(record, item, by);
+
+    item.preferredQuantity = item.quantity;
+    item.preferredUnitRaw = itemUnit(item);
+    takeOffList(item);
+    this.save([record, item]);
+    // No alert here: other members get one shopping-trip summary once this person has finished.
+    this.refreshRestockReminders();
+    return record;
+  }
+
+  undoPurchase(record: PurchaseRecord): void {
+    if (!this.isHouseholdAvailable) return;
+    const item = record.item;
+    if (item && !item.isOnList) putOnList(item, record.quantity, record.unitRaw, record.member, new Date());
+    this.env.sync?.delete([record]);
+    this.store.deletePurchase(record);
+    this.save(item ? [item] : []);
+    this.refreshRestockReminders();
+  }
+
+  // MARK: Housekeeping
+
+  removeFromList(item: GroceryItem): void {
+    if (!this.isHouseholdAvailable) return;
+    if (purchaseCount(item) === 0) {
+      this.env.sync?.delete([item]); // Never bought: nothing worth remembering.
+      this.store.deleteItem(item);
+      this.save();
+    } else {
+      takeOffList(item); // Keep history so suggestions still learn.
+      this.save([item]);
+    }
+  }
+
+  snooze(itemID: string, days: number): void {
+    if (!this.isHouseholdAvailable) return;
+    const item = this.itemWithID(itemID);
+    if (!item) return;
+    item.snoozedUntil = addDays(new Date(), days);
+    this.save([item]);
+    this.refreshRestockReminders();
+  }
+
+  update(
+    item: GroceryItem,
+    f: {
+      name: string; quantity: number; unit: MeasurementUnit | null; category: CategoryChoice; room: RoomChoice | null;
+      note: string; assignedTo?: HouseholdMember | null; recipient?: ItemRecipient | null;
+    },
+  ): void {
+    if (!this.isHouseholdAvailable) return;
+    const cleanName = NameNormalizer.displayName(f.name);
+    if (cleanName !== '' && cleanName !== item.name) renameItem(item, cleanName);
+    item.quantity = Math.max(f.quantity, 0.01);
+    item.unitRaw = f.unit;
+    setCategoryChoice(item, f.category);
+    setRoomChoice(item, f.room);
+    item.note = f.note.trim() === '' ? null : f.note;
+    item.assignedTo = f.assignedTo ?? null;
+    setRecipient(item, f.recipient ?? null);
+    this.save([item]);
+  }
+
+  // MARK: Custom categories and rooms
+
+  categoryChoiceNamed(name: string): CategoryChoice | null {
+    if (!this.isHouseholdAvailable) return null;
+    const clean = NameNormalizer.displayName(name);
+    if (clean === '') return null;
+    const builtInMatch = ITEM_CATEGORIES.find((c) => (sameName(categoryTitle(c), clean) || sameName(categoryTitleEnglish(c), clean)));
+    if (builtInMatch) return builtIn(builtInMatch);
+    return custom(this.customOption(clean, 'category'));
+  }
+
+  roomChoiceNamed(name: string): RoomChoice | null {
+    if (!this.isHouseholdAvailable) return null;
+    const clean = NameNormalizer.displayName(name);
+    if (clean === '') return null;
+    const builtInMatch = HOUSE_ROOMS.find((r) => (sameName(roomTitle(r), clean) || sameName(roomTitleEnglish(r), clean)));
+    if (builtInMatch) return builtIn(builtInMatch);
+    return custom(this.customOption(clean, 'room'));
+  }
+
+  deleteOption(option: CustomOption): void {
+    if (!this.isHouseholdAvailable) return;
+    const affected = this.store.itemsUsing(option); // Items lose the reference when the option goes, so they change too.
+    this.env.sync?.delete([option]);
+    this.store.deleteOption(option);
+    this.save(affected);
+  }
+
+  private customOption(name: string, kind: OptionKind): CustomOption {
+    const existing = this.store.optionsOf(this.householdID, kind).find((o) => sameName(o.name, name));
+    if (existing) return existing;
+    const option = this.store.insertOption(makeOption(name, kind, this.householdID));
+    this.save([option]);
+    return option;
+  }
+
+  refreshRestockReminders(): void {
+    ShoppingListService.refreshRestockReminders(this.env, this.engine);
+  }
+
+  static refreshRestockReminders(env: ServiceEnv, engine = new SuggestionEngine()): void {
+    const forecasts = engine.forecasts(env.store.allItems().map(itemHistory));
+    void env.notifier.scheduleRestockReminders(forecasts);
+  }
+
+  // MARK: Lookup
+
+  itemMatching(name: string): GroceryItem | undefined {
+    const key = NameNormalizer.key(name);
+    return this.store.itemsIn(this.householdID).find((i) => i.normalizedName === key);
+  }
+
+  itemWithID(id: string): GroceryItem | undefined {
+    const item = this.store.item(id);
+    return item && item.householdID === this.householdID ? item : undefined;
+  }
+
+  currentMember(): HouseholdMember | null {
+    const key = this.env.prefs.userRecordName;
+    return key ? this.store.member(key, this.householdID) ?? null : null;
+  }
+
+  private save(changed: Entity[] = []): void {
+    this.store.commit();
+    this.env.sync?.save(changed);
+  }
+}
