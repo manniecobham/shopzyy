@@ -411,5 +411,8 @@ const nl: Record<string, string> = {
   "in {n} years": "over {n} jaar",
   "yesterday": "gisteren",
   "tomorrow": "morgen",
+  "Confirm your password": "Bevestig je wachtwoord",
+  "For your security, enter your password to delete your account. This can't be undone.": "Voer voor je veiligheid je wachtwoord in om je account te verwijderen. Dit kan niet ongedaan worden gemaakt.",
+  "Password": "Wachtwoord",
 };
 export default nl;

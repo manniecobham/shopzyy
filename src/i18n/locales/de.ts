@@ -411,5 +411,8 @@ const de: Record<string, string> = {
   "in {n} years": "in {n} Jahren",
   "yesterday": "gestern",
   "tomorrow": "morgen",
+  "Confirm your password": "Passwort bestätigen",
+  "For your security, enter your password to delete your account. This can't be undone.": "Gib zu deiner Sicherheit dein Passwort ein, um dein Konto zu löschen. Das kann nicht rückgängig gemacht werden.",
+  "Password": "Passwort",
 };
 export default de;

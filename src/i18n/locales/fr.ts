@@ -411,5 +411,8 @@ const fr: Record<string, string> = {
   "in {n} years": "dans {n} ans",
   "yesterday": "hier",
   "tomorrow": "demain",
+  "Confirm your password": "Confirmez votre mot de passe",
+  "For your security, enter your password to delete your account. This can't be undone.": "Pour votre sécurité, saisissez votre mot de passe pour supprimer votre compte. Cette action est irréversible.",
+  "Password": "Mot de passe",
 };
 export default fr;

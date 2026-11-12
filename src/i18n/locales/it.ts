@@ -411,5 +411,8 @@ const it: Record<string, string> = {
   "in {n} years": "tra {n} anni",
   "yesterday": "ieri",
   "tomorrow": "domani",
+  "Confirm your password": "Conferma la tua password",
+  "For your security, enter your password to delete your account. This can't be undone.": "Per la tua sicurezza, inserisci la password per eliminare il tuo account. Questa azione non può essere annullata.",
+  "Password": "Password",
 };
 export default it;
