@@ -1,7 +1,8 @@
 import { Glyph, type SymbolName } from '../../components/Glyph';
 import { t as tr } from '../../i18n';
 import { useEffect, useMemo, useState } from 'react';
-import { KeyboardAvoidingView, Platform, SectionList, StyleSheet, Text, View } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Platform, SectionList, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenOptions } from '../../components/NativeHeader';
 import { SuggestionEngine } from '../../logic/SuggestionEngine';
 import { ShoppingTrip } from '../../logic/ShoppingTrip';
@@ -39,6 +40,17 @@ export function ShoppingListScreen({ household }: { household: Household }) {
   const [tripTarget, setTripTarget] = useState<TripTotalTarget | null>(null);
   const [now, setNow] = useState(() => new Date());
   const [skippedKey, setSkippedKey] = useState<string | null>(null);
+
+  // The native tab bar floats over this screen (Liquid Glass on iOS 26, the standard bar below it), so the add bar sits above it;
+  // while the keyboard is up the tab bar is hidden behind it and the bar needs no gap.
+  const insets = useSafeAreaInsets();
+  const [keyboardUp, setKeyboardUp] = useState(false);
+  useEffect(() => {
+    const show = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () => setKeyboardUp(true));
+    const hide = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () => setKeyboardUp(false));
+    return () => { show.remove(); hide.remove(); };
+  }, []);
+  const tabBarClearance = keyboardUp || Platform.OS !== 'ios' ? 0 : isIOS26 ? 84 : 49 + insets.bottom;
 
   const catalog = store.itemsIn(household.id);
   const listItems = catalog.filter((i) => i.isOnList);
@@ -131,7 +143,7 @@ export function ShoppingListScreen({ household }: { household: Household }) {
                 onBought={() => list.markBought(item, currentMember)} onEdit={() => setEditing(item)} onRemove={() => list.removeFromList(item)} />
             )}
           />
-          <View style={{ marginBottom: isIOS26 ? 84 : 0 }}>
+          <View style={{ marginBottom: tabBarClearance }}>
             {tripAwaitingTotal ? (
               <TripTotalBanner onAdd={() => setTripTarget(targetForTrip(tripAwaitingTotal, tripSkipKey(tripAwaitingTotal)))} onSkip={() => skip(tripSkipKey(tripAwaitingTotal))} />
             ) : null}

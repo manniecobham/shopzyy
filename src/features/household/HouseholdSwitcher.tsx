@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { ActionMenu } from '../../components/Sheet';
 import { Prompt } from '../../components/Prompt';
-import { useAccount, useRuntime, useStoreVersion } from '../../runtime/RuntimeProvider';
+import { useAccount, useAppState, useStoreVersion } from '../../runtime/RuntimeProvider';
 import { useTheme } from '../../theme/theme';
 import { HouseholdThumbnail, householdDisplayName } from './HouseholdBackground';
 
 /** Header control showing the current household, to switch between households or start a new one. */
 export function HouseholdSwitcher() {
   const th = useTheme();
-  const runtime = useRuntime();
+  const runtime = useAppState();
   const account = useAccount();
   useStoreVersion();
   const [menu, setMenu] = useState(false);

@@ -221,7 +221,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
       {editing ? <EditProfileSheet onClose={() => setEditing(false)} /> : null}
       {diagnostics ? <DiagnosticsSheet onClose={() => setDiagnostics(false)} /> : null}
       <LoadingOverlay visible={deleting} message={t('Deleting your data…')} />
-      <LoadingOverlay visible={importing} message={t('Importing your lists…')} />
+      <LoadingOverlay visible={importing} message={t('Updating your data…')} />
     </Sheet>
   );
 }

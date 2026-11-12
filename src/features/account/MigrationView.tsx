@@ -6,7 +6,7 @@ import { useAccount, useAppState } from '../../runtime/RuntimeProvider';
 import { useTheme } from '../../theme/theme';
 import { t as tr } from '../../i18n';
 
-/** Shown for a moment on the first launch after updating from the original app, while the person's lists move to their new account. */
+/** Shown for a moment on the first launch after updating from the original app, while their data is brought across to the new account (worded generically on purpose so it doesn't worry anyone). */
 export function MigrationView() {
   const t = useTheme();
   const runtime = useAppState();
@@ -18,12 +18,12 @@ export function MigrationView() {
   return (
     <SafeAreaView style={[s.root, { backgroundColor: t.background }]}>
       <View style={s.body}>
-        {failed ? <Text style={{ fontSize: 56 }}>🛒</Text> : <LogoLoader size={128} label={tr('Moving your lists')} />}
-        <Text style={[s.title, { color: t.label }]}>{failed ? tr("Couldn't move your lists yet") : tr('Moving your lists…')}</Text>
+        {failed ? <Text style={{ fontSize: 56 }}>🛒</Text> : <LogoLoader size={128} label={tr('Updating your data')} />}
+        <Text style={[s.title, { color: t.label }]}>{failed ? tr("Couldn't update your data yet") : tr('Updating your data…')}</Text>
         <Text style={[s.sub, { color: t.secondaryLabel }]}>
           {failed
             ? migration.message
-            : tr('Shopzyy is bringing your households, lists and shopping history to your new account. Nothing on your phone or in iCloud is changed or deleted.')}
+            : tr('Shopzyy is getting everything ready for you. This only takes a moment.')}
         </Text>
         {!failed && p && p.total > 0 ? <Text style={{ marginTop: 10, fontSize: 13, color: t.secondaryLabel }}>{tr('{done} of {total}', { done: Math.min(p.done, p.total), total: p.total })}</Text> : null}
       </View>

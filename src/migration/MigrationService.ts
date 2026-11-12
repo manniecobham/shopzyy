@@ -90,7 +90,9 @@ export class MigrationService {
     let moved = 0;
     for (const snapshot of data.households) {
       // Only households this person belongs to can be claimed.
-      if (!snapshot.members.some((m) => m.id === userKey)) { report(1); continue; }
+      const counts = `${snapshot.members.length} members, ${snapshot.options.length} custom options, ${snapshot.items.length} items, ${snapshot.purchases.length} purchases, ${snapshot.tripTotals.length} trip totals`;
+      if (!snapshot.members.some((m) => m.id === userKey)) { this.deps.log?.(`Skipped a household you are not a member of (${counts}).`); report(1); continue; }
+      this.deps.log?.(`Moving a household: ${counts}.`);
       await this.moveHousehold(snapshot, userKey, report);
       moved++;
     }
