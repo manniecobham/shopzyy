@@ -15,6 +15,7 @@ export function SignInView() {
   const [mode, setMode] = useState<'signIn' | 'signUp'>('signIn');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [emailOpen, setEmailOpen] = useState(false);
   const canSubmit = email.trim().includes('@') && password.length >= 6;
 
   const submit = () => {
@@ -30,7 +31,7 @@ export function SignInView() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: t.groupedBackground }}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 32 }}>
+        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingVertical: 32 }}>
           <View style={s.hero}>
             <AppLogo />
             <Text style={[s.title, { color: t.label }]}>{tr('Sign in to {app}', { app: Brand.appName })}</Text>
@@ -50,9 +51,17 @@ export function SignInView() {
               <Glyph name="logo-google" size={20} color={t.label} />
               <Text style={[s.socialText, { color: t.label }]}>{tr('Continue with Google')}</Text>
             </Pressable>
+            {!emailOpen ? (
+              <Pressable accessibilityRole="button" disabled={account.busy} onPress={() => setEmailOpen(true)}
+                style={[s.social, { backgroundColor: t.cell, borderWidth: StyleSheet.hairlineWidth, borderColor: t.separator }]}>
+                <Glyph name="envelope" size={20} color={t.label} />
+                <Text style={[s.socialText, { color: t.label }]}>{tr('Continue with email')}</Text>
+              </Pressable>
+            ) : null}
           </View>
 
-          <FormSection header={mode === 'signIn' ? tr('Or use your email') : tr('Create an account')}>
+          {emailOpen ? <>
+          <FormSection header={mode === 'signIn' ? tr('Sign in with email') : tr('Create an account')}>
             <FormRow>
               <TextInput style={[s.input, { color: t.label }]} placeholder={tr('Email')} placeholderTextColor={t.tertiaryLabel}
                 value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address"
@@ -75,6 +84,7 @@ export function SignInView() {
             <TextButton title={mode === 'signIn' ? tr('Create an account') : tr('I already have an account')} onPress={() => setMode(mode === 'signIn' ? 'signUp' : 'signIn')} />
             {mode === 'signIn' ? <TextButton title={tr('Forgot password?')} onPress={() => void forgot()} /> : null}
           </View>
+          </> : null}
         </ScrollView>
       </KeyboardAvoidingView>
       <LoadingOverlay visible={account.busy} message={tr('Signing in…')} />
@@ -83,7 +93,7 @@ export function SignInView() {
 }
 
 const s = StyleSheet.create({
-  hero: { alignItems: 'center', gap: 8, paddingHorizontal: 32, paddingTop: 28, paddingBottom: 24 },
+  hero: { alignItems: 'center', gap: 8, paddingHorizontal: 32, paddingBottom: 24 },
   title: { fontSize: 28, fontWeight: '700', textAlign: 'center' },
   sub: { fontSize: 16, textAlign: 'center' },
   social: { minHeight: 50, borderRadius: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },

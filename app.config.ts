@@ -78,6 +78,8 @@ const config: ExpoConfig = {
     ['expo-build-properties', { ios: { useFrameworks: 'dynamic' }, android: { kotlinVersion: '2.4.0' } }],
     // Android status-bar icon: white silhouette of the basket, in the brand green.
     ['expo-notifications', { icon: './assets/notification-icon.png', color: '#1E9E68' }],
+    ['expo-image-picker', { photosPermission: 'Choose a photo of a receipt to read on your device, or a picture for your household. Receipt photos are never saved or uploaded.', cameraPermission: 'Take a photo of a receipt to read it on your device. The photo is never saved or uploaded.' }],
+    ['react-native-document-scanner-plugin', { cameraPermission: 'Take a photo of a receipt to read it on your device. The photo is never saved or uploaded.' }],
     ['expo-splash-screen', { backgroundColor: '#1E9E68', dark: { backgroundColor: '#1E9E68' } }],
     ['expo-localization', { supportedLocales: { ios: ['en', 'es', 'fr', 'nl', 'de', 'it'], android: ['en', 'es', 'fr', 'nl', 'de', 'it'] } }],
   ],
