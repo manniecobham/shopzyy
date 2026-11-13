@@ -55,4 +55,15 @@ describe('ActivityMonitor', () => {
     scanForRemotePurchases(env, prefs, NOW);
     expect(posted).toHaveLength(0);
   });
+
+  test('catching up on open stays silent, then only changes after that are announced', () => {
+    const { env, buy, posted, prefs } = setup();
+    buy('Milk', 20);
+    scanForRemotePurchases(env, prefs, NOW, false);
+    scanForRemotePurchases(env, prefs, NOW);
+    expect(posted).toHaveLength(0);
+    buy('Eggs', 10);
+    scanForRemotePurchases(env, prefs, NOW);
+    expect(posted).toHaveLength(1);
+  });
 });

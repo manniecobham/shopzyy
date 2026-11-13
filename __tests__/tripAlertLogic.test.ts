@@ -68,4 +68,12 @@ describe('localised push text', () => {
     expect(tripSummary(['a', 'b', 'c', 'd', 'e'], 3, '5,00 €', 'de')).toBe('5 Artikel · a, b, c und 2 weitere · 5,00 €');
     expect(tripTitle('Ada', 'nl')).toBe('Ada is boodschappen gaan doen');
   });
+
+  test('purchases with the same timestamp have one stable last purchase, so only one push is sent', () => {
+    const same = (id: string): TripPurchase => ({ id, purchasedAtMs: base, itemID: id });
+    const a = groupTrips(H, '_ada', [same('c'), same('a'), same('b')])[0];
+    const b = groupTrips(H, '_ada', [same('b'), same('c'), same('a')])[0];
+    expect(a.purchases[a.purchases.length - 1].id).toBe('c');
+    expect(b.purchases[b.purchases.length - 1].id).toBe('c');
+  });
 });

@@ -18,7 +18,7 @@ export interface Trip {
 const tripID = (householdID: string, buyerKey: string, startMs: number) => `${householdID}.${buyerKey}.${Math.trunc(startMs / 1000)}`;
 
 export function groupTrips(householdID: string, buyerKey: string, purchases: TripPurchase[]): Trip[] {
-  const sorted = [...purchases].sort((a, b) => a.purchasedAtMs - b.purchasedAtMs);
+  const sorted = [...purchases].sort((a, b) => a.purchasedAtMs - b.purchasedAtMs || a.id.localeCompare(b.id));
   const trips: Trip[] = [];
   let current: TripPurchase[] = [];
   const flush = () => {

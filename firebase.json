@@ -48,7 +48,7 @@
     "rewrites": [
       {
         "source": "/join/**",
-        "destination": "/join.html"
+        "function": { "functionId": "invitePage" }
       },
       {
         "source": "/download",

@@ -205,3 +205,4 @@ export const importLegacyRecords = onCall({ memory: '512MiB', timeoutSeconds: 12
 
 export * from './trips';
 export * from './adoption';
+export * from './invitePage';

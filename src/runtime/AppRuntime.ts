@@ -103,7 +103,9 @@ export class AppRuntime extends Observable {
     n.onOpenActivity = () => router.navigate('/activity');
   }
 
-  scanActivity(): void { scanForRemotePurchases(this.env, this.prefs); }
+  scanActivity(live = false): void {
+    scanForRemotePurchases(this.env, this.prefs, new Date(), live && AppState.currentState === 'active');
+  }
 
   restartSync(): void {
     const uid = this.account.uid;
@@ -285,8 +287,7 @@ export class AppRuntime extends Observable {
         t("It was deleted by its owner or you were removed from it, so it's been removed from this phone."),
       ),
       onRemoteChange: () => {
-        // Handled here, not in a screen: when the app is woken in the background no screen exists.
-        this.scanActivity();
+        this.scanActivity(true);
         ShoppingListService.refreshRestockReminders(this.env);
       },
       onFetched: () => {
