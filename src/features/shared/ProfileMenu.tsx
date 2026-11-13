@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { t } from '../../i18n';
-import { Alert, Pressable } from 'react-native';
-import { ActionMenu } from '../../components/Sheet';
+import { Alert } from 'react-native';
+import { NativeMenu } from '../../components/NativeMenu';
 import { MemberBadge } from '../../components/ui';
 import type { HouseholdMember } from '../../models/entities';
 import { useAccount, useRuntime } from '../../runtime/RuntimeProvider';
@@ -11,7 +11,6 @@ import { SettingsSheet } from './SettingsSheet';
 export function ProfileMenu({ member }: { member: HouseholdMember | null }) {
   const account = useAccount();
   const runtime = useRuntime();
-  const [menu, setMenu] = useState(false);
   const [editing, setEditing] = useState(false);
   const [settings, setSettings] = useState(false);
 
@@ -26,14 +25,13 @@ export function ProfileMenu({ member }: { member: HouseholdMember | null }) {
 
   return (
     <>
-      <Pressable onPress={() => setMenu(true)} accessibilityLabel={t('Your profile')}>
-        <MemberBadge emoji={member?.emoji ?? account.profile?.emoji} colorHex={member?.colorHex ?? account.profile?.colorHex} size={30} />
-      </Pressable>
-      <ActionMenu visible={menu} title={account.profile?.name ?? t('You')} onClose={() => setMenu(false)} sections={[[
+      <NativeMenu label={t('Your profile')} sections={[[
         { title: t('Edit profile'), icon: 'person.crop.circle', onPress: () => setEditing(true) },
         { title: t('Settings'), icon: 'gearshape', onPress: () => setSettings(true) },
         { title: t('Delete my data…'), icon: 'trash', destructive: true, onPress: confirmDelete },
-      ]]} />
+      ]]}>
+        <MemberBadge emoji={member?.emoji ?? account.profile?.emoji} colorHex={member?.colorHex ?? account.profile?.colorHex} size={30} />
+      </NativeMenu>
       {editing ? <EditProfileSheet onClose={() => setEditing(false)} /> : null}
       {settings ? <SettingsSheet onClose={() => setSettings(false)} /> : null}
     </>

@@ -4,7 +4,8 @@ import type { ReactNode } from 'react';
 import { Platform, View } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ActionMenu, type MenuItem } from './Sheet';
+import { NativeMenu } from './NativeMenu';
+import type { MenuItem } from './Sheet';
 import { Glyph, type SymbolName } from './Glyph';
 import { useTheme } from '../theme/theme';
 
@@ -60,11 +61,9 @@ export interface HeaderMenu {
 
 function MenuButton({ menu }: { menu: HeaderMenu }) {
   const t = useTheme();
-  const [open, setOpen] = useState(false);
   return (
-    <>
-      <Glyph name={menu.icon} size={24} color={t.label} onPress={() => setOpen(true)} accessibilityLabel={menu.label} />
-      <ActionMenu visible={open} title={menu.title} onClose={() => setOpen(false)} sections={menu.groups.map((g) => g.items)} />
-    </>
+    <NativeMenu label={menu.label} sections={menu.groups.map((g) => g.items)}>
+      <Glyph name={menu.icon} size={24} color={t.label} />
+    </NativeMenu>
   );
 }

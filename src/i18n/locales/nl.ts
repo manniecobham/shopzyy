@@ -210,7 +210,6 @@ const nl: Record<string, string> = {
   "When someone goes shopping you get one summary of what they bought, once they're done. Restock reminders arrive at 9 AM on the day Shopzyy expects you to run out, with a button to add the item straight to the list.": "Als iemand boodschappen gaat doen, krijg je één samenvatting van wat er is gekocht zodra de persoon klaar is. Aanvulherinneringen komen om 9:00 uur op de dag waarop Shopzyy verwacht dat iets op is, met een knop om het item meteen aan de lijst toe te voegen.",
   "Who it's for": "Voor wie",
   "Yesterday": "Gisteren",
-  "You": "Jij",
   "You can invite people to it from the Household tab.": "Je kunt er mensen voor uitnodigen via het tabblad Huishouden.",
   "You don't have permission to change this household.": "Je hebt geen toestemming om dit huishouden te wijzigen.",
   "You'd normally have bought these again by now.": "Normaal had je deze inmiddels weer gekocht.",

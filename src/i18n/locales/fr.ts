@@ -210,7 +210,6 @@ const fr: Record<string, string> = {
   "When someone goes shopping you get one summary of what they bought, once they're done. Restock reminders arrive at 9 AM on the day Shopzyy expects you to run out, with a button to add the item straight to the list.": "Quand quelqu’un fait les courses, vous recevez un récapitulatif de ses achats une fois terminé. Les rappels de réapprovisionnement arrivent à 9 h le jour où Shopzyy pense que vous serez à court, avec un bouton pour ajouter l’article directement à la liste.",
   "Who it's for": "Pour qui",
   "Yesterday": "Hier",
-  "You": "Vous",
   "You can invite people to it from the Household tab.": "Vous pouvez y inviter des personnes depuis l’onglet Foyer.",
   "You don't have permission to change this household.": "Vous n’avez pas l’autorisation de modifier ce foyer.",
   "You'd normally have bought these again by now.": "Vous les auriez normalement déjà rachetés.",
