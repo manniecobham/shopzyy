@@ -2,6 +2,7 @@ import { Glyph, type SymbolName } from '../../components/Glyph';
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { AppLogo } from '../../components/AppLogo';
 import { LoadingOverlay } from '../../components/LogoAnimation';
 import { FormRow, FormSection, ProminentButton, TextButton } from '../../components/ui';
 import { useAccount } from '../../runtime/RuntimeProvider';
@@ -31,7 +32,7 @@ export function SignInView() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 32 }}>
           <View style={s.hero}>
-            <Text style={{ fontSize: 48 }}>🛒</Text>
+            <AppLogo />
             <Text style={[s.title, { color: t.label }]}>{tr('Sign in to {app}', { app: Brand.appName })}</Text>
             <Text style={[s.sub, { color: t.secondaryLabel }]}>{tr('Your account keeps your households in sync on every device.')}</Text>
           </View>
