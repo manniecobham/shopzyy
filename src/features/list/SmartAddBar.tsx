@@ -13,7 +13,7 @@ import { colorFromHex, useTheme } from '../../theme/theme';
 
 const SEPARATORS = /[,;\n+]/;
 
-export function SmartAddBar({ catalog, onSubmit }: { catalog: GroceryItem[]; onSubmit: (text: string) => void }) {
+export function SmartAddBar({ catalog, onSubmit, onScan }: { catalog: GroceryItem[]; onSubmit: (text: string) => void; onScan?: () => void }) {
   const t = useTheme();
   const input = useRef<React.ComponentRef<typeof TextInput>>(null);
   const [text, setText] = useState('');
@@ -85,6 +85,8 @@ export function SmartAddBar({ catalog, onSubmit }: { catalog: GroceryItem[]; onS
         />
         {trimmed ? (
           <Pressable onPress={submit} accessibilityLabel={tr('Add to list')} hitSlop={8}><Glyph name="arrow.up.circle.fill" size={30} color={t.accent} /></Pressable>
+        ) : onScan ? (
+          <Pressable onPress={onScan} accessibilityLabel={tr('Scan receipt')} hitSlop={8}><Glyph name="doc.text.viewfinder" size={26} color={t.accent} /></Pressable>
         ) : null}
       </View>
     </View>

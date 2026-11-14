@@ -27,6 +27,15 @@ export function compareVersions(a: string, b: string): number {
 
 export const appVersion = (): string => Constants.expoConfig?.version ?? '1.0.0';
 
+const nativeBuild = (): string | null => {
+  try { return (require('expo-application') as typeof import('expo-application')).nativeBuildVersion; } catch { return null; }
+};
+
+export const displayVersion = (): string => {
+  const build = nativeBuild();
+  return build ? `${appVersion()}.${build}` : appVersion();
+};
+
 export class AppConfigService extends Observable {
   config: RemoteConfig;
 

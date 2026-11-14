@@ -34,7 +34,7 @@ export const onPurchaseCreated = onDocumentCreated('households/{householdID}/pur
 export const sendTripAlert = onTaskDispatched<{ householdID: string; purchaseID: string; purchasedAtMs: number }>(
   { retryConfig: { maxAttempts: 3, minBackoffSeconds: 30 }, rateLimits: { maxConcurrentDispatches: 10 } },
   async (req) => {
-    const { householdID, purchaseID, purchasedAtMs } = req.data;
+    const { householdID, purchaseID } = req.data;
     const doc = await db.doc(`households/${householdID}/purchases/${purchaseID}`).get();
     if (!doc.exists) return; // undone in the meantime
     const buyerKey = doc.get('member') as string | null;
@@ -43,7 +43,7 @@ export const sendTripAlert = onTaskDispatched<{ householdID: string; purchaseID:
     const purchases = await buyerPurchases(householdID, buyerKey, Date.now() - LOOKBACK_MS);
     const trip = tripContaining(groupTrips(householdID, buyerKey, purchases), purchaseID);
     if (!trip) return;
-    if (trip.endMs > purchasedAtMs) return; // more items were ticked off; that purchase's task will announce the trip
+    if (trip.purchases[trip.purchases.length - 1].id !== purchaseID) return; // a later purchase's task announces the trip
     await deliver(trip, (doc.get('originDeviceID') as string) ?? '');
   },
 );

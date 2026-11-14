@@ -8,6 +8,7 @@ import { Sheet } from '../../components/Sheet';
 import { FormRow, FormSection, MemberBadge, ProminentButton } from '../../components/ui';
 import { DELETE_CANCELLED } from '../../runtime/AppRuntime';
 import { useAccount, useAppState } from '../../runtime/RuntimeProvider';
+import { displayVersion } from '../../services/AppConfig';
 import { ShoppingListService } from '../../services/ShoppingListService';
 import { StorageKeys } from '../../services/storageKeys';
 import { HAD_LEGACY_APP_KEY } from '../../migration/legacyDefaults';
@@ -98,7 +99,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
   const syncTitle = { idle: t('Up to date'), syncing: t('Syncing…'), offline: t('Offline'), failed: t('Not syncing') }[sync.state];
   const syncIcon = ({ idle: 'checkmark.icloud', syncing: 'icloud', offline: 'wifi.slash', failed: 'exclamationmark.icloud' } as const)[sync.state];
   const syncColor = sync.state === 'idle' ? th.green : sync.state === 'syncing' ? th.secondaryLabel : th.orange;
-  const version = Constants.expoConfig?.version ?? '1.0';
+  const version = displayVersion();
   const appEnv = (Constants.expoConfig?.extra?.appEnv as string | undefined) ?? 'development';
   const hadOldApp = Platform.OS === 'ios' && !isDemo && prefs.getString(HAD_LEGACY_APP_KEY) === '1';
 

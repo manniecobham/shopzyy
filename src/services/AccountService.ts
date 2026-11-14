@@ -107,10 +107,10 @@ export class AccountService extends Observable {
       });
       if (!response.identityToken) throw new Error('Apple did not return an identity token.');
       const credential = AppleAuthProvider.credential(response.identityToken, response.nonce);
-      await signInWithCredential(getAuth(), credential);
-      // Apple only sends the name the first time; use it to suggest a profile name.
+      // Apple only sends the name the first time; set it before the auth change swaps the screen.
       const given = response.fullName?.givenName;
       if (given && !this.profile) this.suggestedName = given;
+      await signInWithCredential(getAuth(), credential);
     });
   }
 
@@ -123,8 +123,8 @@ export class AccountService extends Observable {
       if (result.type !== 'success') return; // cancelled
       const idToken = result.data.idToken;
       if (!idToken) throw new Error('Google did not return an ID token.');
-      await signInWithCredential(getAuth(), GoogleAuthProvider.credential(idToken));
       if (result.data.user.givenName && !this.profile) this.suggestedName = result.data.user.givenName;
+      await signInWithCredential(getAuth(), GoogleAuthProvider.credential(idToken));
     });
   }
 

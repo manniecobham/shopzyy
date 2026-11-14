@@ -83,3 +83,6 @@ firebase/*/GoogleService-Info.plist
 firebase/*/google-services.json
 scripts/.keys.json
 scripts/.missing.json
+
+# Gradle caches created when building local native modules
+.gradle/

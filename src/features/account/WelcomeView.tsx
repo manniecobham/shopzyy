@@ -1,5 +1,6 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { AppLogo } from '../../components/AppLogo';
 import { Icon, ProminentButton, type IconName } from '../../components/ui';
 import { Brand, useTheme } from '../../theme/theme';
 import { t as tr } from '../../i18n';
@@ -10,7 +11,7 @@ export function WelcomeView({ onStart }: { onStart: () => void }) {
     <SafeAreaView style={[s.root, { backgroundColor: t.background }]}>
       <ScrollView contentContainerStyle={s.scroll}>
         <View style={s.hero}>
-          <Text style={{ fontSize: 64 }}>🛒</Text>
+          <AppLogo />
           <Text style={[s.title, { color: t.label }]}>{tr('Welcome to {app}', { app: Brand.appName })}</Text>
           <Text style={[s.tagline, { color: t.accent }]}>{Brand.tagline}</Text>
           <Text style={[s.body, { color: t.secondaryLabel }]}>

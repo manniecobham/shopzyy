@@ -1,7 +1,17 @@
 import { existsSync, readFileSync } from 'node:fs';
 import type { ExpoConfig } from 'expo/config';
 
-const APP_ENV = process.env.APP_ENV === 'production' ? 'production' : 'development';
+const PROD_FIREBASE_PROJECT = 'shopzyy-19bc2';
+
+function nativeEnv(): 'production' | 'development' {
+  for (const file of ['./ios/Shopzyy/GoogleService-Info.plist', './android/app/google-services.json']) {
+    try { if (readFileSync(file, 'utf8').includes(PROD_FIREBASE_PROJECT)) return 'production'; } catch {}
+  }
+  return 'development';
+}
+
+// An Xcode or Gradle build has no APP_ENV, so the generated native project decides.
+const APP_ENV = process.env.APP_ENV ? (process.env.APP_ENV === 'production' ? 'production' : 'development') : nativeEnv();
 const LINK_HOST = APP_ENV === 'production' ? 'shopzyy.manniedev.com' : 'shopzyy-8e62c.web.app';
 const LINK_HOSTS = APP_ENV === 'production' ? ['shopzyy.manniedev.com', 'shopzyy-19bc2.web.app'] : ['shopzyy-8e62c.web.app'];
 const FIREBASE_DIR = `./firebase/${APP_ENV}`;
@@ -30,7 +40,7 @@ const config: ExpoConfig = {
   name: 'Shopzyy',
   slug: 'shopzyy',
   scheme: 'shopzyy',
-  version: '1.1.0',
+  version: '1.1.1',
   orientation: 'portrait',
   locales: { es: './locales/es.json', fr: './locales/fr.json', nl: './locales/nl.json', de: './locales/de.json', it: './locales/it.json' },
   icon: './assets/icon.png',
@@ -38,6 +48,7 @@ const config: ExpoConfig = {
   ios: {
     supportsTablet: false,
     bundleIdentifier: 'com.manniedev-team.shopzy',
+    buildNumber: '11',
     googleServicesFile: IOS_FIREBASE_FILE,
     infoPlist: {
       UIBackgroundModes: ['remote-notification'],
@@ -59,6 +70,13 @@ const config: ExpoConfig = {
       monochromeImage: './assets/android-icon-monochrome.png',
     },
     predictiveBackGestureEnabled: false,
+    blockedPermissions: [
+      'android.permission.ACTIVITY_RECOGNITION',
+      'android.permission.health.READ_STEPS',
+      'android.permission.RECORD_AUDIO',
+      'android.permission.READ_EXTERNAL_STORAGE',
+      'android.permission.WRITE_EXTERNAL_STORAGE',
+    ],
     intentFilters: [{
       action: 'VIEW',
       autoVerify: true,
@@ -77,6 +95,9 @@ const config: ExpoConfig = {
     ['expo-build-properties', { ios: { useFrameworks: 'dynamic' }, android: { kotlinVersion: '2.4.0' } }],
     // Android status-bar icon: white silhouette of the basket, in the brand green.
     ['expo-notifications', { icon: './assets/notification-icon.png', color: '#1E9E68' }],
+    ['expo-sensors', { motionPermission: 'Shopzyy uses motion sensing so you can shake your phone to undo the last change to your list.' }],
+    ['expo-image-picker', { microphonePermission: false, photosPermission: 'Choose a photo of a receipt to read on your device, or a picture for your household. Receipt photos are never saved or uploaded.', cameraPermission: 'Take a photo of a receipt to read it on your device. The photo is never saved or uploaded.' }],
+    ['react-native-document-scanner-plugin', { cameraPermission: 'Take a photo of a receipt to read it on your device. The photo is never saved or uploaded.' }],
     ['expo-splash-screen', { backgroundColor: '#1E9E68', dark: { backgroundColor: '#1E9E68' } }],
     ['expo-localization', { supportedLocales: { ios: ['en', 'es', 'fr', 'nl', 'de', 'it'], android: ['en', 'es', 'fr', 'nl', 'de', 'it'] } }],
   ],
