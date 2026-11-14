@@ -70,7 +70,13 @@ const config: ExpoConfig = {
       monochromeImage: './assets/android-icon-monochrome.png',
     },
     predictiveBackGestureEnabled: false,
-    blockedPermissions: ['android.permission.ACTIVITY_RECOGNITION', 'android.permission.health.READ_STEPS'],
+    blockedPermissions: [
+      'android.permission.ACTIVITY_RECOGNITION',
+      'android.permission.health.READ_STEPS',
+      'android.permission.RECORD_AUDIO',
+      'android.permission.READ_EXTERNAL_STORAGE',
+      'android.permission.WRITE_EXTERNAL_STORAGE',
+    ],
     intentFilters: [{
       action: 'VIEW',
       autoVerify: true,
