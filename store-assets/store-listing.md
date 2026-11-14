@@ -19,11 +19,13 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 | Terms of use | https://shopzyy.manniedev.com/terms |
 | Support | https://shopzyy.manniedev.com/support |
 | Account deletion | https://shopzyy.manniedev.com/delete-account |
+| Legal notice (Impressum) | https://shopzyy.manniedev.com/impressum |
+| Open-source licences | https://shopzyy.manniedev.com/licenses |
 | Marketing / website | https://shopzyy.manniedev.com |
 | Download link (store redirect) | https://shopzyy.manniedev.com/download |
 | Support email | support@manniedev.com |
-| Developer / seller name | MannieDev |
-| Copyright line (iOS) | © 2026 MannieDev |
+| Developer / seller name | MannieDev Technologies Ltd, registered in Nigeria (RC 8411822), trading as MannieDev |
+| Copyright line (iOS) | © 2026 MannieDev Technologies Ltd |
 
 ---
 
@@ -55,7 +57,7 @@ Answer **None / No** to every content question: cartoon or realistic violence, s
 | Support URL | https://shopzyy.manniedev.com/support | |
 | Marketing URL | https://shopzyy.manniedev.com | |
 | Privacy policy URL | https://shopzyy.manniedev.com/privacy | |
-| Copyright | © 2026 MannieDev | |
+| Copyright | © 2026 MannieDev Technologies Ltd | |
 | Version release | Manually release after approval, then use a phased release | |
 
 #### Description (4000 limit)
@@ -166,6 +168,7 @@ People who used the original Shopzyy (version 1.0) have their households moved t
 | User content: photos or videos (optional household background photo only) | Yes | App functionality |
 | Identifiers: user ID | Yes | App functionality |
 | Identifiers: device ID (push notification token) | Yes | App functionality |
+| Usage data: other usage data (the last time the app was used) | Yes | App functionality |
 | Diagnostics: other diagnostic data (anonymous error logs, no names, emails or list contents) | No | App functionality |
 
 Not collected: location, contacts, health and fitness, financial info, browsing history, search history, purchases, sensitive info, advertising data. Receipt photos are read on the device and deleted, so they are not collected.
@@ -258,6 +261,7 @@ Use the App Store description above with one change. Replace the line `• Sign 
 | App activity: other user-generated content (lists, items, history, trip totals) | Yes | No | No | App functionality |
 | App info and performance: diagnostics (anonymous error logs) | Yes | No | No | App functionality |
 | Device or other IDs (push notification token) | Yes | No | No | App functionality |
+| App activity: other actions (the last time the app was used) | Yes | No | No | App functionality |
 
 Not collected: location, contacts, messages, audio, files and docs, calendar, health and fitness, financial info, web browsing. Google's Firebase processes the data on our behalf as a service provider, which Google's form does not count as sharing. Receipt photos stay on the device and are deleted.
 

@@ -448,5 +448,11 @@ const nl: Record<string, string> = {
   "The photo is read on this device, then deleted. It is never saved or uploaded.": "De foto wordt op dit apparaat gelezen en daarna verwijderd. Hij wordt nooit opgeslagen of geüpload.",
   "Tick off and save": "Afvinken en opslaan",
   "Something went wrong while reading the receipt. Please try again.": "Er ging iets mis bij het lezen van het bonnetje. Probeer het opnieuw.",
+  "By continuing you agree to our {terms} and {privacy}.": "Door verder te gaan ga je akkoord met onze {terms} en ons {privacy}.",
+  "Legal": "Juridisch",
+  "Legal notice": "Juridische kennisgeving",
+  "Open-source licences": "Open-sourcelicenties",
+  "Privacy policy": "Privacybeleid",
+  "Terms of use": "Gebruiksvoorwaarden",
 };
 export default nl;

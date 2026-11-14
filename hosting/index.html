@@ -19,10 +19,10 @@
 <meta name="twitter:image" content="https://shopzyy.manniedev.com/og-image.png">
 <link rel="icon" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<link rel="preload" href="/fonts/space-grotesk-700-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+  @font-face { font-family:"Space Grotesk"; font-style:normal; font-weight:700; font-display:swap; src:url(/fonts/space-grotesk-700-latin-ext.woff2) format("woff2"); unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF }
+  @font-face { font-family:"Space Grotesk"; font-style:normal; font-weight:700; font-display:swap; src:url(/fonts/space-grotesk-700-latin.woff2) format("woff2"); unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD }
   :root { color-scheme: light dark; --green:#1E9E68; --hero:#127A55; --ink:#14221B; --bg:#F4F6F5; --card:#fff; --line:#DCE3DF; --muted:#5B6B63; --soft:#D8EFE4; --accent:#0F6B45; --yellow:#FFC83D; }
   @media (prefers-color-scheme: dark) { :root { --bg:#0E1A14; --card:#16261E; --line:#284236; --ink:#EAF2EE; --muted:#A5B6AD; --soft:#1C3A2D; --accent:#7FD9AE; } }
   * { box-sizing:border-box }
@@ -184,8 +184,8 @@
 
 <footer>
   <div class="wrap">
-    <span>© 2026 MannieDev</span>
-    <span class="links"><a href="/support" data-t="f_support">Support</a><a href="/privacy" data-t="f_privacy">Privacy policy</a><a href="/terms" data-t="f_terms">Terms of use</a><a href="/delete-account" data-t="f_delete">Delete your account</a></span>
+    <span>© 2026 MannieDev Technologies Ltd</span>
+    <span class="links"><a href="/support" data-t="f_support">Support</a><a href="/privacy" data-t="f_privacy">Privacy policy</a><a href="/terms" data-t="f_terms">Terms of use</a><a href="/delete-account" data-t="f_delete">Delete your account</a><a href="/impressum" data-t="f_legal">Legal notice</a><a href="/licenses" data-t="f_licenses">Open-source licences</a></span>
   </div>
 </footer>
 
@@ -220,6 +220,7 @@
       f5_t: 'One tidy alert', f5_p: '"Ada went shopping · 6 items." One summary when someone finishes, instead of a ping for every item.',
       f6_t: 'Private by design', f6_p: 'Sign in with Apple, Google or email. Your lists are shared only with the households you join, and you can delete your data any time.',
       cta_h: 'Get Shopzyy', cta_p: 'Free, in English, Spanish, French, Dutch, German and Italian.',
+      f_legal: 'Legal notice', f_licenses: 'Open-source licences',
       f_support: 'Support', f_privacy: 'Privacy policy', f_terms: 'Terms of use', f_delete: 'Delete your account',
       bar_t: 'Get Shopzyy', bar_s: 'Free on iPhone and Android', bar_go: 'Download' },
     es: { title: 'Shopzyy: una lista de la compra para todo el hogar', desc: 'Shopzyy es la lista de la compra compartida para todos los que viven contigo. Añade artículos en una frase, márcalos en la tienda y todos lo ven al instante. Gratis para iPhone y Android.',
@@ -238,6 +239,7 @@
       f5_t: 'Un solo aviso', f5_p: '"Ada ha ido de compras · 6 artículos." Un resumen cuando alguien termina, en vez de un aviso por artículo.',
       f6_t: 'Privada desde el diseño', f6_p: 'Inicia sesión con Apple, Google o correo. Tus listas solo se comparten con los hogares a los que te unes, y puedes borrar tus datos cuando quieras.',
       cta_h: 'Consigue Shopzyy', cta_p: 'Gratis, en inglés, español, francés, neerlandés, alemán e italiano.',
+      f_legal: 'Aviso legal', f_licenses: 'Licencias de código abierto',
       f_support: 'Ayuda', f_privacy: 'Política de privacidad', f_terms: 'Condiciones de uso', f_delete: 'Eliminar tu cuenta',
       bar_t: 'Consigue Shopzyy', bar_s: 'Gratis para iPhone y Android', bar_go: 'Descargar' },
     fr: { title: 'Shopzyy : une liste de courses pour tout le foyer', desc: 'Shopzyy est la liste de courses partagée pour tous ceux avec qui vous vivez. Ajoutez des articles en une phrase, cochez-les au magasin et tout le monde le voit aussitôt. Gratuit sur iPhone et Android.',
@@ -256,6 +258,7 @@
       f5_t: 'Une seule alerte', f5_p: '« Ada a fait les courses · 6 articles. » Un résumé quand quelqu\'un a fini, au lieu d\'une alerte par article.',
       f6_t: 'Confidentielle par conception', f6_p: "Connectez-vous avec Apple, Google ou e-mail. Vos listes ne sont partagées qu'avec les foyers que vous rejoignez, et vous pouvez supprimer vos données à tout moment.",
       cta_h: 'Obtenez Shopzyy', cta_p: 'Gratuit, en anglais, espagnol, français, néerlandais, allemand et italien.',
+      f_legal: 'Mentions légales', f_licenses: 'Licences open source',
       f_support: 'Aide', f_privacy: 'Politique de confidentialité', f_terms: "Conditions d'utilisation", f_delete: 'Supprimer votre compte',
       bar_t: 'Obtenez Shopzyy', bar_s: 'Gratuit sur iPhone et Android', bar_go: 'Télécharger' },
     nl: { title: 'Shopzyy: één boodschappenlijst voor het hele huishouden', desc: 'Shopzyy is de gedeelde boodschappenlijst voor iedereen met wie je samenwoont. Voeg artikelen toe in één zin, vink ze af in de winkel en iedereen ziet het direct. Gratis voor iPhone en Android.',
@@ -274,6 +277,7 @@
       f5_t: 'Eén nette melding', f5_p: '"Ada is boodschappen gaan doen · 6 artikelen." Eén overzicht als iemand klaar is, geen melding per artikel.',
       f6_t: 'Privé door ontwerp', f6_p: 'Log in met Apple, Google of e-mail. Je lijsten worden alleen gedeeld met huishoudens waar je bij hoort, en je kunt je gegevens altijd verwijderen.',
       cta_h: 'Download Shopzyy', cta_p: 'Gratis, in het Engels, Spaans, Frans, Nederlands, Duits en Italiaans.',
+      f_legal: 'Juridische kennisgeving', f_licenses: 'Open-sourcelicenties',
       f_support: 'Help', f_privacy: 'Privacybeleid', f_terms: 'Gebruiksvoorwaarden', f_delete: 'Verwijder je account',
       bar_t: 'Download Shopzyy', bar_s: 'Gratis voor iPhone en Android', bar_go: 'Downloaden' },
     de: { title: 'Shopzyy: eine Einkaufsliste für den ganzen Haushalt', desc: 'Shopzyy ist die gemeinsame Einkaufsliste für alle, mit denen du zusammenlebst. Artikel in einem Satz hinzufügen, im Laden abhaken und alle sehen es sofort. Kostenlos für iPhone und Android.',
@@ -292,6 +296,7 @@
       f5_t: 'Eine saubere Mitteilung', f5_p: '"Ada war einkaufen · 6 Artikel." Eine Zusammenfassung, wenn jemand fertig ist, statt einer Mitteilung pro Artikel.',
       f6_t: 'Privat von Grund auf', f6_p: 'Melde dich mit Apple, Google oder E-Mail an. Deine Listen werden nur mit Haushalten geteilt, denen du beitrittst, und du kannst deine Daten jederzeit löschen.',
       cta_h: 'Hol dir Shopzyy', cta_p: 'Kostenlos, auf Englisch, Spanisch, Französisch, Niederländisch, Deutsch und Italienisch.',
+      f_legal: 'Impressum', f_licenses: 'Open-Source-Lizenzen',
       f_support: 'Hilfe', f_privacy: 'Datenschutz', f_terms: 'Nutzungsbedingungen', f_delete: 'Konto löschen',
       bar_t: 'Hol dir Shopzyy', bar_s: 'Kostenlos für iPhone und Android', bar_go: 'Laden' },
     it: { title: 'Shopzyy: una lista della spesa per tutta la casa', desc: 'Shopzyy è la lista della spesa condivisa per tutti quelli con cui vivi. Aggiungi articoli in una frase, spuntali al negozio e tutti li vedono subito. Gratis per iPhone e Android.',
@@ -310,6 +315,7 @@
       f5_t: 'Un solo avviso', f5_p: '"Ada ha fatto la spesa · 6 articoli." Un riepilogo quando qualcuno finisce, invece di un avviso per articolo.',
       f6_t: 'Privata per progetto', f6_p: 'Accedi con Apple, Google o email. Le tue liste sono condivise solo con le case a cui ti unisci e puoi eliminare i tuoi dati in qualsiasi momento.',
       cta_h: 'Scarica Shopzyy', cta_p: 'Gratis, in inglese, spagnolo, francese, olandese, tedesco e italiano.',
+      f_legal: 'Note legali', f_licenses: 'Licenze open source',
       f_support: 'Aiuto', f_privacy: 'Informativa sulla privacy', f_terms: 'Termini di utilizzo', f_delete: 'Elimina il tuo account',
       bar_t: 'Scarica Shopzyy', bar_s: 'Gratis per iPhone e Android', bar_go: 'Scarica' }
   };

@@ -448,5 +448,11 @@ const de: Record<string, string> = {
   "The photo is read on this device, then deleted. It is never saved or uploaded.": "Das Foto wird auf diesem Gerät gelesen und danach gelöscht. Es wird nie gespeichert oder hochgeladen.",
   "Tick off and save": "Abhaken und speichern",
   "Something went wrong while reading the receipt. Please try again.": "Beim Lesen des Kassenbons ist etwas schiefgelaufen. Bitte versuche es erneut.",
+  "By continuing you agree to our {terms} and {privacy}.": "Mit dem Fortfahren stimmst du unseren {terms} und unserer {privacy} zu.",
+  "Legal": "Rechtliches",
+  "Legal notice": "Impressum",
+  "Open-source licences": "Open-Source-Lizenzen",
+  "Privacy policy": "Datenschutzerklärung",
+  "Terms of use": "Nutzungsbedingungen",
 };
 export default de;

@@ -8,6 +8,7 @@ import { Sheet } from '../../components/Sheet';
 import { FormRow, FormSection, MemberBadge, ProminentButton } from '../../components/ui';
 import { DELETE_CANCELLED } from '../../runtime/AppRuntime';
 import { useAccount, useAppState } from '../../runtime/RuntimeProvider';
+import { LEGAL_URLS } from '../../lib/legal';
 import { displayVersion } from '../../services/AppConfig';
 import { ShoppingListService } from '../../services/ShoppingListService';
 import { StorageKeys } from '../../services/storageKeys';
@@ -175,6 +176,15 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
           <Glyph name="chevron.right" size={16} color={th.tertiaryLabel} />
         </FormRow>
         <FormRow last onPress={confirmDelete}><Text style={{ fontSize: 17, color: th.red }}>{t('Delete my data…')}</Text></FormRow>
+      </FormSection>
+
+      <FormSection header={t('Legal')}>
+        {[[t('Privacy policy'), LEGAL_URLS.privacy], [t('Terms of use'), LEGAL_URLS.terms], [t('Legal notice'), LEGAL_URLS.notice], [t('Open-source licences'), LEGAL_URLS.licenses]].map(([label, url], i, all) => (
+          <FormRow key={url} last={i === all.length - 1} onPress={() => void Linking.openURL(url)}>
+            <Text style={{ fontSize: 17, color: th.label, flex: 1 }}>{label}</Text>
+            <Glyph name="chevron.right" size={16} color={th.tertiaryLabel} />
+          </FormRow>
+        ))}
       </FormSection>
 
       <View style={{ alignItems: 'center', gap: 4, marginTop: 24 }}>
