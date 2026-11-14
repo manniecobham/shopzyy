@@ -24,6 +24,8 @@ const ICONS = {
   'chevron.up.chevron.down': 'unfold_more',
   'circle': 'radio_button_unchecked',
   'clock.arrow.circlepath': 'history',
+  'doc.text.viewfinder': 'document_scanner',
+  'envelope': 'mail',
   'exclamationmark.circle.fill': 'error',
   'exclamationmark.icloud': 'cloud_off',
   'exclamationmark.triangle.fill': 'warning',

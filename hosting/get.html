@@ -4,9 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Get Shopzyy</title>
-<meta name="description" content="Shopzyy: one shared shopping list for the whole household.">
+<meta name="description" content="One shared shopping list for the whole household. Free for iPhone and Android.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Shopzyy">
 <meta property="og:title" content="Get Shopzyy">
-<meta property="og:description" content="One shared shopping list for the whole household.">
+<meta property="og:description" content="One shared shopping list for the whole household. Free for iPhone and Android.">
+<meta property="og:image" content="https://shopzyy.manniedev.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Get Shopzyy">
+<meta name="twitter:description" content="One shared shopping list for the whole household. Free for iPhone and Android.">
+<meta name="twitter:image" content="https://shopzyy.manniedev.com/og-image.png">
+<link rel="icon" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>
   :root { color-scheme: light dark; }
   body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; font:17px -apple-system,system-ui,sans-serif; background:#1E9E68; color:#fff; text-align:center; }
@@ -14,18 +25,39 @@
   h1 { font-size:28px; margin:0 0 8px; }
   p { margin:8px 0 24px; opacity:.92; }
   a.btn { display:block; background:#fff; color:#12724A; text-decoration:none; font-weight:600; padding:15px; border-radius:14px; margin:10px 0; }
+  .logo { width:96px; height:96px; border-radius:22%; box-shadow:0 6px 24px rgba(0,0,0,.25); margin:0 auto 18px; display:block; }
+  .stores { display:flex; gap:10px; margin-top:6px; }
+  .store { flex:1; display:flex; align-items:center; justify-content:center; gap:10px; background:#000; color:#fff; text-decoration:none; padding:10px 12px; border-radius:12px; text-align:left; }
+  .store span { display:flex; flex-direction:column; line-height:1.15; font-weight:600; font-size:17px; }
+  .store small { font-size:11px; font-weight:400; opacity:.85; }
+  @media (max-width:360px) { .stores { flex-direction:column; } }
 </style>
 </head>
 <body>
 <main>
+  <img class="logo" src="/logo.png" alt="Shopzyy" width="96" height="96">
   <h1 id="title">Get Shopzyy</h1>
   <p id="body">One shared shopping list for the whole household.</p>
-  <a class="btn" id="ios" href="https://apps.apple.com/app/id6823087110">Download on the App Store</a>
-  <a class="btn" id="android" href="https://play.google.com/store/apps/details?id=com.manniedevteam.shopzyy">Get it on Google Play</a>
+  <div class="stores" id="stores">
+    <a class="store" id="ios" href="https://apps.apple.com/app/id6823087110"><svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg><span><small id="iosCap">Download on the</small>App Store</span></a>
+    <a class="store" id="android" href="https://play.google.com/store/apps/details?id=com.manniedevteam.shopzyy"><svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" aria-hidden="true"><path d="M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594zM1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924zm12.207 10.065l3.258-3.238L3.45.195a1.466 1.466 0 0 0-.946-.179l11.04 10.973zm0 2.067l-11 10.933c.298.036.612-.016.906-.183l13.324-7.54-3.23-3.21z"/></svg><span><small id="androidCap">Get it on</small>Google Play</span></a>
+  </div>
 </main>
 <script>
   var APP_STORE_URL = 'https://apps.apple.com/app/id6823087110';
   var PLAY_URL = 'https://play.google.com/store/apps/details?id=com.manniedevteam.shopzyy';
+  var lang = (navigator.language || 'en').slice(0, 2).toLowerCase();
+  var CAPS = {
+    en: ['Download on the', 'Get it on', 'Don’t have Shopzyy yet?'],
+    es: ['Descárgala en', 'Disponible en', '¿Aún no tienes Shopzyy?'],
+    fr: ['Télécharger dans', 'Disponible sur', 'Pas encore Shopzyy ?'],
+    nl: ['Download in de', 'Ontdek het op', 'Nog geen Shopzyy?'],
+    de: ['Laden im', 'Jetzt bei', 'Noch kein Shopzyy?'],
+    it: ['Scarica su', 'Disponibile su', 'Non hai ancora Shopzyy?']
+  };
+  var c = CAPS[lang] || CAPS.en;
+  document.getElementById('iosCap').textContent = c[0];
+  document.getElementById('androidCap').textContent = c[1];
   var ua = navigator.userAgent || '';
   var android = /android/i.test(ua);
   var ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);

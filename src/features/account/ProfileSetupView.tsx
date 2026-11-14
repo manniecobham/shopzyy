@@ -1,3 +1,4 @@
+import { getAuth } from '@react-native-firebase/auth';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from 'react-native';
@@ -16,7 +17,7 @@ export function ProfileSetupView() {
   const mine = account.userRecordName ? store.allMembers().find((m) => m.userRecordName === account.userRecordName) : undefined;
   const starting = mine
     ? { name: mine.name, emoji: mine.emoji, colorHex: mine.colorHex }
-    : suggestedProfile(account.suggestedName ?? '');
+    : suggestedProfile(account.suggestedName ?? getAuth().currentUser?.displayName?.split(' ')[0] ?? '');
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: t.groupedBackground }}>
