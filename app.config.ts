@@ -1,7 +1,17 @@
 import { existsSync, readFileSync } from 'node:fs';
 import type { ExpoConfig } from 'expo/config';
 
-const APP_ENV = process.env.APP_ENV === 'production' ? 'production' : 'development';
+const PROD_FIREBASE_PROJECT = 'shopzyy-19bc2';
+
+function nativeEnv(): 'production' | 'development' {
+  for (const file of ['./ios/Shopzyy/GoogleService-Info.plist', './android/app/google-services.json']) {
+    try { if (readFileSync(file, 'utf8').includes(PROD_FIREBASE_PROJECT)) return 'production'; } catch {}
+  }
+  return 'development';
+}
+
+// An Xcode or Gradle build has no APP_ENV, so the generated native project decides.
+const APP_ENV = process.env.APP_ENV ? (process.env.APP_ENV === 'production' ? 'production' : 'development') : nativeEnv();
 const LINK_HOST = APP_ENV === 'production' ? 'shopzyy.manniedev.com' : 'shopzyy-8e62c.web.app';
 const LINK_HOSTS = APP_ENV === 'production' ? ['shopzyy.manniedev.com', 'shopzyy-19bc2.web.app'] : ['shopzyy-8e62c.web.app'];
 const FIREBASE_DIR = `./firebase/${APP_ENV}`;
@@ -38,7 +48,7 @@ const config: ExpoConfig = {
   ios: {
     supportsTablet: false,
     bundleIdentifier: 'com.manniedev-team.shopzy',
-    buildNumber: '10',
+    buildNumber: '11',
     googleServicesFile: IOS_FIREBASE_FILE,
     infoPlist: {
       UIBackgroundModes: ['remote-notification'],
