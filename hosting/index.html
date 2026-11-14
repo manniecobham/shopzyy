@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shopzyy: one shopping list for the whole household</title>
+<meta name="description" content="Shopzyy is the shared shopping list for everyone you live with. Add items in a sentence, tick them off at the shop and everyone sees it live. Free for iPhone and Android.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Shopzyy">
+<meta property="og:title" content="Shopzyy: one shopping list for the whole household">
+<meta property="og:description" content="Add items in a sentence, tick them off at the shop and everyone sees it live. Free for iPhone and Android.">
+<meta property="og:url" content="https://shopzyy.manniedev.com/">
+<meta property="og:image" content="https://shopzyy.manniedev.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Shopzyy: one shopping list for the whole household">
+<meta name="twitter:description" content="Add items in a sentence, tick them off at the shop and everyone sees it live. Free for iPhone and Android.">
+<meta name="twitter:image" content="https://shopzyy.manniedev.com/og-image.png">
+<link rel="icon" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: light dark; --green:#1E9E68; --hero:#127A55; --ink:#14221B; --bg:#F4F6F5; --card:#fff; --line:#DCE3DF; --muted:#5B6B63; --soft:#D8EFE4; --accent:#0F6B45; --yellow:#FFC83D; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0E1A14; --card:#16261E; --line:#284236; --ink:#EAF2EE; --muted:#A5B6AD; --soft:#1C3A2D; --accent:#7FD9AE; } }
+  * { box-sizing:border-box }
+  html { scroll-behavior:smooth }
+  body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; -webkit-text-size-adjust:100% }
+  body.has-bar { padding-bottom:calc(92px + env(safe-area-inset-bottom, 0px)) }
+  .wrap { max-width:1080px; margin:0 auto; padding-left:max(20px, env(safe-area-inset-left, 0px)); padding-right:max(20px, env(safe-area-inset-right, 0px)) }
+  h1, h2, .brand, .num { font-family:"Space Grotesk", system-ui, sans-serif }
+  a:focus-visible, button:focus-visible, select:focus-visible { outline:3px solid var(--yellow); outline-offset:3px }
+
+  .hero { background:var(--hero); color:#fff; padding-block:22px 80px; overflow:hidden }
+  nav { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:48px; font-weight:600; font-size:15px }
+  nav a { color:#fff; text-decoration:none } nav .right { display:flex; align-items:center; gap:18px }
+  .brand { display:flex; align-items:center; gap:10px; font-size:22px }
+  .brand img { width:38px; height:38px; border-radius:10px }
+  .lang { appearance:none; -webkit-appearance:none; background:rgba(255,255,255,.16) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center; color:#fff; border:0; border-radius:999px; padding:9px 34px 9px 16px; font-size:15px; font-weight:600; line-height:1.2; font-family:inherit; cursor:pointer }
+  .lang option { color:#14221B }
+  .hero-grid { display:grid; grid-template-columns:1.1fr .9fr; gap:48px; align-items:center }
+  h1 { font-size:clamp(38px, 6vw, 64px); line-height:1.04; letter-spacing:-.02em; margin:0 0 20px; text-wrap:balance }
+  .lead { font-size:clamp(18px, 2.4vw, 21px); margin:0 0 30px; max-width:36ch; font-weight:500 }
+  .stores { display:flex; flex-wrap:wrap; gap:14px }
+  .store { display:flex; align-items:center; gap:14px; min-width:214px; background:#000; color:#fff; text-decoration:none; padding:12px 22px; border-radius:14px; text-align:left; transition:transform .15s }
+  .store:hover { transform:translateY(-2px) }
+  .store svg { width:30px; height:30px; fill:#fff; flex:none }
+  .store span { display:flex; flex-direction:column; line-height:1.15; font-weight:700; font-size:20px } .store small { font-size:12px; font-weight:400; opacity:.85 }
+  .free { margin:18px 0 0; font-size:15px; font-weight:600; display:flex; align-items:center; gap:8px }
+  .free svg { width:18px; height:18px; stroke:#fff; fill:none; stroke-width:3; stroke-linecap:round; stroke-linejoin:round }
+
+  .stage { position:relative; display:flex; justify-content:center; padding:20px 0 }
+  .phone { width:290px; height:540px; border-radius:46px; background:#0B1511; padding:10px; box-shadow:0 40px 80px rgba(0,0,0,.35); transform:rotate(3deg) }
+  .screen { text-align:left; height:100%; background:#fff; color:#14221B; border-radius:36px; overflow:hidden; position:relative }
+  .m-bar { height:92px; padding:0 22px 12px; display:flex; align-items:flex-end; justify-content:space-between; font-family:"Space Grotesk", system-ui, sans-serif; font-size:30px; font-weight:700 }
+  .m-av { width:34px; height:34px; border-radius:50%; background:#D2EDE1; display:flex; align-items:center; justify-content:center; font-size:19px }
+  .m-row { display:flex; align-items:center; gap:12px; height:62px; padding:0 22px; border-bottom:1px solid #E9ECEA; font-size:17px }
+  .m-row .e { width:28px; text-align:center; font-size:22px } .m-row .n { flex:1; font-weight:600 } .m-row .q { color:#5B6B63; font-size:15px }
+  .m-row .c { width:26px; height:26px; border-radius:50%; border:2.5px solid #C8D0CC; display:flex; align-items:center; justify-content:center }
+  .m-row.done .n { text-decoration:line-through; opacity:.5 } .m-row.done .c { background:#1E9E68; border-color:#1E9E68 }
+  .m-row .c svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:3.4; stroke-linecap:round; stroke-linejoin:round; opacity:0 } .m-row.done .c svg { opacity:1 }
+  .m-add { position:absolute; left:14px; right:14px; bottom:16px; height:52px; border-radius:26px; background:#EEF0EF; display:flex; align-items:center; gap:10px; padding:0 18px; font-size:14px; color:#5B6B63 }
+  .m-add svg { width:20px; height:20px; flex:none } .m-add span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+  .notif { position:absolute; right:-6px; top:46px; width:262px; background:var(--card); color:var(--ink); border-radius:20px; padding:12px 14px; display:flex; gap:12px; align-items:center; box-shadow:0 18px 40px rgba(0,0,0,.28) }
+  .notif img { width:40px; height:40px; border-radius:10px; flex:none } .notif b { display:block; font-size:14px } .notif span { font-size:13px; color:var(--muted) }
+  @media (prefers-reduced-motion: no-preference) { .notif { animation:float 4s ease-in-out infinite } @keyframes float { 50% { transform:translateY(-8px) } } }
+
+  section { padding-block:76px }
+  h2 { font-size:clamp(26px, 4vw, 38px); letter-spacing:-.01em; margin:0 0 12px; text-align:center; text-wrap:balance }
+  .sub { text-align:center; color:var(--muted); margin:0 auto 40px; max-width:52ch }
+  .steps { display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:18px; counter-reset:s }
+  .step { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:28px }
+  .num { width:44px; height:44px; border-radius:50%; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:16px }
+  .step h3, .card h3 { margin:0 0 8px; font-size:20px } .step p, .card p { margin:0; color:var(--muted); font-size:16px }
+  .alt { background:var(--card); border-block:1px solid var(--line) }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(290px, 1fr)); gap:18px }
+  .card { background:var(--bg); border:1px solid var(--line); border-radius:20px; padding:26px }
+  .ico { width:46px; height:46px; border-radius:14px; background:var(--soft); display:flex; align-items:center; justify-content:center; margin-bottom:16px }
+  .ico svg { width:24px; height:24px; stroke:var(--accent); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+  .cta { text-align:center } .cta .stores { justify-content:center }
+  footer { border-top:1px solid var(--line); padding-block:30px 40px; font-size:15px; color:var(--muted) }
+  footer .wrap { display:flex; flex-wrap:wrap; justify-content:space-between; gap:14px 28px } footer .links { display:flex; flex-wrap:wrap; gap:8px 24px }
+  footer a { color:var(--muted) } footer a:hover { color:var(--ink) }
+
+  .bar { position:fixed; left:0; right:0; bottom:0; z-index:20; background:var(--card); border-top:1px solid var(--line); box-shadow:0 -10px 30px rgba(0,0,0,.14); padding:12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); transform:translateY(110%); transition:transform .3s ease }
+  .bar.show { transform:none }
+  .bar .in { max-width:1080px; margin:0 auto; display:flex; align-items:center; gap:14px }
+  .bar img { width:48px; height:48px; border-radius:12px; flex:none }
+  .bar .t { flex:1; min-width:0; line-height:1.25 } .bar .t b { display:block; font-size:17px } .bar .t span { font-size:14px; color:var(--muted) }
+  .bar .go { display:flex; gap:8px; flex:none }
+  .bar .go a { background:var(--hero); color:#fff; font-weight:700; text-decoration:none; padding:12px 20px; border-radius:999px; font-size:16px; white-space:nowrap }
+  .bar .x { flex:none; background:none; border:0; color:var(--muted); font-size:26px; line-height:1; padding:6px 8px; cursor:pointer }
+  .bar [data-os-only] { display:none } .bar[data-os="ios"] [data-os-only="ios"], .bar[data-os="android"] [data-os-only="android"], .bar[data-os="other"] [data-os-only] { display:inline-block }
+
+  @media (max-width:860px) {
+    .hero-grid { grid-template-columns:1fr; text-align:center } .lead { margin-inline:auto } .stores, .free { justify-content:center }
+    .stage { padding-top:40px } nav { margin-bottom:36px } .nav-support { display:none }
+    .phone { transform:none }
+  }
+  @media (max-width:480px) {
+    .store { min-width:0; flex:1 1 100% } .bar .t span { display:none } .bar .go a { padding:11px 16px }
+    .notif { right:50%; transform:translateX(50%) } @media (prefers-reduced-motion: no-preference) { .notif { animation:none } }
+  }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <nav>
+      <span class="brand"><img src="/logo.png" alt="" width="38" height="38">Shopzyy</span>
+      <span class="right">
+        <a class="nav-support" href="/support" data-t="nav_support">Support</a>
+        <select class="lang" id="lang" aria-label="Language">
+          <option value="en">English</option><option value="es">Español</option><option value="fr">Français</option><option value="nl">Nederlands</option><option value="de">Deutsch</option><option value="it">Italiano</option>
+        </select>
+      </span>
+    </nav>
+    <div class="hero-grid">
+      <div>
+        <h1 data-t="h1">One shopping list for the whole household.</h1>
+        <p class="lead" data-t="lead">Add something on your phone and it's on everyone's list straight away. Tick it off at the shop and everyone knows it's sorted.</p>
+        <div class="stores" id="heroStores">
+          <a class="store" href="https://apps.apple.com/app/id6823087110"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg><span><small data-t="cap_ios">Download on the</small>App Store</span></a>
+          <a class="store" href="https://play.google.com/store/apps/details?id=com.manniedevteam.shopzyy"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594zM1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924zm12.207 10.065l3.258-3.238L3.45.195a1.466 1.466 0 0 0-.946-.179l11.04 10.973zm0 2.067l-11 10.933c.298.036.612-.016.906-.183l13.324-7.54-3.23-3.21z"/></svg><span><small data-t="cap_play">Get it on</small>Google Play</span></a>
+        </div>
+        <p class="free"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-t="free">Free for iPhone and Android</span></p>
+      </div>
+      <div class="stage" aria-hidden="true">
+        <div class="phone"><div class="screen">
+          <div class="m-bar"><span data-t="m_list">List</span><span class="m-av">🙂</span></div>
+          <div class="m-row done"><span class="e">🍚</span><span class="n" data-t="m_rice">Rice</span><span class="q">2 kg</span><span class="c"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></div>
+          <div class="m-row done"><span class="e">🥛</span><span class="n" data-t="m_milk">Milk</span><span class="q">×2</span><span class="c"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></div>
+          <div class="m-row"><span class="e">🥚</span><span class="n" data-t="m_eggs">Eggs</span><span class="q"></span><span class="c"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></div>
+          <div class="m-row"><span class="e">🍌</span><span class="n" data-t="m_bananas">Bananas</span><span class="q"></span><span class="c"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></div>
+          <div class="m-add"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z" fill="#FFC83D"/></svg><span data-t="m_add">Add items, e.g. 2 kg rice, milk x2</span></div>
+        </div></div>
+        <div class="notif"><img src="/logo.png" alt="" width="40" height="40"><div><b data-t="m_notif_t">Ada went shopping</b><span data-t="m_notif_b">6 items · €42.30</span></div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section>
+    <div class="wrap">
+      <h2 data-t="how_h">How it works</h2>
+      <p class="sub" data-t="how_s">From a sentence to a trip, in three steps.</p>
+      <div class="steps">
+        <div class="step"><div class="num">1</div><h3 data-t="s1_t">Add it in a sentence</h3><p data-t="s1_p">Type "2 kg rice, milk x2, eggs". Shopzyy works out the quantities, units and aisles.</p></div>
+        <div class="step"><div class="num">2</div><h3 data-t="s2_t">Invite your household</h3><p data-t="s2_p">Share a link or a code from any app. They join in one tap.</p></div>
+        <div class="step"><div class="num">3</div><h3 data-t="s3_t">Shop together</h3><p data-t="s3_p">Tick items off at the shop. Everyone sees it live, and gets one tidy summary when you're done.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="wrap">
+      <h2 data-t="feat_h">Made for the people you share a home with</h2>
+      <p class="sub" data-t="feat_s">Everything a household needs, and nothing it doesn't.</p>
+      <div class="grid">
+        <div class="card"><div class="ico"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><h3 data-t="f1_t">Everyone sees it live</h3><p data-t="f1_p">Add an item on one phone and it appears on every other phone in the household. No more double-buying milk.</p></div>
+        <div class="card"><div class="ico"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div><h3 data-t="f2_t">Type it like a text</h3><p data-t="f2_p">"2 kg rice, milk x2, eggs" becomes three neat items, with quantities, units and store aisles worked out for you.</p></div>
+        <div class="card"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><h3 data-t="f3_t">Learns what you buy</h3><p data-t="f3_p">Suggestions and restock reminders arrive before you run out, each with a plain reason.</p></div>
+        <div class="card"><div class="ico"><svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg></div><h3 data-t="f4_t">Scan the receipt</h3><p data-t="f4_p">Photograph a receipt to tick off your list and save the total. The photo is read on your phone and never stored.</p></div>
+        <div class="card"><div class="ico"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div><h3 data-t="f5_t">One tidy alert</h3><p data-t="f5_p">"Ada went shopping · 6 items." One summary when someone finishes, instead of a ping for every item.</p></div>
+        <div class="card"><div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><h3 data-t="f6_t">Private by design</h3><p data-t="f6_p">Sign in with Apple, Google or email. Your lists are shared only with the households you join, and you can delete your data any time.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="wrap">
+      <h2 data-t="cta_h">Get Shopzyy</h2>
+      <p class="sub" data-t="cta_p">Free, in English, Spanish, French, Dutch, German and Italian.</p>
+      <div class="stores">
+        <a class="store" href="https://apps.apple.com/app/id6823087110"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg><span><small data-t="cap_ios">Download on the</small>App Store</span></a>
+        <a class="store" href="https://play.google.com/store/apps/details?id=com.manniedevteam.shopzyy"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594zM1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924zm12.207 10.065l3.258-3.238L3.45.195a1.466 1.466 0 0 0-.946-.179l11.04 10.973zm0 2.067l-11 10.933c.298.036.612-.016.906-.183l13.324-7.54-3.23-3.21z"/></svg><span><small data-t="cap_play">Get it on</small>Google Play</span></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 MannieDev</span>
+    <span class="links"><a href="/support" data-t="f_support">Support</a><a href="/privacy" data-t="f_privacy">Privacy policy</a><a href="/terms" data-t="f_terms">Terms of use</a><a href="/delete-account" data-t="f_delete">Delete your account</a></span>
+  </div>
+</footer>
+
+<div class="bar" id="bar" data-os="other" role="region" aria-label="Shopzyy">
+  <div class="in">
+    <img src="/logo.png" alt="" width="48" height="48">
+    <div class="t"><b data-t="bar_t">Get Shopzyy</b><span data-t="bar_s">Free on iPhone and Android</span></div>
+    <div class="go">
+      <a data-os-only="ios" href="https://apps.apple.com/app/id6823087110"><span data-t="bar_go">Download</span></a>
+      <a data-os-only="android" href="https://play.google.com/store/apps/details?id=com.manniedevteam.shopzyy"><span data-t="bar_go">Download</span></a>
+    </div>
+    <button class="x" id="barX" type="button" aria-label="Close">×</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var T = {
+    en: { title: 'Shopzyy: one shopping list for the whole household', desc: "Shopzyy is the shared shopping list for everyone you live with. Add items in a sentence, tick them off at the shop and everyone sees it live. Free for iPhone and Android.",
+      nav_support: 'Support', h1: 'One shopping list for the whole household.', lead: "Add something on your phone and it's on everyone's list straight away. Tick it off at the shop and everyone knows it's sorted.",
+      cap_ios: 'Download on the', cap_play: 'Get it on', free: 'Free for iPhone and Android',
+      m_list: 'List', m_rice: 'Rice', m_milk: 'Milk', m_eggs: 'Eggs', m_bananas: 'Bananas', m_add: 'Add items, e.g. 2 kg rice, milk x2', m_notif_t: 'Ada went shopping', m_notif_b: '6 items · €42.30',
+      how_h: 'How it works', how_s: 'From a sentence to a trip, in three steps.',
+      s1_t: 'Add it in a sentence', s1_p: 'Type "2 kg rice, milk x2, eggs". Shopzyy works out the quantities, units and aisles.',
+      s2_t: 'Invite your household', s2_p: 'Share a link or a code from any app. They join in one tap.',
+      s3_t: 'Shop together', s3_p: "Tick items off at the shop. Everyone sees it live, and gets one tidy summary when you're done.",
+      feat_h: 'Made for the people you share a home with', feat_s: "Everything a household needs, and nothing it doesn't.",
+      f1_t: 'Everyone sees it live', f1_p: 'Add an item on one phone and it appears on every other phone in the household. No more double-buying milk.',
+      f2_t: 'Type it like a text', f2_p: '"2 kg rice, milk x2, eggs" becomes three neat items, with quantities, units and store aisles worked out for you.',
+      f3_t: 'Learns what you buy', f3_p: 'Suggestions and restock reminders arrive before you run out, each with a plain reason.',
+      f4_t: 'Scan the receipt', f4_p: 'Photograph a receipt to tick off your list and save the total. The photo is read on your phone and never stored.',
+      f5_t: 'One tidy alert', f5_p: '"Ada went shopping · 6 items." One summary when someone finishes, instead of a ping for every item.',
+      f6_t: 'Private by design', f6_p: 'Sign in with Apple, Google or email. Your lists are shared only with the households you join, and you can delete your data any time.',
+      cta_h: 'Get Shopzyy', cta_p: 'Free, in English, Spanish, French, Dutch, German and Italian.',
+      f_support: 'Support', f_privacy: 'Privacy policy', f_terms: 'Terms of use', f_delete: 'Delete your account',
+      bar_t: 'Get Shopzyy', bar_s: 'Free on iPhone and Android', bar_go: 'Download' },
+    es: { title: 'Shopzyy: una lista de la compra para todo el hogar', desc: 'Shopzyy es la lista de la compra compartida para todos los que viven contigo. Añade artículos en una frase, márcalos en la tienda y todos lo ven al instante. Gratis para iPhone y Android.',
+      nav_support: 'Ayuda', h1: 'Una lista de la compra para todo el hogar.', lead: 'Añade algo en tu teléfono y aparece al instante en la lista de todos. Márcalo en la tienda y todos saben que ya está.',
+      cap_ios: 'Descárgala en', cap_play: 'Disponible en', free: 'Gratis para iPhone y Android',
+      m_list: 'Lista', m_rice: 'Arroz', m_milk: 'Leche', m_eggs: 'Huevos', m_bananas: 'Plátanos', m_add: 'Añade, p. ej. 2 kg arroz, leche x2', m_notif_t: 'Ada ha ido de compras', m_notif_b: '6 artículos · 42,30 €',
+      how_h: 'Cómo funciona', how_s: 'De una frase a una compra, en tres pasos.',
+      s1_t: 'Añádelo en una frase', s1_p: 'Escribe "2 kg arroz, leche x2, huevos". Shopzyy calcula cantidades, unidades y pasillos.',
+      s2_t: 'Invita a tu hogar', s2_p: 'Comparte un enlace o un código desde cualquier app. Se unen con un toque.',
+      s3_t: 'Comprad juntos', s3_p: 'Marca los artículos en la tienda. Todos lo ven al instante y reciben un resumen cuando terminas.',
+      feat_h: 'Hecha para quienes comparten casa', feat_s: 'Todo lo que un hogar necesita, y nada más.',
+      f1_t: 'Todos lo ven al instante', f1_p: 'Añade un artículo en un teléfono y aparece en todos los demás del hogar. Se acabó comprar la leche dos veces.',
+      f2_t: 'Escríbelo como un mensaje', f2_p: '"2 kg arroz, leche x2, huevos" se convierte en tres artículos con cantidades, unidades y pasillos de la tienda.',
+      f3_t: 'Aprende lo que compras', f3_p: 'Sugerencias y recordatorios llegan antes de que se acabe algo, cada uno con una razón clara.',
+      f4_t: 'Escanea el ticket', f4_p: 'Haz una foto del ticket para marcar tu lista y guardar el total. La foto se lee en tu teléfono y nunca se guarda.',
+      f5_t: 'Un solo aviso', f5_p: '"Ada ha ido de compras · 6 artículos." Un resumen cuando alguien termina, en vez de un aviso por artículo.',
+      f6_t: 'Privada desde el diseño', f6_p: 'Inicia sesión con Apple, Google o correo. Tus listas solo se comparten con los hogares a los que te unes, y puedes borrar tus datos cuando quieras.',
+      cta_h: 'Consigue Shopzyy', cta_p: 'Gratis, en inglés, español, francés, neerlandés, alemán e italiano.',
+      f_support: 'Ayuda', f_privacy: 'Política de privacidad', f_terms: 'Condiciones de uso', f_delete: 'Eliminar tu cuenta',
+      bar_t: 'Consigue Shopzyy', bar_s: 'Gratis para iPhone y Android', bar_go: 'Descargar' },
+    fr: { title: 'Shopzyy : une liste de courses pour tout le foyer', desc: 'Shopzyy est la liste de courses partagée pour tous ceux avec qui vous vivez. Ajoutez des articles en une phrase, cochez-les au magasin et tout le monde le voit aussitôt. Gratuit sur iPhone et Android.',
+      nav_support: 'Aide', h1: 'Une liste de courses pour tout le foyer.', lead: "Ajoutez quelque chose sur votre téléphone et c'est aussitôt sur la liste de tous. Cochez-le au magasin et chacun sait que c'est fait.",
+      cap_ios: 'Télécharger dans', cap_play: 'Disponible sur', free: 'Gratuit sur iPhone et Android',
+      m_list: 'Liste', m_rice: 'Riz', m_milk: 'Lait', m_eggs: 'Œufs', m_bananas: 'Bananes', m_add: 'Ajoutez, ex. 2 kg riz, lait x2', m_notif_t: 'Ada a fait les courses', m_notif_b: '6 articles · 42,30 €',
+      how_h: 'Comment ça marche', how_s: "D'une phrase à des courses, en trois étapes.",
+      s1_t: 'Ajoutez en une phrase', s1_p: 'Tapez « 2 kg riz, lait x2, œufs ». Shopzyy déduit les quantités, les unités et les rayons.',
+      s2_t: 'Invitez votre foyer', s2_p: "Partagez un lien ou un code depuis n'importe quelle app. Ils rejoignent en un geste.",
+      s3_t: 'Faites les courses ensemble', s3_p: "Cochez les articles au magasin. Tout le monde le voit en direct et reçoit un résumé quand vous avez fini.",
+      feat_h: 'Pensée pour ceux qui partagent un foyer', feat_s: "Tout ce dont un foyer a besoin, et rien de superflu.",
+      f1_t: 'Tout le monde voit en direct', f1_p: "Ajoutez un article sur un téléphone et il apparaît sur tous les autres du foyer. Fini le lait acheté en double.",
+      f2_t: 'Écrivez comme un message', f2_p: '« 2 kg riz, lait x2, œufs » devient trois articles, avec quantités, unités et rayons du magasin.',
+      f3_t: 'Apprend ce que vous achetez', f3_p: "Suggestions et rappels arrivent avant la rupture, chacun avec une raison claire.",
+      f4_t: 'Scannez le ticket', f4_p: "Photographiez un ticket pour cocher votre liste et garder le total. La photo est lue sur votre téléphone et jamais conservée.",
+      f5_t: 'Une seule alerte', f5_p: '« Ada a fait les courses · 6 articles. » Un résumé quand quelqu\'un a fini, au lieu d\'une alerte par article.',
+      f6_t: 'Confidentielle par conception', f6_p: "Connectez-vous avec Apple, Google ou e-mail. Vos listes ne sont partagées qu'avec les foyers que vous rejoignez, et vous pouvez supprimer vos données à tout moment.",
+      cta_h: 'Obtenez Shopzyy', cta_p: 'Gratuit, en anglais, espagnol, français, néerlandais, allemand et italien.',
+      f_support: 'Aide', f_privacy: 'Politique de confidentialité', f_terms: "Conditions d'utilisation", f_delete: 'Supprimer votre compte',
+      bar_t: 'Obtenez Shopzyy', bar_s: 'Gratuit sur iPhone et Android', bar_go: 'Télécharger' },
+    nl: { title: 'Shopzyy: één boodschappenlijst voor het hele huishouden', desc: 'Shopzyy is de gedeelde boodschappenlijst voor iedereen met wie je samenwoont. Voeg artikelen toe in één zin, vink ze af in de winkel en iedereen ziet het direct. Gratis voor iPhone en Android.',
+      nav_support: 'Help', h1: 'Één boodschappenlijst voor het hele huishouden.', lead: 'Voeg iets toe op je telefoon en het staat meteen op ieders lijst. Vink het af in de winkel en iedereen weet dat het geregeld is.',
+      cap_ios: 'Download in de', cap_play: 'Ontdek het op', free: 'Gratis voor iPhone en Android',
+      m_list: 'Lijst', m_rice: 'Rijst', m_milk: 'Melk', m_eggs: 'Eieren', m_bananas: 'Bananen', m_add: 'Voeg toe, bijv. 2 kg rijst, melk x2', m_notif_t: 'Ada is boodschappen gaan doen', m_notif_b: '6 artikelen · € 42,30',
+      how_h: 'Zo werkt het', how_s: 'Van een zin naar een winkelronde, in drie stappen.',
+      s1_t: 'Voeg toe in één zin', s1_p: 'Typ "2 kg rijst, melk x2, eieren". Shopzyy bepaalt hoeveelheden, eenheden en looproute.',
+      s2_t: 'Nodig je huishouden uit', s2_p: 'Deel een link of code vanuit elke app. Ze doen mee met één tik.',
+      s3_t: 'Samen winkelen', s3_p: 'Vink artikelen af in de winkel. Iedereen ziet het direct en krijgt één overzicht als je klaar bent.',
+      feat_h: 'Gemaakt voor mensen die een huis delen', feat_s: 'Alles wat een huishouden nodig heeft, en niets meer.',
+      f1_t: 'Iedereen ziet het direct', f1_p: 'Voeg een artikel toe op één telefoon en het verschijnt op alle andere in het huishouden. Nooit meer dubbel melk kopen.',
+      f2_t: 'Typ het als een appje', f2_p: '"2 kg rijst, melk x2, eieren" wordt drie nette artikelen, met hoeveelheden, eenheden en winkelafdelingen.',
+      f3_t: 'Leert wat je koopt', f3_p: 'Suggesties en herinneringen komen voordat iets op is, elk met een duidelijke reden.',
+      f4_t: 'Scan het bonnetje', f4_p: 'Fotografeer een bonnetje om je lijst af te vinken en het totaal op te slaan. De foto wordt op je telefoon gelezen en nooit bewaard.',
+      f5_t: 'Eén nette melding', f5_p: '"Ada is boodschappen gaan doen · 6 artikelen." Eén overzicht als iemand klaar is, geen melding per artikel.',
+      f6_t: 'Privé door ontwerp', f6_p: 'Log in met Apple, Google of e-mail. Je lijsten worden alleen gedeeld met huishoudens waar je bij hoort, en je kunt je gegevens altijd verwijderen.',
+      cta_h: 'Download Shopzyy', cta_p: 'Gratis, in het Engels, Spaans, Frans, Nederlands, Duits en Italiaans.',
+      f_support: 'Help', f_privacy: 'Privacybeleid', f_terms: 'Gebruiksvoorwaarden', f_delete: 'Verwijder je account',
+      bar_t: 'Download Shopzyy', bar_s: 'Gratis voor iPhone en Android', bar_go: 'Downloaden' },
+    de: { title: 'Shopzyy: eine Einkaufsliste für den ganzen Haushalt', desc: 'Shopzyy ist die gemeinsame Einkaufsliste für alle, mit denen du zusammenlebst. Artikel in einem Satz hinzufügen, im Laden abhaken und alle sehen es sofort. Kostenlos für iPhone und Android.',
+      nav_support: 'Hilfe', h1: 'Eine Einkaufsliste für den ganzen Haushalt.', lead: 'Füge etwas auf deinem Handy hinzu und es steht sofort auf der Liste aller. Hak es im Laden ab und alle wissen, dass es erledigt ist.',
+      cap_ios: 'Laden im', cap_play: 'Jetzt bei', free: 'Kostenlos für iPhone und Android',
+      m_list: 'Liste', m_rice: 'Reis', m_milk: 'Milch', m_eggs: 'Eier', m_bananas: 'Bananen', m_add: 'Hinzufügen, z. B. 2 kg Reis, Milch x2', m_notif_t: 'Ada war einkaufen', m_notif_b: '6 Artikel · 42,30 €',
+      how_h: "So funktioniert's", how_s: 'Vom Satz zum Einkauf in drei Schritten.',
+      s1_t: 'In einem Satz hinzufügen', s1_p: 'Tippe "2 kg Reis, Milch x2, Eier". Shopzyy erkennt Mengen, Einheiten und Gänge.',
+      s2_t: 'Haushalt einladen', s2_p: 'Teile einen Link oder Code aus jeder App. Mit einem Tipp sind alle dabei.',
+      s3_t: 'Gemeinsam einkaufen', s3_p: 'Hak Artikel im Laden ab. Alle sehen es live und bekommen eine Zusammenfassung, wenn du fertig bist.',
+      feat_h: 'Gemacht für alle, die ein Zuhause teilen', feat_s: 'Alles, was ein Haushalt braucht, und nichts, was er nicht braucht.',
+      f1_t: 'Alle sehen es live', f1_p: 'Füge einen Artikel auf einem Handy hinzu und er erscheint auf allen anderen im Haushalt. Nie wieder doppelt Milch kaufen.',
+      f2_t: 'Tippen wie eine Nachricht', f2_p: '"2 kg Reis, Milch x2, Eier" werden drei saubere Artikel mit Mengen, Einheiten und Gängen im Laden.',
+      f3_t: 'Lernt, was ihr kauft', f3_p: 'Vorschläge und Erinnerungen kommen, bevor etwas ausgeht, jeweils mit einem klaren Grund.',
+      f4_t: 'Kassenbon scannen', f4_p: 'Fotografiere einen Kassenbon, um die Liste abzuhaken und die Summe zu speichern. Das Foto wird auf deinem Handy gelesen und nie gespeichert.',
+      f5_t: 'Eine saubere Mitteilung', f5_p: '"Ada war einkaufen · 6 Artikel." Eine Zusammenfassung, wenn jemand fertig ist, statt einer Mitteilung pro Artikel.',
+      f6_t: 'Privat von Grund auf', f6_p: 'Melde dich mit Apple, Google oder E-Mail an. Deine Listen werden nur mit Haushalten geteilt, denen du beitrittst, und du kannst deine Daten jederzeit löschen.',
+      cta_h: 'Hol dir Shopzyy', cta_p: 'Kostenlos, auf Englisch, Spanisch, Französisch, Niederländisch, Deutsch und Italienisch.',
+      f_support: 'Hilfe', f_privacy: 'Datenschutz', f_terms: 'Nutzungsbedingungen', f_delete: 'Konto löschen',
+      bar_t: 'Hol dir Shopzyy', bar_s: 'Kostenlos für iPhone und Android', bar_go: 'Laden' },
+    it: { title: 'Shopzyy: una lista della spesa per tutta la casa', desc: 'Shopzyy è la lista della spesa condivisa per tutti quelli con cui vivi. Aggiungi articoli in una frase, spuntali al negozio e tutti li vedono subito. Gratis per iPhone e Android.',
+      nav_support: 'Aiuto', h1: 'Una lista della spesa per tutta la casa.', lead: 'Aggiungi qualcosa sul telefono e compare subito nella lista di tutti. Spuntalo al negozio e tutti sanno che è fatto.',
+      cap_ios: 'Scarica su', cap_play: 'Disponibile su', free: 'Gratis per iPhone e Android',
+      m_list: 'Lista', m_rice: 'Riso', m_milk: 'Latte', m_eggs: 'Uova', m_bananas: 'Banane', m_add: 'Aggiungi, es. 2 kg riso, latte x2', m_notif_t: 'Ada ha fatto la spesa', m_notif_b: '6 articoli · 42,30 €',
+      how_h: 'Come funziona', how_s: 'Da una frase alla spesa, in tre passi.',
+      s1_t: 'Aggiungi in una frase', s1_p: 'Scrivi "2 kg riso, latte x2, uova". Shopzyy capisce quantità, unità e reparti.',
+      s2_t: 'Invita la tua casa', s2_p: 'Condividi un link o un codice da qualsiasi app. Entrano con un tocco.',
+      s3_t: 'Fate la spesa insieme', s3_p: 'Spunta gli articoli al negozio. Tutti lo vedono in diretta e ricevono un riepilogo quando finisci.',
+      feat_h: 'Pensata per chi condivide una casa', feat_s: 'Tutto ciò che serve a una casa, e nient\'altro.',
+      f1_t: 'Tutti vedono in diretta', f1_p: 'Aggiungi un articolo su un telefono e compare su tutti gli altri della casa. Mai più latte comprato due volte.',
+      f2_t: 'Scrivi come un messaggio', f2_p: '"2 kg riso, latte x2, uova" diventano tre articoli con quantità, unità e reparti del negozio.',
+      f3_t: 'Impara cosa compri', f3_p: 'Suggerimenti e promemoria arrivano prima che qualcosa finisca, ciascuno con un motivo chiaro.',
+      f4_t: 'Scansiona lo scontrino', f4_p: 'Fotografa uno scontrino per spuntare la lista e salvare il totale. La foto viene letta sul tuo telefono e mai conservata.',
+      f5_t: 'Un solo avviso', f5_p: '"Ada ha fatto la spesa · 6 articoli." Un riepilogo quando qualcuno finisce, invece di un avviso per articolo.',
+      f6_t: 'Privata per progetto', f6_p: 'Accedi con Apple, Google o email. Le tue liste sono condivise solo con le case a cui ti unisci e puoi eliminare i tuoi dati in qualsiasi momento.',
+      cta_h: 'Scarica Shopzyy', cta_p: 'Gratis, in inglese, spagnolo, francese, olandese, tedesco e italiano.',
+      f_support: 'Aiuto', f_privacy: 'Informativa sulla privacy', f_terms: 'Termini di utilizzo', f_delete: 'Elimina il tuo account',
+      bar_t: 'Scarica Shopzyy', bar_s: 'Gratis per iPhone e Android', bar_go: 'Scarica' }
+  };
+  var meta = document.querySelector('meta[name="description"]'), select = document.getElementById('lang');
+  function pick() {
+    var q = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
+    if (T[q]) return q;
+    try { var saved = localStorage.getItem('lang'); if (saved && T[saved]) return saved; } catch (e) {}
+    var l = (navigator.language || 'en').slice(0, 2).toLowerCase();
+    return T[l] ? l : 'en';
+  }
+  function apply(l) {
+    var d = T[l];
+    document.documentElement.lang = l;
+    document.title = d.title;
+    if (meta) meta.setAttribute('content', d.desc);
+    document.querySelectorAll('[data-t]').forEach(function (el) { var v = d[el.getAttribute('data-t')]; if (v != null) el.textContent = v; });
+    select.value = l;
+  }
+  select.addEventListener('change', function () { apply(select.value); try { localStorage.setItem('lang', select.value); } catch (e) {} });
+  apply(pick());
+
+  var ua = navigator.userAgent || '';
+  var android = /android/i.test(ua), ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+  var bar = document.getElementById('bar');
+  bar.setAttribute('data-os', ios ? 'ios' : android ? 'android' : 'other');
+  var dismissed = false;
+  try { dismissed = sessionStorage.getItem('barX') === '1'; } catch (e) {}
+  var heroVisible = true, small = window.matchMedia ? window.matchMedia('(max-width: 860px)') : { matches: false };
+  function show(on) { var v = on && !dismissed; bar.classList.toggle('show', v); document.body.classList.toggle('has-bar', v); }
+  function update() { show(!heroVisible || small.matches); }
+  document.getElementById('barX').addEventListener('click', function () { dismissed = true; try { sessionStorage.setItem('barX', '1'); } catch (e) {} show(false); });
+  if (small.addEventListener) small.addEventListener('change', update);
+  var heroStores = document.getElementById('heroStores');
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) { heroVisible = entries[0].isIntersecting; update(); }).observe(heroStores);
+  } else {
+    window.addEventListener('scroll', function () { heroVisible = window.scrollY < 500; update(); }, { passive: true });
+  }
+  update();
+})();
+</script>
+</body>
+</html>

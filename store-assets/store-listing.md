@@ -7,7 +7,7 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 | | iOS | Android |
 |---|---|---|
 | Version | 1.1.1 | 1.1.1 |
-| Build | 11 | versionCode **[next number above your last upload]** |
+| Build | 12 | versionCode **[next number above your last upload]** |
 | Bundle / package | `com.manniedev-team.shopzy` | `com.manniedevteam.shopzyy` |
 | Minimum OS | iOS 16.4 | Android 7.0 (API 24), as set by the project |
 | Price | Free, no in-app purchases | Free, no in-app purchases |
@@ -185,7 +185,8 @@ Not collected: location, contacts, health and fitness, financial info, browsing 
 
 | Set | Size | Notes |
 |---|---|---|
-| iPhone 6.9" | 1320 × 2868 | The poster boards are 1290 × 2796, so scale or re-export them. App Store Connect shows the exact accepted sizes on the upload screen, and sizes change |
+| iPhone, 6.1" or 6.3" slot | 1179 × 2556 or 1206 × 2622 (portrait) | Sizes shown on the App Store Connect upload screen. The poster boards are 1290 × 2796, so export them at 1206 × 2622. The sizes change over time, so trust the upload screen |
+| App Preview (video) | 886 × 1920 portrait, or 1920 × 886 landscape | 15 to 30 seconds. Must be real footage of the app, with no other platforms shown. The animated ads do not qualify |
 | iPad | Not needed | The app is iPhone only |
 
 Five screenshots, in this order: One list, Type it, Live, Scan, Alerts. They come from the **Shopzyy Store Posters** canvas. App icon: `assets/icon.png` (1024 × 1024, no transparency, no rounded corners). Other images in `store-assets/ios/`.

@@ -105,7 +105,7 @@ export class ShoppingListService {
 
   // MARK: Buying
 
-  markBought(item: GroceryItem, by: HouseholdMember | null, at: Date = new Date(), startsTrip = false): PurchaseRecord | null {
+  markBought(item: GroceryItem, by: HouseholdMember | null, at: Date = new Date(), startsTrip = false, remind = true): PurchaseRecord | null {
     if (!this.isHouseholdAvailable) return null;
     const record = makePurchase(at, item.quantity, itemUnit(item), this.env.prefs.deviceID, this.householdID);
     if (startsTrip) record.startsTrip = true;
@@ -117,7 +117,7 @@ export class ShoppingListService {
     takeOffList(item);
     this.save([record, item]);
     // No alert here: other members get one shopping-trip summary once this person has finished.
-    this.refreshRestockReminders();
+    if (remind) this.refreshRestockReminders();
     return record;
   }
 

@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useShake } from '../../lib/useShake';
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, SectionList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LoadingOverlay } from '../../components/LogoAnimation';
+import { InlineLoading } from '../../components/LogoAnimation';
 import { ScreenOptions } from '../../components/NativeHeader';
 import { SuggestionEngine } from '../../logic/SuggestionEngine';
 import { ShoppingTrip } from '../../logic/ShoppingTrip';
@@ -98,7 +98,7 @@ export function ShoppingListScreen({ household }: { household: Household }) {
 
   const scan = async (source: ReceiptSource) => {
     const result = await scanReceipt(source, () => setScanning(true)).finally(() => setScanning(false));
-    if ('receipt' in result) { setReceipt(result.receipt); return; }
+    if ('receipt' in result) { setTimeout(() => setReceipt(result.receipt), 450); return; }
     if ('cancelled' in result) return;
     const message = result.error === 'permission' ? tr('Allow camera access in Settings to scan receipts.')
       : result.error === 'unsupported' ? tr("Receipt scanning isn't available in this version of the app.")
@@ -232,13 +232,15 @@ export function ShoppingListScreen({ household }: { household: Household }) {
           setTimeout(chooseSource, 450);
         }} />
       ) : null}
-      <LoadingOverlay visible={scanning} message={tr('Reading receipt…')} />
+      <InlineLoading visible={scanning} message={tr('Reading receipt…')} />
       {receipt ? (
         <ReceiptReviewSheet receipt={receipt} household={household} listItems={listItems} onCancel={() => setReceipt(null)}
           onConfirm={(r) => {
             setReceipt(null);
-            const done = importReceipt({ list, households, householdID: household.id, by: currentMember, ...r });
-            if (done.count > 0) record(tr('Scanned receipt'), done.undo);
+            setTimeout(() => {
+              const done = importReceipt({ list, households, householdID: household.id, by: currentMember, ...r });
+              if (done.count > 0) record(tr('Scanned receipt'), done.undo);
+            }, 450);
           }} />
       ) : null}
       {tripTarget ? <TripTotalSheet target={tripTarget} household={household} onSkip={() => skip(tripTarget.skipKey)} onClose={() => setTripTarget(null)} /> : null}

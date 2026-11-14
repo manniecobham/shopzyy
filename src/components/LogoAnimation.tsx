@@ -110,6 +110,19 @@ export function LoadingOverlay({ visible, message }: { visible: boolean; message
   );
 }
 
+export function InlineLoading({ visible, message }: { visible: boolean; message?: string }) {
+  const t = useTheme();
+  if (!visible) return null;
+  return (
+    <View style={[StyleSheet.absoluteFill, s.backdrop]}>
+      <View style={[s.card, { backgroundColor: t.cell }]}>
+        <LogoLoader size={84} label={message ?? 'Loading'} />
+        {message ? <Text style={[s.cardText, { color: t.label }]}>{message}</Text> : null}
+      </View>
+    </View>
+  );
+}
+
 const s = StyleSheet.create({
   full: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, paddingHorizontal: 32 },
   message: { fontSize: 16, textAlign: 'center' },

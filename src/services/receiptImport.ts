@@ -14,11 +14,12 @@ export function importReceipt(a: {
   const bought: { record: PurchaseRecord; created: GroceryItem | null }[] = [];
   a.entries.forEach((entry, i) => {
     const at = new Date(base + i);
-    const created = entry.item ? null : a.list.add({ name: NameNormalizer.displayName(entry.name), quantity: entry.quantity, unit: null, hasExplicitQuantity: entry.quantity !== 1 }, a.by, at);
+    const created = entry.item ? null : a.list.add({ name: NameNormalizer.displayName(entry.name), quantity: entry.quantity, unit: null, hasExplicitQuantity: entry.quantity !== 1 }, a.by, at, false);
     const item = entry.item ?? created;
-    const record = item ? a.list.markBought(item, a.by, at, i === 0) : null;
+    const record = item ? a.list.markBought(item, a.by, at, i === 0, false) : null;
     if (record) bought.push({ record, created: created && !entry.item ? created : null });
   });
+  a.list.refreshRestockReminders();
   if (bought.length === 0) return { count: 0, undo: () => {} };
 
   const times = bought.map((b) => b.record.purchasedAt);
