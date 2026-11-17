@@ -7,7 +7,7 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 | | iOS | Android |
 |---|---|---|
 | Version | 1.1.1 | 1.1.1 |
-| Build | 13 | versionCode **[next number above your last upload]** |
+| Build | 13 | versionCode **11** (EAS shows the last Android build as 10, and its production profile raises it by one) |
 | Bundle / package | `com.manniedev-team.shopzy` | `com.manniedevteam.shopzyy` |
 | Minimum OS | iOS 16.4 | Android 7.0 (API 24), as set by the project |
 | Price | Free, no in-app purchases | Free, no in-app purchases |
@@ -26,6 +26,38 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 | Support email | support@manniedev.com |
 | Developer / seller name | MannieDev Technologies Ltd, registered in Nigeria (RC 8411822), trading as MannieDev |
 | Copyright line (iOS) | © 2026 MannieDev Technologies Ltd |
+
+---
+
+## Build and upload
+
+### iOS (Xcode, no EAS)
+
+1. In `app.config.ts`, check `version` and `ios.buildNumber`. Every upload needs a build number higher than the last one for the same version. App Store Connect refuses a version that is already approved, so a new release needs a new version (1.1.1 is the current one).
+2. `ios/` is generated. Do not run `prebuild` again unless you must, because it resets your signing settings in Xcode. If you do, run `npm run prebuild:prod`, then reselect your team under Signing & Capabilities.
+3. Open `ios/Shopzyy.xcworkspace`. Destination: **Any iOS Device (arm64)**. Signing: Automatically manage signing, with your team.
+4. **Product → Clean Build Folder**, then **Product → Archive**.
+5. **Distribute App → App Store Connect → Upload**. Warnings about missing debug symbols for React and Expo frameworks are harmless.
+6. Wait for the build to process in TestFlight. Test it, then attach it to the version in App Store Connect and **Add for Review**.
+
+### Android (EAS, as before)
+
+1. Commit your work, then run `npm install` so the menu patch is applied.
+2. Build the bundle. EAS signs it with your existing upload key and raises the version code for you:
+   ```
+   npx eas-cli build --platform android --profile production
+   ```
+   If it fails with "google-services.json not found", check at expo.dev that `GOOGLE_SERVICES_JSON` exists as a file variable in the production environment. As a fallback, build on your own machine with the Android tools installed:
+   ```
+   GOOGLE_SERVICES_JSON=$PWD/firebase/production/google-services.json npx eas-cli build --platform android --profile production --local
+   ```
+3. Download the `.aab`, then check its permissions (see the table in the Google Play section):
+   ```
+   bundletool dump manifest --bundle=app-release.aab | grep uses-permission
+   ```
+4. In Play Console, update the store listing and App content first (see below).
+5. **Testing → Internal testing → Create new release**, upload the `.aab`, paste the release notes, review and roll out. Install it from the test link on a real Android phone and try sign-in, the receipt scan, the menus, notifications and invite links.
+6. Then **Production → Create new release → Add from library**. Use a staged rollout, for example 20%.
 
 ---
 
@@ -125,7 +157,12 @@ Made by MannieDev.
 | Field | Value |
 |---|---|
 | Sign-in required | Yes |
-| Demo account | **[DEMO EMAIL]** / **[DEMO PASSWORD]** (create it first and put it in a household with a few items) |
+| Demo account | **[DEMO EMAIL]** / **[DEMO PASSWORD]** |
+
+Create the demo account before you submit. Install the app, tap **Continue with email**, sign up with a throwaway email and a password of 6 or more characters, choose a name and avatar, create a household called "Demo home", add a few items, and tick one off. Leave it in that state.
+
+| Field | Value |
+|---|---|
 | Contact first / last name | **[NAME]** |
 | Contact phone | **[PHONE, with country code]** |
 | Contact email | support@manniedev.com |
@@ -135,10 +172,10 @@ Notes for the reviewer (paste into the Notes box):
 ```
 Shopzyy is a shared household shopping list. There are no in-app purchases, no ads and no tracking.
 
-Sign in: tap "Continue with Apple", or tap "Continue with email" and either use the demo account above or create an account with any email address and a password of 6 or more characters. After signing in, choose a name and avatar, then create or join a household.
+Sign in: use the demo account above (tap "Continue with email"), tap "Continue with Apple", or create an account with any email address and a password of 6 or more characters. After signing in, choose a name and avatar, then create or join a household.
 
 Main flows to try:
-1. List tab: type "2 kg rice, milk x2, eggs" in the bar at the bottom. Three items are added. Tap an item's circle to tick it off.
+1. List tab: type "2 kg rice, milk x2, eggs" in the bar at the bottom. Three items are added. Tap an item's circle to tick it off. Swipe a row and tap Remove to delete it.
 2. Receipt scan: on the List tab, tap the document icon at the right end of the add bar. Choose "Take photo" or "Choose from library". The text is read on the device with Apple's Vision framework. The photo is deleted after reading and never uploaded. The review sheet shows how each receipt line matches the list; tap Confirm to tick off the matched items and save the total.
 3. Shake the phone to undo the last add or tick-off (a confirmation appears first).
 4. Household tab: Invite people creates a link and a code. Notifications about someone finishing a shop need a second device in the same household.
@@ -238,7 +275,7 @@ Use the App Store description above with one change. Replace the line `• Sign 
 |---|---|
 | Privacy policy | https://shopzyy.manniedev.com/privacy |
 | Ads | The app does not contain ads |
-| App access | Restricted. Login required. Give the demo account **[DEMO EMAIL]** / **[DEMO PASSWORD]** and these steps: sign in with Google or email, choose a name, create a household, add items |
+| App access | Select **All or some functionality is restricted**, then **Add new instructions**. Use the name, username, password and text in the next section |
 | Content rating | Complete the IARC questionnaire. Answer No to violence, sexual content, language, controlled substances and gambling. Answer Yes to "users can interact or share content" because household members see each other's lists. No location sharing, no purchases. Expect Everyone or PEGI 3 |
 | Target audience | 18 and over, matching the terms of use. The app is not designed for children |
 | Government app | No |
@@ -247,6 +284,24 @@ Use the App Store description above with one change. Replace the line `• Sign 
 | News app | No |
 | Advertising ID | The app does not use it. If a build shows `AD_ID` in its permissions, remove it or declare it |
 | Data deletion | Yes. In the app and at https://shopzyy.manniedev.com/delete-account |
+
+#### App access instructions (Play Console, App content, App access)
+
+| Field | Value |
+|---|---|
+| Name | Reviewer account |
+| Username | **[DEMO EMAIL]** |
+| Password | **[DEMO PASSWORD]** |
+
+Any other information, to paste:
+
+```
+Open the app and tap "Continue with email", then sign in with the details above (or use "Continue with Google"). The demo account already has a household called "Demo home" with a few items.
+
+To try the main features: on the List tab type "2 kg rice, milk x2, eggs" in the bar at the bottom; tick an item off by tapping its circle; swipe a row and tap Remove to delete it; tap the document icon at the right end of the bar to scan a receipt (any photo of a shopping receipt works); open the Household tab to see Invite people and App settings. Account deletion is under Household > App settings > Delete my data.
+
+Camera and notification permissions are optional.
+```
 
 ### Data safety
 

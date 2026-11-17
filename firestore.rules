@@ -25,6 +25,11 @@ service cloud.firestore {
       }
     }
 
+    // Which trip alerts were already sent. Written by Cloud Functions only.
+    match /tripAlerts/{id} {
+      allow read, write: if false;
+    }
+
     // Invite codes are created and redeemed by Cloud Functions only.
     match /invites/{code} {
       allow read, write: if false;

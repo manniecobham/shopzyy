@@ -87,6 +87,7 @@ export class AppRuntime extends Observable {
     this.changed();
     AppState.addEventListener('change', (state) => {
       if (state !== 'active') return;
+      this.activeSince = new Date();
       this.account.refresh();
       void this.appConfig.refresh();
       this.scanActivity();
@@ -103,8 +104,10 @@ export class AppRuntime extends Observable {
     n.onOpenActivity = () => router.navigate('/activity');
   }
 
+  private activeSince = new Date();
+
   scanActivity(live = false): void {
-    scanForRemotePurchases(this.env, this.prefs, new Date(), live && AppState.currentState === 'active');
+    scanForRemotePurchases(this.env, this.prefs, new Date(), live && AppState.currentState === 'active', this.activeSince);
   }
 
   restartSync(): void {
@@ -289,6 +292,12 @@ export class AppRuntime extends Observable {
       onRemoteChange: () => {
         this.scanActivity(true);
         ShoppingListService.refreshRestockReminders(this.env);
+      },
+      onMembersSynced: (householdID, present) => {
+        const { profile, userRecordName } = this.account;
+        const household = this.store.household(householdID);
+        if (!profile || !userRecordName || !household || present.has(userRecordName)) return;
+        this.sync?.save([this.households.ensureMembership(household, userRecordName, profile)]);
       },
       onFetched: () => {
         this.markInitialSyncDone();

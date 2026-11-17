@@ -1,4 +1,4 @@
-import { TRIP_QUIET_PERIOD_MS, groupTrips, tripBody, tripContaining, totalMatchesTrip, type TripPurchase } from '../functions/src/tripLogic';
+import { TRIP_QUIET_PERIOD_MS, alertSignature, groupTrips, ledgerID, tripBody, tripContaining, totalMatchesTrip, type TripPurchase } from '../functions/src/tripLogic';
 import { ShoppingTrip } from '../src/logic/ShoppingTrip';
 import { totalMatchesTrip as appMatches } from '../src/logic/tripTotals';
 import { makeTripTotal } from '../src/models/factories';
@@ -75,5 +75,16 @@ describe('localised push text', () => {
     const b = groupTrips(H, '_ada', [same('b'), same('c'), same('a')])[0];
     expect(a.purchases[a.purchases.length - 1].id).toBe('c');
     expect(b.purchases[b.purchases.length - 1].id).toBe('c');
+  });
+
+  test('the same trip state has the same alert signature, so a repeat or retry sends nothing', () => {
+    expect(alertSignature(3, null)).toBe(alertSignature(3, null));
+    expect(alertSignature(3, null)).not.toBe(alertSignature(4, null));
+    expect(alertSignature(3, null)).not.toBe(alertSignature(3, 12.5));
+    expect(alertSignature(3, 12.5)).not.toBe(alertSignature(3, 13));
+  });
+
+  test('a trip id is safe to use as a document id', () => {
+    expect(ledgerID('h1._ada/x y.1700000000')).toBe('h1._ada_x_y.1700000000');
   });
 });

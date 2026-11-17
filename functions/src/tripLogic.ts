@@ -36,6 +36,10 @@ export function groupTrips(householdID: string, buyerKey: string, purchases: Tri
   return trips;
 }
 
+export const alertSignature = (purchaseCount: number, totalAmount: number | null): string => `${purchaseCount}:${totalAmount ?? ''}`;
+
+export const ledgerID = (tripID: string): string => tripID.replace(/[/\s]/g, '_');
+
 export const tripContaining = (trips: Trip[], purchaseID: string): Trip | undefined => trips.find((t) => t.purchases.some((p) => p.id === purchaseID));
 
 export function totalMatchesTrip(total: { tripKey: string; enteredBy: string | null; tripEndedAtMs: number }, trip: Trip): boolean {

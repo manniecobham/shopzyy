@@ -13,7 +13,7 @@ interface PrefsLike {
   setJSON(key: string, value: unknown): void;
 }
 
-export function scanForRemotePurchases(env: ServiceEnv, prefs: PrefsLike, now: Date = new Date(), announce = true): void {
+export function scanForRemotePurchases(env: ServiceEnv, prefs: PrefsLike, now: Date = new Date(), announce = true, since: Date | null = null): void {
   const cutoff = now.getTime() - LOOKBACK_MS;
   const recent = env.store.allPurchases().filter((p) => p.purchasedAt.getTime() > cutoff && p.originDeviceID !== env.prefs.deviceID);
 
@@ -32,7 +32,7 @@ export function scanForRemotePurchases(env: ServiceEnv, prefs: PrefsLike, now: D
     const total = totals.find((t) => totalMatchesTrip(t, trip)) ?? null;
     const signature = trip.purchases.length + (total ? TOTAL_MARKER : 0);
     if (announced[trip.id] === signature) continue;
-    if (announce) {
+    if (announce && (!since || trip.end >= since)) {
       void env.notifier.postShoppingTrip(
         trip, showsHousehold ? names.get(trip.householdID) ?? null : null, total ? formatCurrency(total.amount, total.currencyCode) : null, now,
       );

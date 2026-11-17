@@ -23,6 +23,7 @@ export interface SyncHooks {
   onRemoteChange?: () => void;
   onHouseholdRemoved?: (name: string) => void;
   onFetched?: () => void;
+  onMembersSynced?: (householdID: string, present: ReadonlySet<string>) => void;
   onStatus?: (status: SyncStatus) => void;
 }
 
@@ -143,6 +144,9 @@ export class FirestoreSync implements SyncBackend {
     if (touched) {
       this.store.commit();
       this.hooks.onRemoteChange?.();
+    }
+    if (kind === 'members' && !snap.metadata.fromCache && !snap.metadata.hasPendingWrites) {
+      this.hooks.onMembersSynced?.(householdID, new Set(snap.docs.map((d) => d.id)));
     }
     this.setStatus({ state: 'idle' });
   }
