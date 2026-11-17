@@ -141,14 +141,14 @@ export function ActionMenu({ visible, title, sections, onClose, anchor }: {
   );
 }
 
-export function PickerRow<T>({ label, value, options, onChange, last, hideLabel }: {
-  label: string; value: T; options: { title: string; value: T }[]; onChange: (v: T) => void; last?: boolean; hideLabel?: boolean;
+export function PickerRow<T>({ label, value, options, onChange, last, hideLabel, same = Object.is }: {
+  label: string; value: T; options: { title: string; value: T }[]; onChange: (v: T) => void; last?: boolean; hideLabel?: boolean; same?: (a: T, b: T) => boolean;
 }) {
   const t = useTheme();
-  const current = options.find((o) => Object.is(o.value, value));
+  const current = options.find((o) => same(o.value, value));
   return (
     <NativeMenu label={label} style={{ alignSelf: 'stretch' }}
-      sections={[options.map((o) => ({ title: o.title, checked: Object.is(o.value, value), onPress: () => onChange(o.value) }))]}>
+      sections={[options.map((o) => ({ title: o.title, checked: same(o.value, value), onPress: () => onChange(o.value) }))]}>
       <FormRow last={last}>
         {hideLabel ? null : <Text style={{ fontSize: 17, color: t.label, flex: 1 }}>{label}</Text>}
         <Text style={{ fontSize: 17, color: t.secondaryLabel, flex: hideLabel ? 1 : undefined, textAlign: hideLabel ? 'left' : 'right' }} numberOfLines={1}>{current?.title ?? ''}</Text>

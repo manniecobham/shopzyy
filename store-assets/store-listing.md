@@ -7,7 +7,7 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 | | iOS | Android |
 |---|---|---|
 | Version | 1.1.1 | 1.1.1 |
-| Build | 12 | versionCode **[next number above your last upload]** |
+| Build | 13 | versionCode **[next number above your last upload]** |
 | Bundle / package | `com.manniedev-team.shopzy` | `com.manniedevteam.shopzyy` |
 | Minimum OS | iOS 16.4 | Android 7.0 (API 24), as set by the project |
 | Price | Free, no in-app purchases | Free, no in-app purchases |

@@ -1,5 +1,5 @@
-import { existsSync, readFileSync } from 'node:fs';
 import type { ExpoConfig } from 'expo/config';
+import { existsSync, readFileSync } from 'node:fs';
 
 const PROD_FIREBASE_PROJECT = 'shopzyy-19bc2';
 
@@ -40,7 +40,7 @@ const config: ExpoConfig = {
   name: 'Shopzyy',
   slug: 'shopzyy',
   scheme: 'shopzyy',
-  version: '1.1.1',
+  version: '1.1.2',
   orientation: 'portrait',
   locales: { es: './locales/es.json', fr: './locales/fr.json', nl: './locales/nl.json', de: './locales/de.json', it: './locales/it.json' },
   icon: './assets/icon.png',
@@ -48,7 +48,7 @@ const config: ExpoConfig = {
   ios: {
     supportsTablet: false,
     bundleIdentifier: 'com.manniedev-team.shopzy',
-    buildNumber: '12',
+    buildNumber: '13',
     googleServicesFile: IOS_FIREBASE_FILE,
     infoPlist: {
       UIBackgroundModes: ['remote-notification'],

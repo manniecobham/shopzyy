@@ -210,7 +210,7 @@ export function ShoppingListScreen({ household }: { household: Household }) {
             </>}
             renderSectionHeader={({ section }) => <ListSectionHeader title={section.title} count={section.items.length} collapsed={collapsed.has(section.title)} onToggle={() => toggleSection(section.title)} />}
             renderItem={({ item, index, section }) => (
-              <ItemRow item={item} first={index === 0} last={index === section.items.length - 1}
+              <ItemRow item={item} first={index === 0} last={index === section.items.length - 1} showCategory={household.groupingRaw !== 'category'}
                 onBought={() => requestTickOff(item)} onEdit={() => setEditing(item)} onRemove={() => list.removeFromList(item)} />
             )}
           />

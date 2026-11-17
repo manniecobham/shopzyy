@@ -5,7 +5,7 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
-import { LoadingOverlay } from '../../components/LogoAnimation';
+import { InlineLoading } from '../../components/LogoAnimation';
 import { PickerRow } from '../../components/Sheet';
 import { ScreenOptions } from '../../components/NativeHeader';
 import { FormRow, FormSection, MemberBadge } from '../../components/ui';
@@ -23,6 +23,7 @@ import { HouseholdSwitcher } from './HouseholdSwitcher';
 import { PhotoPositionSheet } from './PhotoPositionSheet';
 
 const BANNER_WIDTH = 1200;
+const MAX_BANNER_CHARS = 700_000;
 const linkHost = (Constants.expoConfig?.extra?.linkHost as string | undefined) ?? 'shopzyy-19bc2.web.app';
 
 export function HouseholdScreen({ household }: { household: Household }) {
@@ -48,18 +49,25 @@ export function HouseholdScreen({ household }: { household: Household }) {
   // MARK: Photo
 
   const choosePhoto = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1 });
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8, exif: false });
     if (result.canceled || !result.assets[0]) return;
     const asset = result.assets[0];
     setPreparingPhoto(true);
+    let base64: string | null = null;
     try {
-    let ctx = ImageManipulator.ImageManipulator.manipulate(asset.uri);
-    if (asset.width > BANNER_WIDTH) ctx = ctx.resize({ width: BANNER_WIDTH });
-    const image = await (await ctx.renderAsync()).saveAsync({ format: ImageManipulator.SaveFormat.JPEG, compress: 0.75, base64: true });
-    if (image.base64) setPendingPhoto(image.base64);
+      for (const [width, compress] of [[BANNER_WIDTH, 0.7], [800, 0.6]] as const) {
+        let ctx = ImageManipulator.ImageManipulator.manipulate(asset.uri);
+        if (asset.width > width) ctx = ctx.resize({ width });
+        const image = await (await ctx.renderAsync()).saveAsync({ format: ImageManipulator.SaveFormat.JPEG, compress, base64: true });
+        if (image.base64 && image.base64.length <= MAX_BANNER_CHARS) { base64 = image.base64; break; }
+      }
+    } catch {
+      base64 = null;
     } finally {
       setPreparingPhoto(false);
     }
+    if (!base64) { Alert.alert(t("Couldn't use that photo"), t('Try a different photo.')); return; }
+    setTimeout(() => setPendingPhoto(base64), 450);
   };
 
   // MARK: Invite
@@ -188,7 +196,7 @@ export function HouseholdScreen({ household }: { household: Household }) {
         </FormSection>
       </>
 
-      <LoadingOverlay visible={preparingPhoto} message={t('Preparing photo…')} />
+      <InlineLoading visible={preparingPhoto} message={t('Preparing photo…')} />
       {options ? <CustomOptionsSheet householdID={household.id} onClose={() => setOptions(false)} /> : null}
       {settings ? <SettingsSheet onClose={() => setSettings(false)} /> : null}
       {pendingPhoto ? (

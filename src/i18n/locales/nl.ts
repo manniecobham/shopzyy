@@ -454,5 +454,7 @@ const nl: Record<string, string> = {
   "Open-source licences": "Open-sourcelicenties",
   "Privacy policy": "Privacybeleid",
   "Terms of use": "Gebruiksvoorwaarden",
+  "Couldn't use that photo": "Deze foto kan niet worden gebruikt",
+  "Try a different photo.": "Probeer een andere foto.",
 };
 export default nl;

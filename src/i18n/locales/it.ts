@@ -454,5 +454,7 @@ const it: Record<string, string> = {
   "Open-source licences": "Licenze open source",
   "Privacy policy": "Informativa sulla privacy",
   "Terms of use": "Termini di utilizzo",
+  "Couldn't use that photo": "Impossibile usare questa foto",
+  "Try a different photo.": "Prova con un’altra foto.",
 };
 export default it;

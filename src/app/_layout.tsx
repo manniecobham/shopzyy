@@ -1,15 +1,28 @@
-import { Stack } from 'expo-router';
+import { Stack, type ErrorBoundaryProps } from 'expo-router';
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { Alert, AppState, StyleSheet, View } from 'react-native';
+import { Alert, AppState, StyleSheet, Text, View } from 'react-native';
 import { language, refreshLanguage, subscribeLanguage, t as tr } from '../i18n';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ProminentButton } from '../components/ui';
 import { MigrationView } from '../features/account/MigrationView';
 import { UpdateRequiredView } from '../features/shared/UpdateRequiredView';
 import { SplashView } from '../features/shared/SplashView';
 import { RuntimeProvider, useAccount, useAppState, useStoreVersion } from '../runtime/RuntimeProvider';
+import { AppLog } from '../services/AppLog';
 import { AppNotice } from '../services/UserFacingError';
 import { useTheme } from '../theme/theme';
+
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  const t = useTheme();
+  useEffect(() => { AppLog.error('list', 'A screen failed to draw', error); }, [error]);
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 20, padding: 32, backgroundColor: t.groupedBackground }}>
+      <Text style={{ fontSize: 18, fontWeight: '600', textAlign: 'center', color: t.label }}>{tr('Something went wrong. Please try again.')}</Text>
+      <View style={{ alignSelf: 'stretch' }}><ProminentButton title={tr('Try again')} onPress={() => void retry()} /></View>
+    </View>
+  );
+}
 
 export default function RootLayout() {
   const lang = useSyncExternalStore(subscribeLanguage, language);
