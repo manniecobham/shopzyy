@@ -14,6 +14,9 @@ import {
 import type { ServiceEnv } from './ports';
 import type { Entity } from '../models/entities';
 
+const REFRESH_DELAY_MS = 1500;
+const pendingRefresh = new WeakMap<ServiceEnv, ReturnType<typeof setTimeout>>();
+
 export type ItemSnapshot = Pick<GroceryItem, 'isOnList' | 'quantity' | 'unitRaw' | 'addedBy' | 'addedAt' | 'snoozedUntil'>;
 
 const addDays = (d: Date, n: number) => { const r = new Date(d.getTime()); r.setDate(r.getDate() + n); return r; };
@@ -215,8 +218,11 @@ export class ShoppingListService {
   }
 
   static refreshRestockReminders(env: ServiceEnv, engine = new SuggestionEngine()): void {
-    const forecasts = engine.forecasts(env.store.allItems().map(itemHistory));
-    void env.notifier.scheduleRestockReminders(forecasts);
+    clearTimeout(pendingRefresh.get(env));
+    pendingRefresh.set(env, setTimeout(() => {
+      pendingRefresh.delete(env);
+      void env.notifier.scheduleRestockReminders(engine.forecasts(env.store.allItems().map(itemHistory)));
+    }, REFRESH_DELAY_MS));
   }
 
   // MARK: Lookup

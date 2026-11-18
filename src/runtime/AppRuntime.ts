@@ -117,6 +117,11 @@ export class AppRuntime extends Observable {
     this.changed();
   }
 
+  async signOut(): Promise<void> {
+    await this.push.unregister();
+    await this.account.signOut();
+  }
+
   async deleteMyData(password?: string): Promise<string | null> {
     try {
       await this.account.reauthenticate(password);
@@ -129,7 +134,7 @@ export class AppRuntime extends Observable {
       const uid = this.account.uid;
       await this.households.deleteMyData();
       await this.push.unregister();
-      if (uid) { try { await deleteDoc(doc(getFirestore(), 'users', uid)); } catch {} }
+      if (uid) await httpsCallable(getFunctions(), 'deleteAccountData')();
       await this.account.deleteAccount();
       this.account.reset();
       this.prefs.currentHouseholdID = null;

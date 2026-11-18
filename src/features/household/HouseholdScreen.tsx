@@ -3,7 +3,7 @@ import { t, tn } from '../../i18n';
 import Constants from 'expo-constants';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 import { InlineLoading } from '../../components/LogoAnimation';
 import { PickerRow } from '../../components/Sheet';
@@ -30,9 +30,14 @@ export function HouseholdScreen({ household }: { household: Household }) {
   const th = useTheme();
   const runtime = useRuntime();
   const account = useAccount();
-  useStoreVersion();
   const service = runtime.households;
   const members = runtime.store.membersOf(household.id);
+  const storeVersion = useStoreVersion();
+  const purchaseCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of runtime.store.allPurchases()) if (p.member) counts.set(p.member.id, (counts.get(p.member.id) ?? 0) + 1);
+    return counts;
+  }, [storeVersion]); // eslint-disable-line react-hooks/exhaustive-deps
   const owner = members.find((m) => m.userRecordName === household.ownerRecordName);
 
   const [draftName, setDraftName] = useState(household.name);
@@ -161,7 +166,7 @@ export function HouseholdScreen({ household }: { household: Household }) {
                 <Text style={{ fontSize: 17, color: th.label }}>{m.userRecordName === account.userRecordName ? t('{name} (you)', { name: m.name }) : m.name}</Text>
                 {m.userRecordName === household.ownerRecordName ? <Text style={{ fontSize: 12, color: th.secondaryLabel }}>{t('Owner')}</Text> : null}
               </View>
-              <Text style={{ fontSize: 13, color: th.secondaryLabel }}>{purchaseSummary(runtime.store.allPurchases().filter((p) => p.member === m).length)}</Text>
+              <Text style={{ fontSize: 13, color: th.secondaryLabel }}>{purchaseSummary(purchaseCounts.get(m.id) ?? 0)}</Text>
             </FormRow>
           ))}
           <FormRow last onPress={() => void invite()} disabled={inviting}>

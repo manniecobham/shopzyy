@@ -118,7 +118,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
       </FormSection>
 
       <FormSection header={t('Account')} footer={account.email ? t('Signed in as {email}.', { email: account.email }) : t('Signed in.')}>
-        <FormRow last onPress={() => void account.signOut().then(onClose)}><Text style={{ fontSize: 17, color: th.accent }}>{t('Sign out')}</Text></FormRow>
+        <FormRow last onPress={() => void runtime.signOut().then(onClose)}><Text style={{ fontSize: 17, color: th.accent }}>{t('Sign out')}</Text></FormRow>
       </FormSection>
 
       <FormSection header={t('Notifications')} footer={denied

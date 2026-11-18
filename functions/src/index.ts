@@ -73,6 +73,17 @@ export const leaveHousehold = onCall(async (req) => {
   return { ok: true };
 });
 
+export const deleteAccountData = onCall(async (req) => {
+  const uid = requireAuth(req.auth?.uid);
+  await db.recursiveDelete(db.doc(`users/${uid}`));
+  const [legacy, invites] = await Promise.all([
+    db.collection('legacyUsers').where('uid', '==', uid).get(),
+    db.collection('invites').where('createdBy', '==', uid).get(),
+  ]);
+  await Promise.all([...legacy.docs, ...invites.docs].map((d) => d.ref.delete()));
+  return { ok: true };
+});
+
 export const deleteHousehold = onCall(async (req) => {
   const uid = requireAuth(req.auth?.uid);
   const householdID = String(req.data?.householdID ?? '');

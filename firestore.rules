@@ -3,6 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     function signedIn() { return request.auth != null; }
+    function small(v, n) { return v == null || v is number || v is bool || v is timestamp || (v is string && v.size() <= n); }
     function household(hid) { return get(/databases/$(database)/documents/households/$(hid)); }
     function isMember(hid) { return signedIn() && request.auth.uid in household(hid).data.memberUIDs; }
 
@@ -16,6 +17,7 @@ service cloud.firestore {
       allow update: if signedIn()
         && request.auth.uid in resource.data.memberUIDs
         && request.resource.data.ownerUID == resource.data.ownerUID
+        && request.resource.data.get('ownerRecordName', null) == resource.data.get('ownerRecordName', null)
         && request.resource.data.memberUIDs == resource.data.memberUIDs;
       allow delete: if false;
 
@@ -39,7 +41,12 @@ service cloud.firestore {
     match /errorLogs/{id} {
       allow create: if signedIn() && request.resource.data.keys().hasOnly([
         'id', 'date', 'level', 'area', 'message', 'errorDomain', 'errorCode', 'errorDetail', 'appVersion', 'osVersion', 'deviceModel'
-      ]);
+      ]) && request.resource.data.keys().size() <= 11
+        && small(request.resource.data.get('message', null), 1000) && small(request.resource.data.get('errorDetail', null), 2000)
+        && small(request.resource.data.get('errorDomain', null), 200) && small(request.resource.data.get('errorCode', null), 200)
+        && small(request.resource.data.get('area', null), 50) && small(request.resource.data.get('level', null), 50)
+        && small(request.resource.data.get('id', null), 100) && small(request.resource.data.get('appVersion', null), 50)
+        && small(request.resource.data.get('osVersion', null), 100) && small(request.resource.data.get('deviceModel', null), 100);
       allow read, update, delete: if false;
     }
 
