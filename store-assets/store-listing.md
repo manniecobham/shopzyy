@@ -7,7 +7,7 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 | | iOS | Android |
 |---|---|---|
 | Version | 1.1.2 | 1.1.2 |
-| Build | 13 | versionCode **11** (EAS shows the last Android build as 10, and its production profile raises it by one) |
+| Build | 13 | versionCode **11** (the last release on Play is 10, set in `app.config.ts`) |
 | Bundle / package | `com.manniedev-team.shopzy` | `com.manniedevteam.shopzyy` |
 | Minimum OS | iOS 16.4 | Android 7.0 (API 24), as set by the project |
 | Price | Free, no in-app purchases | Free, no in-app purchases |
@@ -40,21 +40,23 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 5. **Distribute App → App Store Connect → Upload**. Warnings about missing debug symbols for React and Expo frameworks are harmless.
 6. Wait for the build to process in TestFlight. Test it, then attach it to the version in App Store Connect and **Add for Review**.
 
-### Android (EAS, as before)
+### Android (Android Studio, without EAS)
 
-1. Commit your work, then run `npm install` so the menu patch is applied.
-2. Build the bundle. EAS signs it with your existing upload key and raises the version code for you:
+1. Run `npm install` so the menu patch is applied, then `npm run prebuild:prod`. `app.config.ts` sets `versionCode` to 11 and blocks the unwanted permissions, including `SYSTEM_ALERT_WINDOW`. Raise `versionCode` by one for each later upload.
+2. Download the upload key once: `npx eas credentials`, then Android, production, credentials.json, **Download credentials from EAS to credentials.json**. This writes `credentials/android/keystore.jks` and `credentials.json` (both ignored by git). Move them to a safe place and back them up.
+3. Open Android Studio **from a terminal**, so it finds Node:
    ```
-   npx eas-cli build --platform android --profile production
+   export ANDROID_HOME=~/Library/Android/sdk
+   export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+   "/Applications/Android Studio.app/Contents/MacOS/studio" android
    ```
-   If it fails with "google-services.json not found", check at expo.dev that `GOOGLE_SERVICES_JSON` exists as a file variable in the production environment. As a fallback, build on your own machine with the Android tools installed:
+4. After Gradle syncs, choose **Build → Generate Signed App Bundle / APK → Android App Bundle**. Use the keystore, its password, the key alias and the key password from `credentials.json`, leave "Remember passwords" off, choose **release** and Create. The file is `android/app/release/app-release.aab`.
+5. Check the upload key and permissions:
    ```
-   GOOGLE_SERVICES_JSON=$PWD/firebase/production/google-services.json npx eas-cli build --platform android --profile production --local
+   keytool -printcert -jarfile android/app/release/app-release.aab | grep SHA1
+   bundletool dump manifest --bundle=android/app/release/app-release.aab | grep uses-permission
    ```
-3. Download the `.aab`, then check its permissions (see the table in the Google Play section):
-   ```
-   bundletool dump manifest --bundle=app-release.aab | grep uses-permission
-   ```
+   The SHA-1 must equal the upload key certificate on Play Console's App signing page (`8C:CB:D9:8C:73:01:3A:28:C2:61:C9:56:BC:47:DF:27:16:40:0C:57`).
 4. In Play Console, update the store listing and App content first (see below).
 5. **Testing → Internal testing → Create new release**, upload the `.aab`, paste the release notes, review and roll out. Install it from the test link on a real Android phone and try sign-in, the receipt scan, the menus, notifications and invite links.
 6. Then **Production → Create new release → Add from library**. Use a staged rollout, for example 20%.
@@ -332,7 +334,7 @@ Not collected: location, contacts, messages, audio, files and docs, calendar, he
 
 None of these needs a special declaration form.
 
-These must **not** appear in the bundle: `ACTIVITY_RECOGNITION`, `health.READ_STEPS`, `RECORD_AUDIO`, `READ_EXTERNAL_STORAGE`, `WRITE_EXTERNAL_STORAGE`, `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `SYSTEM_ALERT_WINDOW`. The project blocks the first five in `app.config.ts`. The `android/` folder on your machine was generated before that change, so run `npm run prebuild:prod` again and check the real list:
+These must **not** appear in the bundle: `ACTIVITY_RECOGNITION`, `health.READ_STEPS`, `RECORD_AUDIO`, `READ_EXTERNAL_STORAGE`, `WRITE_EXTERNAL_STORAGE`, `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `SYSTEM_ALERT_WINDOW`. The project blocks these in `app.config.ts`, except `READ_MEDIA_IMAGES` and `READ_MEDIA_VIDEO`, which the app never requests. Check the real list after every build:
 
 ```
 bundletool dump manifest --bundle=app-release.aab | grep uses-permission
@@ -346,7 +348,7 @@ bundletool dump manifest --bundle=app-release.aab | grep uses-permission
 | Countries | All, or your chosen list |
 | Pricing | Free |
 
-Upload key: sign with the same upload key you used before. If EAS stored it, run `eas credentials` to download it.
+Upload key: sign with the same upload key you used before, which EAS stores. Download it with `npx eas credentials` as described above.
 
 ---
 
@@ -382,7 +384,23 @@ The full English description is above. The other five languages need the descrip
 
 1. **Test the build** from TestFlight (iOS) or an internal track (Android), especially the receipt scan on real receipts, the invite link, Google sign-in and notifications.
 2. **Receipt scanning claims.** If it doesn't read receipts well, remove the "Scan the receipt" section, the first What's New line and the receipt line in the short fields.
-3. **Fill in the brackets:** demo account, review contact name and phone, Android `versionCode`, trader status.
+3. **Fill in the brackets:** demo account, review contact name and phone, trader status.
 4. **Check the privacy answers** match the live privacy policy. If you ever add analytics, ads or a new data type, update both stores and the policy together.
 5. **Check the pages are live:** open the privacy, terms, support and delete-account links from a phone.
 6. **Android:** rebuild with `npm run prebuild:prod`, then confirm the permission list with `bundletool` as shown above.
+
+## TestFlight checklist for 1.1.2
+
+Use a real phone and the TestFlight build, with the functions, rules and hosting already deployed to production.
+
+1. **Environment:** Settings shows the production app, not "Development build".
+2. **Sign-in:** email, Google and Apple each work, with the Shopzyy logo and the consent note showing.
+3. **Delete my data:** on a spare account that has joined a household on a second phone, delete it. Check the Firebase console shows no `users/…` record for it afterwards.
+4. **Invite link:** share a link, open it on a second phone with the app installed, and see the household and inviter names in the preview. Joining adds the person to the Members screen.
+5. **Install from an invite:** on a phone without the app, open the link, tap the store button, install, and use **Paste invite code** on the join screen.
+6. **Join on a slow connection:** switch to a poor connection and join. The spinner changes to "Still syncing…" and a message appears if the household doesn't arrive.
+7. **Receipt scan:** scan a real receipt, such as a long German one held in the hand. Check the items, store and total, and that no photo is saved.
+8. **Lists:** change an item's category and see it update at once. Swipe an item to delete without marking it bought. Pick a household background photo without the app freezing.
+9. **Notifications:** one trip alert per trip, with no repeats after reopening the app.
+10. **Offline:** add items in airplane mode, reconnect, and confirm they reach the second phone.
+11. **Languages:** change the language and check the new join and paste strings.

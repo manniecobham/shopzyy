@@ -62,6 +62,7 @@ const config: ExpoConfig = {
   },
   android: {
     package: 'com.manniedevteam.shopzyy',
+    versionCode: 11,
     googleServicesFile: ANDROID_FIREBASE_FILE,
     adaptiveIcon: {
       backgroundColor: '#1D9D67',
@@ -76,6 +77,7 @@ const config: ExpoConfig = {
       'android.permission.RECORD_AUDIO',
       'android.permission.READ_EXTERNAL_STORAGE',
       'android.permission.WRITE_EXTERNAL_STORAGE',
+      'android.permission.SYSTEM_ALERT_WINDOW',
     ],
     intentFilters: [{
       action: 'VIEW',
