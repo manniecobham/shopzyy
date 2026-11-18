@@ -365,6 +365,54 @@ App Store "What's New" and Google Play "Release notes" (Play allows 500 characte
 | Deutsch | • Scanne einen Kassenbon, um die Liste abzuhaken und die Summe zu speichern.<br>• Schüttle dein Handy, um die letzte Änderung rückgängig zu machen.<br>• Übersichtlichere Anmeldung, native Menüs und einklappbare Listenbereiche.<br>• Korrekturen bei Einladungen, Haushaltsbeitritt und Einkaufsbenachrichtigungen; zuverlässigeres Speichern bei schlechter Verbindung. |
 | Italiano | • Scansiona uno scontrino per spuntare la lista e salvare il totale.<br>• Scuoti il telefono per annullare l'ultima modifica.<br>• Accesso più chiaro, menu nativi e sezioni dell'elenco comprimibili.<br>• Correzioni a inviti, adesione a una casa e avvisi di spesa; salvataggio più affidabile con poca connessione. |
 
+### Google Play release notes, ready to paste
+
+Play needs each language between its own tag. Paste this whole block into the release notes box.
+
+```
+<en-US>
+• Scan a receipt to tick off your list and save the total.
+• Shake your phone to undo your last change.
+• Cleaner sign-in, native menus and collapsible list sections.
+• Fixes for invites, joining a household and shopping alerts, and more reliable saving on a poor connection.
+</en-US>
+
+<es-ES>
+• Escanea un ticket para marcar tu lista y guardar el total.
+• Agita el teléfono para deshacer el último cambio.
+• Inicio de sesión más claro, menús nativos y secciones de lista plegables.
+• Correcciones en invitaciones, al unirse a un hogar y en los avisos de compra; guardado más fiable con mala conexión.
+</es-ES>
+
+<fr-FR>
+• Scannez un ticket pour cocher votre liste et garder le total.
+• Secouez le téléphone pour annuler la dernière modification.
+• Connexion plus claire, menus natifs et sections de liste repliables.
+• Correctifs pour les invitations, l'adhésion à un foyer et les alertes de courses ; enregistrement plus fiable avec une mauvaise connexion.
+</fr-FR>
+
+<nl-NL>
+• Scan een bonnetje om je lijst af te vinken en het totaal op te slaan.
+• Schud je telefoon om je laatste wijziging ongedaan te maken.
+• Overzichtelijker inloggen, native menu's en inklapbare lijstsecties.
+• Verbeteringen voor uitnodigingen, deelnemen aan een huishouden en winkelmeldingen; betrouwbaarder opslaan bij slecht bereik.
+</nl-NL>
+
+<de-DE>
+• Scanne einen Kassenbon, um die Liste abzuhaken und die Summe zu speichern.
+• Schüttle dein Handy, um die letzte Änderung rückgängig zu machen.
+• Übersichtlichere Anmeldung, native Menüs und einklappbare Listenbereiche.
+• Korrekturen bei Einladungen, Haushaltsbeitritt und Einkaufsbenachrichtigungen; zuverlässigeres Speichern bei schlechter Verbindung.
+</de-DE>
+
+<it-IT>
+• Scansiona uno scontrino per spuntare la lista e salvare il totale.
+• Scuoti il telefono per annullare l'ultima modifica.
+• Accesso più chiaro, menu nativi e sezioni dell'elenco comprimibili.
+• Correzioni a inviti, adesione a una casa e avvisi di spesa; salvataggio più affidabile con poca connessione.
+</it-IT>
+```
+
 ## Short fields in every language
 
 The full English description is above. The other five languages need the description translated too. Ask for that when you want to add them. Until then the store shows the English description, and these short fields carry the translation.
