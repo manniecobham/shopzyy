@@ -1,4 +1,4 @@
-# Shopzyy: store listing for 1.1.1
+# Shopzyy: store listing for 1.1.2
 
 Everything App Store Connect and Google Play Console ask for, in the order they ask for it. Copy each value into its field. Items in **[square brackets]** are for you to fill in.
 
@@ -6,7 +6,7 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 
 | | iOS | Android |
 |---|---|---|
-| Version | 1.1.1 | 1.1.1 |
+| Version | 1.1.2 | 1.1.2 |
 | Build | 13 | versionCode **11** (EAS shows the last Android build as 10, and its production profile raises it by one) |
 | Bundle / package | `com.manniedev-team.shopzy` | `com.manniedevteam.shopzyy` |
 | Minimum OS | iOS 16.4 | Android 7.0 (API 24), as set by the project |
@@ -33,8 +33,8 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 
 ### iOS (Xcode, no EAS)
 
-1. In `app.config.ts`, check `version` and `ios.buildNumber`. Every upload needs a build number higher than the last one for the same version. App Store Connect refuses a version that is already approved, so a new release needs a new version (1.1.1 is the current one).
-2. `ios/` is generated. Do not run `prebuild` again unless you must, because it resets your signing settings in Xcode. If you do, run `npm run prebuild:prod`, then reselect your team under Signing & Capabilities.
+1. In `app.config.ts`, check `version` and `ios.buildNumber`. Every upload needs a build number higher than the last one for the same version. App Store Connect refuses a version that is already approved, so a new release needs a new version (1.1.2 is the current one, and 1.1.1 was never released).
+2. `ios/` is generated from `app.config.ts`. Run `npm run prebuild:prod` before archiving so it carries version 1.1.2 and build 13 and the production Firebase files. It resets signing, so reselect your team under Signing & Capabilities afterwards, and check General shows Version 1.1.2 and Build 13.
 3. Open `ios/Shopzyy.xcworkspace`. Destination: **Any iOS Device (arm64)**. Signing: Automatically manage signing, with your team.
 4. **Product → Clean Build Folder**, then **Product → Archive**.
 5. **Distribute App → App Store Connect → Upload**. Warnings about missing debug symbols for React and Expo frameworks are harmless.
@@ -80,7 +80,7 @@ Terms of use say users must be 18 or older. That is a legal term, separate from 
 
 Answer **None / No** to every content question: cartoon or realistic violence, sexual content or nudity, profanity, horror, alcohol, tobacco or drugs, gambling, medical information, mature or suggestive themes, contests, and unrestricted web access. For user-generated content, select the answer that applies to private sharing only: lists are shared only with people the user invites, nothing is public, and there is no chat.
 
-### Version information (1.1.1)
+### Version information (1.1.2)
 
 | Field | Value | Limit |
 |---|---|---|
@@ -149,7 +149,7 @@ Made by MannieDev.
 • Scan a receipt to tick off your list and save the total.
 • Shake your phone to undo your last change.
 • Cleaner sign-in, native menus and collapsible list sections.
-• Fixes for invites and shopping alerts.
+• Fixes for invites, joining a household and shopping alerts, and more reliable saving on a poor connection.
 ```
 
 ### App Review information
@@ -342,7 +342,7 @@ bundletool dump manifest --bundle=app-release.aab | grep uses-permission
 
 | Field | Value |
 |---|---|
-| Release name | 1.1.1 |
+| Release name | 1.1.2 |
 | Countries | All, or your chosen list |
 | Pricing | Free |
 
@@ -356,12 +356,12 @@ App Store "What's New" and Google Play "Release notes" (Play allows 500 characte
 
 | Language | Text |
 |---|---|
-| English | • Scan a receipt to tick off your list and save the total.<br>• Shake your phone to undo your last change.<br>• Cleaner sign-in, native menus and collapsible list sections.<br>• Fixes for invites and shopping alerts. |
-| Español | • Escanea un ticket para marcar tu lista y guardar el total.<br>• Agita el teléfono para deshacer el último cambio.<br>• Inicio de sesión más claro, menús nativos y secciones de lista plegables.<br>• Correcciones en las invitaciones y los avisos de compra. |
-| Français | • Scannez un ticket pour cocher votre liste et garder le total.<br>• Secouez le téléphone pour annuler la dernière modification.<br>• Connexion plus claire, menus natifs et sections de liste repliables.<br>• Correctifs pour les invitations et les alertes de courses. |
-| Nederlands | • Scan een bonnetje om je lijst af te vinken en het totaal op te slaan.<br>• Schud je telefoon om je laatste wijziging ongedaan te maken.<br>• Overzichtelijker inloggen, native menu's en inklapbare lijstsecties.<br>• Verbeteringen voor uitnodigingen en winkelmeldingen. |
-| Deutsch | • Scanne einen Kassenbon, um die Liste abzuhaken und die Summe zu speichern.<br>• Schüttle dein Handy, um die letzte Änderung rückgängig zu machen.<br>• Übersichtlichere Anmeldung, native Menüs und einklappbare Listenbereiche.<br>• Korrekturen bei Einladungen und Einkaufsbenachrichtigungen. |
-| Italiano | • Scansiona uno scontrino per spuntare la lista e salvare il totale.<br>• Scuoti il telefono per annullare l'ultima modifica.<br>• Accesso più chiaro, menu nativi e sezioni dell'elenco comprimibili.<br>• Correzioni a inviti e avvisi di spesa. |
+| English | • Scan a receipt to tick off your list and save the total.<br>• Shake your phone to undo your last change.<br>• Cleaner sign-in, native menus and collapsible list sections.<br>• Fixes for invites, joining a household and shopping alerts, and more reliable saving on a poor connection. |
+| Español | • Escanea un ticket para marcar tu lista y guardar el total.<br>• Agita el teléfono para deshacer el último cambio.<br>• Inicio de sesión más claro, menús nativos y secciones de lista plegables.<br>• Correcciones en invitaciones, al unirse a un hogar y en los avisos de compra; guardado más fiable con mala conexión. |
+| Français | • Scannez un ticket pour cocher votre liste et garder le total.<br>• Secouez le téléphone pour annuler la dernière modification.<br>• Connexion plus claire, menus natifs et sections de liste repliables.<br>• Correctifs pour les invitations, l'adhésion à un foyer et les alertes de courses ; enregistrement plus fiable avec une mauvaise connexion. |
+| Nederlands | • Scan een bonnetje om je lijst af te vinken en het totaal op te slaan.<br>• Schud je telefoon om je laatste wijziging ongedaan te maken.<br>• Overzichtelijker inloggen, native menu's en inklapbare lijstsecties.<br>• Verbeteringen voor uitnodigingen, deelnemen aan een huishouden en winkelmeldingen; betrouwbaarder opslaan bij slecht bereik. |
+| Deutsch | • Scanne einen Kassenbon, um die Liste abzuhaken und die Summe zu speichern.<br>• Schüttle dein Handy, um die letzte Änderung rückgängig zu machen.<br>• Übersichtlichere Anmeldung, native Menüs und einklappbare Listenbereiche.<br>• Korrekturen bei Einladungen, Haushaltsbeitritt und Einkaufsbenachrichtigungen; zuverlässigeres Speichern bei schlechter Verbindung. |
+| Italiano | • Scansiona uno scontrino per spuntare la lista e salvare il totale.<br>• Scuoti il telefono per annullare l'ultima modifica.<br>• Accesso più chiaro, menu nativi e sezioni dell'elenco comprimibili.<br>• Correzioni a inviti, adesione a una casa e avvisi di spesa; salvataggio più affidabile con poca connessione. |
 
 ## Short fields in every language
 
