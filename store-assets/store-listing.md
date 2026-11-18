@@ -7,7 +7,7 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 | | iOS | Android |
 |---|---|---|
 | Version | 1.1.2 | 1.1.2 |
-| Build | 13 | versionCode **11** (the last release on Play is 10, set in `app.config.ts`) |
+| Build | 13 | versionCode **12** (the last release on Play is 10 and 11 was uploaded and rebuilt, set in `app.config.ts`) |
 | Bundle / package | `com.manniedev-team.shopzy` | `com.manniedevteam.shopzyy` |
 | Minimum OS | iOS 16.4 | Android 7.0 (API 24), as set by the project |
 | Price | Free, no in-app purchases | Free, no in-app purchases |
@@ -42,7 +42,7 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 
 ### Android (Android Studio, without EAS)
 
-1. Run `npm install` so the menu patch is applied, then `npm run prebuild:prod`. `app.config.ts` sets `versionCode` to 11 and blocks the unwanted permissions, including `SYSTEM_ALERT_WINDOW`. Raise `versionCode` by one for each later upload.
+1. Run `npm install` so the menu patch is applied, then `npm run prebuild:prod`. `app.config.ts` sets `versionCode` to 12 and blocks the unwanted permissions, including `SYSTEM_ALERT_WINDOW`. Raise `versionCode` by one for each later upload.
 2. Download the upload key once: `npx eas credentials`, then Android, production, credentials.json, **Download credentials from EAS to credentials.json**. This writes `credentials/android/keystore.jks` and `credentials.json` (both ignored by git). Move them to a safe place and back them up.
 3. Open Android Studio **from a terminal**, so it finds Node:
    ```

@@ -62,7 +62,7 @@ const config: ExpoConfig = {
   },
   android: {
     package: 'com.manniedevteam.shopzyy',
-    versionCode: 11,
+    versionCode: 12,
     googleServicesFile: ANDROID_FIREBASE_FILE,
     adaptiveIcon: {
       backgroundColor: '#1D9D67',
@@ -90,6 +90,7 @@ const config: ExpoConfig = {
     './plugins/withNotificationColorMerge',
     // Android: the iOS-only strings from `locales` above would fail the release lint check.
     './plugins/withAndroidLintTweaks',
+    './plugins/withOptionalPortrait',
     'expo-router',
     '@react-native-firebase/app',
     '@react-native-firebase/auth',
