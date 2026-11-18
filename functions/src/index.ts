@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase-admin/app';
 import { FieldValue, Timestamp, getFirestore } from 'firebase-admin/firestore';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { randomInt } from 'node:crypto';
+import { limit } from './rateLimit';
 
 initializeApp();
 const db = getFirestore();
@@ -10,6 +11,7 @@ const db = getFirestore();
 const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 const CODE_LENGTH = 8;
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const HOUR = 60 * 60 * 1000;
 
 const requireAuth = (uid: string | undefined): string => {
   if (!uid) throw new HttpsError('unauthenticated', 'Sign in first.');
@@ -28,6 +30,7 @@ export const createInvite = onCall(async (req) => {
   const uid = requireAuth(req.auth?.uid);
   const householdID = String(req.data?.householdID ?? '');
   if (!householdID) throw new HttpsError('invalid-argument', 'householdID is required.');
+  await limit(uid, 'invite', 30, HOUR);
   if (!(await memberUIDs(householdID)).includes(uid)) throw new HttpsError('permission-denied', 'Not a member.');
 
   for (let attempt = 0; attempt < 5; attempt++) {
@@ -45,6 +48,7 @@ export const createInvite = onCall(async (req) => {
 
 export const joinHousehold = onCall(async (req) => {
   const uid = requireAuth(req.auth?.uid);
+  await limit(uid, 'join', 20, HOUR); // codes are guessable by brute force otherwise
   const code = String(req.data?.code ?? '').trim().toUpperCase();
   if (code.length !== CODE_LENGTH) throw new HttpsError('invalid-argument', 'That invite code is not valid.');
 
@@ -75,11 +79,13 @@ export const leaveHousehold = onCall(async (req) => {
 
 export const deleteAccountData = onCall(async (req) => {
   const uid = requireAuth(req.auth?.uid);
+  await limit(uid, 'delete', 10, HOUR);
   await db.recursiveDelete(db.doc(`users/${uid}`));
   const [legacy, invites] = await Promise.all([
     db.collection('legacyUsers').where('uid', '==', uid).get(),
     db.collection('invites').where('createdBy', '==', uid).get(),
   ]);
+  await Promise.all([db.doc(`rateLimits/${uid}_invite`).delete(), db.doc(`rateLimits/${uid}_join`).delete()]);
   await Promise.all([...legacy.docs, ...invites.docs].map((d) => d.ref.delete()));
   return { ok: true };
 });

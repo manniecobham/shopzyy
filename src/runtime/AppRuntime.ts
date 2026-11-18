@@ -22,6 +22,8 @@ import { AppConfigService, appVersion } from '../services/AppConfig';
 import { deleteDoc, doc, getFirestore, setDoc } from '@react-native-firebase/firestore';
 import { getFunctions, httpsCallable } from '@react-native-firebase/functions';
 import { StorageKeys } from '../services/AppPreferences';
+import { getInstallReferrerAsync } from 'expo-application';
+import { extractInviteCode } from '../lib/inviteCode';
 import { AppNotice, UserFacingError } from '../services/UserFacingError';
 
 export const DELETE_CANCELLED = 'cancelled';
@@ -80,6 +82,7 @@ export class AppRuntime extends Observable {
     void this.appConfig.refresh();
     this.appConfig.subscribe(() => this.changed());
     this.wireNotifications();
+    void this.adoptInstallReferrer();
     // Re-read values that depend on preferences now that they are loaded.
     this.account.userRecordName = this.prefs.userRecordName;
     this.account.start();
@@ -181,6 +184,22 @@ export class AppRuntime extends Observable {
     if (this.account.phase === 'ready') return this.joinHousehold(code);
     this.prefs.setString(StorageKeys.pendingInvite, code);
     return null;
+  }
+
+  // The invite page puts the code in the Play install referrer, so it survives installing from the store.
+  private async adoptInstallReferrer(): Promise<void> {
+    if (Platform.OS !== 'android' || this.prefs.getString(StorageKeys.referrerChecked)) return;
+    this.prefs.setString(StorageKeys.referrerChecked, '1');
+    try {
+      const referrer = decodeURIComponent(await getInstallReferrerAsync());
+      const code = referrer.startsWith('join=') ? extractInviteCode(referrer.slice(5)) : null;
+      if (code && !this.prefs.getString(StorageKeys.pendingInvite)) {
+        this.prefs.setString(StorageKeys.pendingInvite, code);
+        if (this.account.phase === 'ready') this.redeemPendingInvite();
+      }
+    } catch {
+      // No referrer (sideloaded or not from Play): nothing to do.
+    }
   }
 
   private redeemPendingInvite(): void {

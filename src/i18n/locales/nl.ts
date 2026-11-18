@@ -456,5 +456,9 @@ const nl: Record<string, string> = {
   "Terms of use": "Gebruiksvoorwaarden",
   "Couldn't use that photo": "Deze foto kan niet worden gebruikt",
   "Try a different photo.": "Probeer een andere foto.",
+  "Paste invite code": "Uitnodigingscode plakken",
+  "Still syncing your household…": "Je huishouden wordt nog gesynchroniseerd…",
+  "There's no invite code on your clipboard.": "Er staat geen uitnodigingscode op je klembord.",
+  "You've joined, but your household hasn't arrived yet. Check your connection; it will appear here by itself.": "Je bent toegevoegd, maar je huishouden is nog niet aangekomen. Controleer je verbinding; het verschijnt hier vanzelf.",
 };
 export default nl;

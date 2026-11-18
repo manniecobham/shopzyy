@@ -3,7 +3,6 @@ import Constants from 'expo-constants';
 import { useEffect, useState } from 'react';
 import { Alert, Linking, Platform, Switch, Text, TextInput, View } from 'react-native';
 import { LANGUAGES, LANGUAGE_NAMES, hasSystemAppLanguage, language, setLanguageOverride, t, tn, type Language } from '../../i18n';
-import { LoadingOverlay } from '../../components/LogoAnimation';
 import { Sheet } from '../../components/Sheet';
 import { FormRow, FormSection, MemberBadge, ProminentButton } from '../../components/ui';
 import { DELETE_CANCELLED } from '../../runtime/AppRuntime';
@@ -105,7 +104,8 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
   const hadOldApp = Platform.OS === 'ios' && !isDemo && prefs.getString(HAD_LEGACY_APP_KEY) === '1';
 
   return (
-    <Sheet visible title={t('Settings')} doneTitle={t('Done')} onCancel={onClose}>
+    <Sheet visible title={t('Settings')} doneTitle={t('Done')} onCancel={onClose}
+      busy={deleting ? t('Deleting your data…') : importing ? t('Updating your data…') : null}>
       <FormSection header={t('Profile')} footer={t("Your account is your Shopzyy identity. Households you're in show the profile you set here.")}>
         <FormRow last onPress={() => setEditing(true)} disabled={!account.profile} style={{ gap: 12 }}>
           {account.profile ? <MemberBadge emoji={account.profile.emoji} colorHex={account.profile.colorHex} size={40} /> : null}
@@ -224,8 +224,6 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
       ) : null}
       {editing ? <EditProfileSheet onClose={() => setEditing(false)} /> : null}
       {diagnostics ? <DiagnosticsSheet onClose={() => setDiagnostics(false)} /> : null}
-      <LoadingOverlay visible={deleting} message={t('Deleting your data…')} />
-      <LoadingOverlay visible={importing} message={t('Updating your data…')} />
     </Sheet>
   );
 }

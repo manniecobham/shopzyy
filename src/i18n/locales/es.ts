@@ -456,5 +456,9 @@ const es: Record<string, string> = {
   "Terms of use": "Condiciones de uso",
   "Couldn't use that photo": "No se pudo usar esa foto",
   "Try a different photo.": "Prueba con otra foto.",
+  "Paste invite code": "Pegar código de invitación",
+  "Still syncing your household…": "Sincronizando tu hogar…",
+  "There's no invite code on your clipboard.": "No hay ningún código de invitación en el portapapeles.",
+  "You've joined, but your household hasn't arrived yet. Check your connection; it will appear here by itself.": "Te has unido, pero tu hogar aún no ha llegado. Comprueba tu conexión; aparecerá aquí por sí solo.",
 };
 export default es;

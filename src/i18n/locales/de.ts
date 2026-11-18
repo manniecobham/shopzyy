@@ -456,5 +456,9 @@ const de: Record<string, string> = {
   "Terms of use": "Nutzungsbedingungen",
   "Couldn't use that photo": "Dieses Foto kann nicht verwendet werden",
   "Try a different photo.": "Versuche ein anderes Foto.",
+  "Paste invite code": "Einladungscode einfügen",
+  "Still syncing your household…": "Dein Haushalt wird noch synchronisiert …",
+  "There's no invite code on your clipboard.": "In der Zwischenablage ist kein Einladungscode.",
+  "You've joined, but your household hasn't arrived yet. Check your connection; it will appear here by itself.": "Du bist beigetreten, aber dein Haushalt ist noch nicht angekommen. Prüfe deine Verbindung; er erscheint hier von selbst.",
 };
 export default de;

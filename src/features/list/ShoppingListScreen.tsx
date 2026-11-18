@@ -3,7 +3,7 @@ import { t as tr } from '../../i18n';
 import { useIsFocused } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useShake } from '../../lib/useShake';
-import { Alert, Keyboard, KeyboardAvoidingView, Platform, SectionList, StyleSheet, Text, View } from 'react-native';
+import { Alert, AppState, Keyboard, KeyboardAvoidingView, Platform, SectionList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { InlineLoading } from '../../components/LogoAnimation';
 import { ScreenOptions } from '../../components/NativeHeader';
@@ -165,7 +165,9 @@ export function ShoppingListScreen({ household }: { household: Household }) {
     const delay = myLatestTrip.promptAt.getTime() - Date.now();
     if (delay <= 0) { setNow(new Date()); return; }
     const id = setTimeout(() => setNow(new Date()), delay + 1000);
-    return () => clearTimeout(id);
+    // Timers stop while the app is in the background, so check again when it comes back.
+    const sub = AppState.addEventListener('change', (state) => { if (state === 'active') setNow(new Date()); });
+    return () => { clearTimeout(id); sub.remove(); };
   }, [myLatestTrip?.id, myLatestTrip?.purchases.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const skip = (key: string) => { SkippedTrips.insert(prefs, key); setSkippedKey(key); };

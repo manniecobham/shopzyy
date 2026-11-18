@@ -86,7 +86,13 @@
   document.getElementById('androidCap').textContent = c[1];
   document.getElementById('get').textContent = c[2];
   document.getElementById('ios').href = APP_STORE_URL;
-  document.getElementById('android').href = PLAY_URL;
+  document.getElementById('android').href = code ? PLAY_URL + '&referrer=' + encodeURIComponent('join=' + code) : PLAY_URL;
+  // A store install loses the link, so keep the code on the clipboard for the app to offer.
+  ['ios', 'android'].forEach(function (id) {
+    document.getElementById(id).addEventListener('click', function () {
+      try { if (code && navigator.clipboard) navigator.clipboard.writeText(code); } catch (e) {}
+    });
+  });
   if (/android/i.test(navigator.userAgent)) {
     var stores = document.getElementById('stores');
     stores.insertBefore(document.getElementById('android'), document.getElementById('ios'));

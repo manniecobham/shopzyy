@@ -1,6 +1,7 @@
 import { Glyph, type SymbolName } from './Glyph';
 import { t as tr } from '../i18n';
 import { useRef, useState as useStateLocal, type ComponentRef, type ReactNode } from 'react';
+import { InlineLoading } from './LogoAnimation';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeMenu } from './NativeMenu';
@@ -8,10 +9,10 @@ import { FormRow, FormSection, TextButton } from './ui';
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { isIOS26, useTheme } from '../theme/theme';
 
-export function Sheet({ visible, title, onCancel, onSave, saveTitle = tr('Save'), cancelTitle = tr('Cancel'), doneTitle, saveDisabled, children, scroll = true }: {
+export function Sheet({ visible, title, onCancel, onSave, saveTitle = tr('Save'), cancelTitle = tr('Cancel'), doneTitle, saveDisabled, children, scroll = true, busy = null }: {
   visible: boolean; title: string; onCancel: () => void; onSave?: () => void; saveTitle?: string; cancelTitle?: string;
   doneTitle?: string;
-  saveDisabled?: boolean; children: ReactNode; scroll?: boolean;
+  saveDisabled?: boolean; children: ReactNode; scroll?: boolean; busy?: string | null;
 }) {
   const t = useTheme();
   return (
@@ -28,6 +29,7 @@ export function Sheet({ visible, title, onCancel, onSave, saveTitle = tr('Save')
         {scroll ? (
           <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 40 }}>{children}</ScrollView>
         ) : children}
+        <InlineLoading visible={busy !== null} message={busy ?? undefined} />
       </SafeAreaView>
     </Modal>
   );
