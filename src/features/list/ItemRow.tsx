@@ -6,13 +6,13 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import ReanimatedSwipeable, { type SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { MemberBadge } from '../../components/ui';
 import { relativeTime } from '../../lib/format';
-import { roomChoiceLabel, roomChoiceTitle } from '../../models/choices';
+import { categoryChoiceLabel, roomChoiceLabel, roomChoiceTitle } from '../../models/choices';
 import type { GroceryItem } from '../../models/entities';
-import { getRecipient, getRoomChoice, itemQuantityText, lastPurchase, recipientName } from '../../models/itemOps';
+import { getCategoryChoice, getRecipient, getRoomChoice, itemQuantityText, lastPurchase, recipientName } from '../../models/itemOps';
 import { CARD_RADIUS, useTheme } from '../../theme/theme';
 
-export function ItemRow({ item, first, last, onBought, onEdit, onRemove }: {
-  item: GroceryItem; first: boolean; last: boolean; onBought: () => void; onEdit: () => void; onRemove: () => void;
+export function ItemRow({ item, first, last, showCategory, onBought, onEdit, onRemove }: {
+  item: GroceryItem; first: boolean; last: boolean; showCategory?: boolean; onBought: () => void; onEdit: () => void; onRemove: () => void;
 }) {
   const t = useTheme();
   const swipe = useRef<SwipeableMethods>(null);
@@ -43,13 +43,16 @@ export function ItemRow({ item, first, last, onBought, onEdit, onRemove }: {
         overshootLeft={false}
         overshootRight={false}
         friction={2}
-        renderLeftActions={() => <View style={[s.action, { backgroundColor: t.green, alignItems: 'flex-start' }]}><Glyph name="checkmark" size={22} color="#fff" /><Text style={s.actionText}>{tr('Bought')}</Text></View>}
-        renderRightActions={() => <View style={[s.action, { backgroundColor: t.red, alignItems: 'flex-end' }]}><Glyph name="trash" size={22} color="#fff" /><Text style={s.actionText}>{tr('Remove')}</Text></View>}
-        onSwipeableOpen={(direction) => {
-          swipe.current?.close();
-          if (direction === 'left') onBought(); // the left-hand action ("Bought") was revealed by swiping right
-          else onRemove();
-        }}
+        renderLeftActions={() => (
+          <Pressable accessibilityRole="button" accessibilityLabel={tr('Bought')} onPress={() => { swipe.current?.close(); onBought(); }} style={[s.action, { backgroundColor: t.green, alignItems: 'flex-start' }]}>
+            <Glyph name="checkmark" size={22} color="#fff" /><Text style={s.actionText}>{tr('Bought')}</Text>
+          </Pressable>
+        )}
+        renderRightActions={() => (
+          <Pressable accessibilityRole="button" accessibilityLabel={tr('Remove')} onPress={() => { swipe.current?.close(); onRemove(); }} style={[s.action, { backgroundColor: t.red, alignItems: 'flex-end' }]}>
+            <Glyph name="trash" size={22} color="#fff" /><Text style={s.actionText}>{tr('Remove')}</Text>
+          </Pressable>
+        )}
       >
         <Pressable onPress={onEdit} style={[s.row, { backgroundColor: t.cell }]}>
           <Pressable onPress={check} hitSlop={8} accessibilityRole="button" accessibilityLabel={tr('Mark {name} as bought', { name: item.name })}>
@@ -67,6 +70,7 @@ export function ItemRow({ item, first, last, onBought, onEdit, onRemove }: {
                 {recipient ? <Tag icon="gift" text={tr('for {name}', { name: recipientName(recipient) })} /> : null}
               </View>
             ) : null}
+            {showCategory ? <Text style={{ fontSize: 12, color: t.secondaryLabel }}>{categoryChoiceLabel(getCategoryChoice(item))}</Text> : null}
             {room ? <Text style={{ fontSize: 12, color: t.secondaryLabel }} accessibilityLabel={tr('For the {room}', { room: roomChoiceTitle(room) })}>{roomChoiceLabel(room)}</Text> : null}
             {item.note ? <Text numberOfLines={1} style={{ fontSize: 12, color: t.secondaryLabel }}>{item.note}</Text> : null}
             {subtitle ? <Text style={{ fontSize: 11, color: t.tertiaryLabel }}>{subtitle}</Text> : null}

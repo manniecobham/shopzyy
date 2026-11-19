@@ -9,7 +9,7 @@ export interface SyncBackend {
   createHousehold(household: Household): void;
   deleteHousehold(household: Household): void;
   availability(household: Household): Promise<'available' | 'gone' | 'unknown'>;
-  leave(household: Household): Promise<void>;
+  leave(household: Household, memberKey?: string): Promise<void>;
   deleteNow(entity: Entity): Promise<void>;
   sendNow(): Promise<void>;
   stop(): void;

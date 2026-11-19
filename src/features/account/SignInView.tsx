@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppLogo } from '../../components/AppLogo';
+import { ConsentNote } from './ConsentNote';
 import { LoadingOverlay } from '../../components/LogoAnimation';
 import { FormRow, FormSection, ProminentButton, TextButton } from '../../components/ui';
 import { useAccount } from '../../runtime/RuntimeProvider';
@@ -85,6 +86,7 @@ export function SignInView() {
             {mode === 'signIn' ? <TextButton title={tr('Forgot password?')} onPress={() => void forgot()} /> : null}
           </View>
           </> : null}
+          <ConsentNote />
         </ScrollView>
       </KeyboardAvoidingView>
       <LoadingOverlay visible={account.busy} message={tr('Signing in…')} />

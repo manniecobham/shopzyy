@@ -29,7 +29,7 @@ export function MigrationView() {
       {failed ? (
         <View style={s.footer}>
           <ProminentButton title={tr('Try again')} onPress={() => runtime.retryMigration()} />
-          <TextButton title={tr('Sign out')} onPress={() => void account.signOut()} />
+          <TextButton title={tr('Sign out')} onPress={() => void runtime.signOut()} />
         </View>
       ) : null}
     </SafeAreaView>

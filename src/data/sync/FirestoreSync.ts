@@ -2,7 +2,7 @@ import {
   collection, deleteDoc, doc, getDocFromServer, getFirestore, onSnapshot, query, setDoc, waitForPendingWrites, where,
   type DocumentSnapshot, type Firestore, type QuerySnapshot, type Unsubscribe,
 } from '@react-native-firebase/firestore';
-import { getFunctions, httpsCallable } from '@react-native-firebase/functions';
+import { callFunction } from '../../services/callable';
 import type { DataStore } from '../DataStore';
 import type { Entity, Household } from '../../models/entities';
 import type { SyncBackend } from '../../services/ports';
@@ -12,6 +12,7 @@ import {
   DocApplier, householdDoc, itemDoc, memberDoc, memberKey, optionDoc, purchaseDoc, tripTotalDoc, type DocData,
 } from './mapping';
 import { APPLY_ORDER, HOUSEHOLDS, type SubCollection } from './schema';
+import { withRetry } from './retry';
 
 export type SyncStatus =
   | { state: 'idle' }
@@ -23,6 +24,7 @@ export interface SyncHooks {
   onRemoteChange?: () => void;
   onHouseholdRemoved?: (name: string) => void;
   onFetched?: () => void;
+  onMembersSynced?: (householdID: string, present: ReadonlySet<string>) => void;
   onStatus?: (status: SyncStatus) => void;
 }
 
@@ -144,6 +146,9 @@ export class FirestoreSync implements SyncBackend {
       this.store.commit();
       this.hooks.onRemoteChange?.();
     }
+    if (kind === 'members' && !snap.metadata.fromCache && !snap.metadata.hasPendingWrites) {
+      this.hooks.onMembersSynced?.(householdID, new Set(snap.docs.map((d) => d.id)));
+    }
     this.setStatus({ state: 'idle' });
   }
 
@@ -174,7 +179,7 @@ export class FirestoreSync implements SyncBackend {
     for (const e of changed) {
       const target = this.target(e);
       if (!target) continue;
-      void setDoc(target.ref, target.data, { merge: true }).catch((err) => this.report(err));
+      this.write(() => setDoc(target.ref, target.data, { merge: true }));
       if (this.store.kindOf(e) === 'household') this.sendBanner(e as Household);
     }
   }
@@ -182,23 +187,23 @@ export class FirestoreSync implements SyncBackend {
   delete(removed: Entity[]): void {
     for (const e of removed) {
       const target = this.target(e);
-      if (target) void deleteDoc(target.ref).catch((err) => this.report(err));
+      if (target) this.write(() => deleteDoc(target.ref));
     }
   }
 
   createHousehold(household: Household): void {
     const ref = doc(this.db, HOUSEHOLDS, household.id);
-    void setDoc(ref, { ...householdDoc(household), ownerUID: this.uid, memberUIDs: [this.uid] }).catch((err) => this.report(err));
+    this.write(() => setDoc(ref, { ...householdDoc(household), ownerUID: this.uid, memberUIDs: [this.uid] }));
     this.sendBanner(household);
   }
 
   deleteHousehold(household: Household): void {
     // The Admin SDK removes the whole subtree, which a client can't do atomically.
-    void httpsCallable(getFunctions(), 'deleteHousehold')({ householdID: household.id }).catch((err) => this.report(err));
+    this.write(() => callFunction('deleteHousehold', { householdID: household.id }));
   }
 
-  async leave(household: Household): Promise<void> {
-    await httpsCallable(getFunctions(), 'leaveHousehold')({ householdID: household.id });
+  async leave(household: Household, memberKey?: string): Promise<void> {
+    await callFunction('leaveHousehold', { householdID: household.id, memberKey });
   }
 
   async deleteNow(entity: Entity): Promise<void> {
@@ -219,12 +224,15 @@ export class FirestoreSync implements SyncBackend {
 
   // MARK: Helpers
 
+  private write(op: () => Promise<unknown>): void {
+    void withRetry(op).catch((err) => this.report(err));
+  }
+
   private sendBanner(h: Household): void {
     if (this.lastBanner.get(h.id) === h.customImage) return;
     this.lastBanner.set(h.id, h.customImage);
     const ref = doc(this.db, HOUSEHOLDS, h.id, 'assets', 'banner');
-    const op = h.customImage ? setDoc(ref, { data: h.customImage }) : deleteDoc(ref);
-    void op.catch((err) => this.report(err));
+    this.write(() => (h.customImage ? setDoc(ref, { data: h.customImage }) : deleteDoc(ref)));
   }
 
   private target(e: Entity): { ref: ReturnType<typeof doc>; data: DocData } | null {

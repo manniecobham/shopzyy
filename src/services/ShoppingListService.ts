@@ -14,6 +14,9 @@ import {
 import type { ServiceEnv } from './ports';
 import type { Entity } from '../models/entities';
 
+const REFRESH_DELAY_MS = 1500;
+const pendingRefresh = new WeakMap<ServiceEnv, ReturnType<typeof setTimeout>>();
+
 export type ItemSnapshot = Pick<GroceryItem, 'isOnList' | 'quantity' | 'unitRaw' | 'addedBy' | 'addedAt' | 'snoozedUntil'>;
 
 const addDays = (d: Date, n: number) => { const r = new Date(d.getTime()); r.setDate(r.getDate() + n); return r; };
@@ -105,7 +108,7 @@ export class ShoppingListService {
 
   // MARK: Buying
 
-  markBought(item: GroceryItem, by: HouseholdMember | null, at: Date = new Date(), startsTrip = false): PurchaseRecord | null {
+  markBought(item: GroceryItem, by: HouseholdMember | null, at: Date = new Date(), startsTrip = false, remind = true): PurchaseRecord | null {
     if (!this.isHouseholdAvailable) return null;
     const record = makePurchase(at, item.quantity, itemUnit(item), this.env.prefs.deviceID, this.householdID);
     if (startsTrip) record.startsTrip = true;
@@ -117,7 +120,7 @@ export class ShoppingListService {
     takeOffList(item);
     this.save([record, item]);
     // No alert here: other members get one shopping-trip summary once this person has finished.
-    this.refreshRestockReminders();
+    if (remind) this.refreshRestockReminders();
     return record;
   }
 
@@ -215,8 +218,11 @@ export class ShoppingListService {
   }
 
   static refreshRestockReminders(env: ServiceEnv, engine = new SuggestionEngine()): void {
-    const forecasts = engine.forecasts(env.store.allItems().map(itemHistory));
-    void env.notifier.scheduleRestockReminders(forecasts);
+    clearTimeout(pendingRefresh.get(env));
+    pendingRefresh.set(env, setTimeout(() => {
+      pendingRefresh.delete(env);
+      void env.notifier.scheduleRestockReminders(engine.forecasts(env.store.allItems().map(itemHistory)));
+    }, REFRESH_DELAY_MS));
   }
 
   // MARK: Lookup

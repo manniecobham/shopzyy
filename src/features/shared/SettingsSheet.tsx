@@ -3,11 +3,11 @@ import Constants from 'expo-constants';
 import { useEffect, useState } from 'react';
 import { Alert, Linking, Platform, Switch, Text, TextInput, View } from 'react-native';
 import { LANGUAGES, LANGUAGE_NAMES, hasSystemAppLanguage, language, setLanguageOverride, t, tn, type Language } from '../../i18n';
-import { LoadingOverlay } from '../../components/LogoAnimation';
 import { Sheet } from '../../components/Sheet';
 import { FormRow, FormSection, MemberBadge, ProminentButton } from '../../components/ui';
 import { DELETE_CANCELLED } from '../../runtime/AppRuntime';
 import { useAccount, useAppState } from '../../runtime/RuntimeProvider';
+import { LEGAL_URLS } from '../../lib/legal';
 import { displayVersion } from '../../services/AppConfig';
 import { ShoppingListService } from '../../services/ShoppingListService';
 import { StorageKeys } from '../../services/storageKeys';
@@ -104,7 +104,8 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
   const hadOldApp = Platform.OS === 'ios' && !isDemo && prefs.getString(HAD_LEGACY_APP_KEY) === '1';
 
   return (
-    <Sheet visible title={t('Settings')} doneTitle={t('Done')} onCancel={onClose}>
+    <Sheet visible title={t('Settings')} doneTitle={t('Done')} onCancel={onClose}
+      busy={deleting ? t('Deleting your data…') : importing ? t('Updating your data…') : null}>
       <FormSection header={t('Profile')} footer={t("Your account is your Shopzyy identity. Households you're in show the profile you set here.")}>
         <FormRow last onPress={() => setEditing(true)} disabled={!account.profile} style={{ gap: 12 }}>
           {account.profile ? <MemberBadge emoji={account.profile.emoji} colorHex={account.profile.colorHex} size={40} /> : null}
@@ -117,7 +118,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
       </FormSection>
 
       <FormSection header={t('Account')} footer={account.email ? t('Signed in as {email}.', { email: account.email }) : t('Signed in.')}>
-        <FormRow last onPress={() => void account.signOut().then(onClose)}><Text style={{ fontSize: 17, color: th.accent }}>{t('Sign out')}</Text></FormRow>
+        <FormRow last onPress={() => void runtime.signOut().then(onClose)}><Text style={{ fontSize: 17, color: th.accent }}>{t('Sign out')}</Text></FormRow>
       </FormSection>
 
       <FormSection header={t('Notifications')} footer={denied
@@ -177,6 +178,15 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
         <FormRow last onPress={confirmDelete}><Text style={{ fontSize: 17, color: th.red }}>{t('Delete my data…')}</Text></FormRow>
       </FormSection>
 
+      <FormSection header={t('Legal')}>
+        {[[t('Privacy policy'), LEGAL_URLS.privacy], [t('Terms of use'), LEGAL_URLS.terms], [t('Legal notice'), LEGAL_URLS.notice], [t('Open-source licences'), LEGAL_URLS.licenses]].map(([label, url], i, all) => (
+          <FormRow key={url} last={i === all.length - 1} onPress={() => void Linking.openURL(url)}>
+            <Text style={{ fontSize: 17, color: th.label, flex: 1 }}>{label}</Text>
+            <Glyph name="chevron.right" size={16} color={th.tertiaryLabel} />
+          </FormRow>
+        ))}
+      </FormSection>
+
       <View style={{ alignItems: 'center', gap: 4, marginTop: 24 }}>
         <Text style={{ fontSize: 13, fontWeight: '600', color: th.secondaryLabel }}>{t('{app} by {maker}', { app: Brand.appName, maker: Brand.maker })}</Text>
         <Text style={{ fontSize: 13, fontStyle: 'italic', color: th.secondaryLabel }}>{t(Brand.tagline)}</Text>
@@ -214,8 +224,6 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
       ) : null}
       {editing ? <EditProfileSheet onClose={() => setEditing(false)} /> : null}
       {diagnostics ? <DiagnosticsSheet onClose={() => setDiagnostics(false)} /> : null}
-      <LoadingOverlay visible={deleting} message={t('Deleting your data…')} />
-      <LoadingOverlay visible={importing} message={t('Updating your data…')} />
     </Sheet>
   );
 }

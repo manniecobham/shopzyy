@@ -1,4 +1,4 @@
-# Shopzyy: store listing for 1.1.1
+# Shopzyy: store listing for 1.1.2
 
 Everything App Store Connect and Google Play Console ask for, in the order they ask for it. Copy each value into its field. Items in **[square brackets]** are for you to fill in.
 
@@ -6,8 +6,8 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 
 | | iOS | Android |
 |---|---|---|
-| Version | 1.1.1 | 1.1.1 |
-| Build | 11 | versionCode **[next number above your last upload]** |
+| Version | 1.1.2 | 1.1.2 |
+| Build | 13 | versionCode **12** (the last release on Play is 10 and 11 was uploaded and rebuilt, set in `app.config.ts`) |
 | Bundle / package | `com.manniedev-team.shopzy` | `com.manniedevteam.shopzyy` |
 | Minimum OS | iOS 16.4 | Android 7.0 (API 24), as set by the project |
 | Price | Free, no in-app purchases | Free, no in-app purchases |
@@ -19,11 +19,47 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 | Terms of use | https://shopzyy.manniedev.com/terms |
 | Support | https://shopzyy.manniedev.com/support |
 | Account deletion | https://shopzyy.manniedev.com/delete-account |
+| Legal notice (Impressum) | https://shopzyy.manniedev.com/impressum |
+| Open-source licences | https://shopzyy.manniedev.com/licenses |
 | Marketing / website | https://shopzyy.manniedev.com |
 | Download link (store redirect) | https://shopzyy.manniedev.com/download |
 | Support email | support@manniedev.com |
-| Developer / seller name | MannieDev |
-| Copyright line (iOS) | © 2026 MannieDev |
+| Developer / seller name | MannieDev Technologies Ltd, registered in Nigeria (RC 8411822), trading as MannieDev |
+| Copyright line (iOS) | © 2026 MannieDev Technologies Ltd |
+
+---
+
+## Build and upload
+
+### iOS (Xcode, no EAS)
+
+1. In `app.config.ts`, check `version` and `ios.buildNumber`. Every upload needs a build number higher than the last one for the same version. App Store Connect refuses a version that is already approved, so a new release needs a new version (1.1.2 is the current one, and 1.1.1 was never released).
+2. `ios/` is generated from `app.config.ts`. Run `npm run prebuild:prod` before archiving so it carries version 1.1.2 and build 13 and the production Firebase files. It resets signing, so reselect your team under Signing & Capabilities afterwards, and check General shows Version 1.1.2 and Build 13.
+3. Open `ios/Shopzyy.xcworkspace`. Destination: **Any iOS Device (arm64)**. Signing: Automatically manage signing, with your team.
+4. **Product → Clean Build Folder**, then **Product → Archive**.
+5. **Distribute App → App Store Connect → Upload**. Warnings about missing debug symbols for React and Expo frameworks are harmless.
+6. Wait for the build to process in TestFlight. Test it, then attach it to the version in App Store Connect and **Add for Review**.
+
+### Android (Android Studio, without EAS)
+
+1. Run `npm install` so the menu patch is applied, then `npm run prebuild:prod`. `app.config.ts` sets `versionCode` to 12 and blocks the unwanted permissions, including `SYSTEM_ALERT_WINDOW`. Raise `versionCode` by one for each later upload.
+2. Download the upload key once: `npx eas credentials`, then Android, production, credentials.json, **Download credentials from EAS to credentials.json**. This writes `credentials/android/keystore.jks` and `credentials.json` (both ignored by git). Move them to a safe place and back them up.
+3. Open Android Studio **from a terminal**, so it finds Node:
+   ```
+   export ANDROID_HOME=~/Library/Android/sdk
+   export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+   "/Applications/Android Studio.app/Contents/MacOS/studio" android
+   ```
+4. After Gradle syncs, choose **Build → Generate Signed App Bundle / APK → Android App Bundle**. Use the keystore, its password, the key alias and the key password from `credentials.json`, leave "Remember passwords" off, choose **release** and Create. The file is `android/app/release/app-release.aab`.
+5. Check the upload key and permissions:
+   ```
+   keytool -printcert -jarfile android/app/release/app-release.aab | grep SHA1
+   bundletool dump manifest --bundle=android/app/release/app-release.aab | grep uses-permission
+   ```
+   The SHA-1 must equal the upload key certificate on Play Console's App signing page (`8C:CB:D9:8C:73:01:3A:28:C2:61:C9:56:BC:47:DF:27:16:40:0C:57`).
+4. In Play Console, update the store listing and App content first (see below).
+5. **Testing → Internal testing → Create new release**, upload the `.aab`, paste the release notes, review and roll out. Install it from the test link on a real Android phone and try sign-in, the receipt scan, the menus, notifications and invite links.
+6. Then **Production → Create new release → Add from library**. Use a staged rollout, for example 20%.
 
 ---
 
@@ -46,7 +82,7 @@ Terms of use say users must be 18 or older. That is a legal term, separate from 
 
 Answer **None / No** to every content question: cartoon or realistic violence, sexual content or nudity, profanity, horror, alcohol, tobacco or drugs, gambling, medical information, mature or suggestive themes, contests, and unrestricted web access. For user-generated content, select the answer that applies to private sharing only: lists are shared only with people the user invites, nothing is public, and there is no chat.
 
-### Version information (1.1.1)
+### Version information (1.1.2)
 
 | Field | Value | Limit |
 |---|---|---|
@@ -55,7 +91,7 @@ Answer **None / No** to every content question: cartoon or realistic violence, s
 | Support URL | https://shopzyy.manniedev.com/support | |
 | Marketing URL | https://shopzyy.manniedev.com | |
 | Privacy policy URL | https://shopzyy.manniedev.com/privacy | |
-| Copyright | © 2026 MannieDev | |
+| Copyright | © 2026 MannieDev Technologies Ltd | |
 | Version release | Manually release after approval, then use a phased release | |
 
 #### Description (4000 limit)
@@ -115,7 +151,7 @@ Made by MannieDev.
 • Scan a receipt to tick off your list and save the total.
 • Shake your phone to undo your last change.
 • Cleaner sign-in, native menus and collapsible list sections.
-• Fixes for invites and shopping alerts.
+• Fixes for invites, joining a household and shopping alerts, and more reliable saving on a poor connection.
 ```
 
 ### App Review information
@@ -123,7 +159,12 @@ Made by MannieDev.
 | Field | Value |
 |---|---|
 | Sign-in required | Yes |
-| Demo account | **[DEMO EMAIL]** / **[DEMO PASSWORD]** (create it first and put it in a household with a few items) |
+| Demo account | **[DEMO EMAIL]** / **[DEMO PASSWORD]** |
+
+Create the demo account before you submit. Install the app, tap **Continue with email**, sign up with a throwaway email and a password of 6 or more characters, choose a name and avatar, create a household called "Demo home", add a few items, and tick one off. Leave it in that state.
+
+| Field | Value |
+|---|---|
 | Contact first / last name | **[NAME]** |
 | Contact phone | **[PHONE, with country code]** |
 | Contact email | support@manniedev.com |
@@ -133,10 +174,10 @@ Notes for the reviewer (paste into the Notes box):
 ```
 Shopzyy is a shared household shopping list. There are no in-app purchases, no ads and no tracking.
 
-Sign in: tap "Continue with Apple", or tap "Continue with email" and either use the demo account above or create an account with any email address and a password of 6 or more characters. After signing in, choose a name and avatar, then create or join a household.
+Sign in: use the demo account above (tap "Continue with email"), tap "Continue with Apple", or create an account with any email address and a password of 6 or more characters. After signing in, choose a name and avatar, then create or join a household.
 
 Main flows to try:
-1. List tab: type "2 kg rice, milk x2, eggs" in the bar at the bottom. Three items are added. Tap an item's circle to tick it off.
+1. List tab: type "2 kg rice, milk x2, eggs" in the bar at the bottom. Three items are added. Tap an item's circle to tick it off. Swipe a row and tap Remove to delete it.
 2. Receipt scan: on the List tab, tap the document icon at the right end of the add bar. Choose "Take photo" or "Choose from library". The text is read on the device with Apple's Vision framework. The photo is deleted after reading and never uploaded. The review sheet shows how each receipt line matches the list; tap Confirm to tick off the matched items and save the total.
 3. Shake the phone to undo the last add or tick-off (a confirmation appears first).
 4. Household tab: Invite people creates a link and a code. Notifications about someone finishing a shop need a second device in the same household.
@@ -166,6 +207,7 @@ People who used the original Shopzyy (version 1.0) have their households moved t
 | User content: photos or videos (optional household background photo only) | Yes | App functionality |
 | Identifiers: user ID | Yes | App functionality |
 | Identifiers: device ID (push notification token) | Yes | App functionality |
+| Usage data: other usage data (the last time the app was used) | Yes | App functionality |
 | Diagnostics: other diagnostic data (anonymous error logs, no names, emails or list contents) | No | App functionality |
 
 Not collected: location, contacts, health and fitness, financial info, browsing history, search history, purchases, sensitive info, advertising data. Receipt photos are read on the device and deleted, so they are not collected.
@@ -185,7 +227,8 @@ Not collected: location, contacts, health and fitness, financial info, browsing 
 
 | Set | Size | Notes |
 |---|---|---|
-| iPhone 6.9" | 1320 × 2868 | The poster boards are 1290 × 2796, so scale or re-export them. App Store Connect shows the exact accepted sizes on the upload screen, and sizes change |
+| iPhone, 6.1" or 6.3" slot | 1179 × 2556 or 1206 × 2622 (portrait) | Sizes shown on the App Store Connect upload screen. The poster boards are 1290 × 2796, so export them at 1206 × 2622. The sizes change over time, so trust the upload screen |
+| App Preview (video) | 886 × 1920 portrait, or 1920 × 886 landscape | 15 to 30 seconds. Must be real footage of the app, with no other platforms shown. The animated ads do not qualify |
 | iPad | Not needed | The app is iPhone only |
 
 Five screenshots, in this order: One list, Type it, Live, Scan, Alerts. They come from the **Shopzyy Store Posters** canvas. App icon: `assets/icon.png` (1024 × 1024, no transparency, no rounded corners). Other images in `store-assets/ios/`.
@@ -234,7 +277,7 @@ Use the App Store description above with one change. Replace the line `• Sign 
 |---|---|
 | Privacy policy | https://shopzyy.manniedev.com/privacy |
 | Ads | The app does not contain ads |
-| App access | Restricted. Login required. Give the demo account **[DEMO EMAIL]** / **[DEMO PASSWORD]** and these steps: sign in with Google or email, choose a name, create a household, add items |
+| App access | Select **All or some functionality is restricted**, then **Add new instructions**. Use the name, username, password and text in the next section |
 | Content rating | Complete the IARC questionnaire. Answer No to violence, sexual content, language, controlled substances and gambling. Answer Yes to "users can interact or share content" because household members see each other's lists. No location sharing, no purchases. Expect Everyone or PEGI 3 |
 | Target audience | 18 and over, matching the terms of use. The app is not designed for children |
 | Government app | No |
@@ -243,6 +286,24 @@ Use the App Store description above with one change. Replace the line `• Sign 
 | News app | No |
 | Advertising ID | The app does not use it. If a build shows `AD_ID` in its permissions, remove it or declare it |
 | Data deletion | Yes. In the app and at https://shopzyy.manniedev.com/delete-account |
+
+#### App access instructions (Play Console, App content, App access)
+
+| Field | Value |
+|---|---|
+| Name | Reviewer account |
+| Username | **[DEMO EMAIL]** |
+| Password | **[DEMO PASSWORD]** |
+
+Any other information, to paste:
+
+```
+Open the app and tap "Continue with email", then sign in with the details above (or use "Continue with Google"). The demo account already has a household called "Demo home" with a few items.
+
+To try the main features: on the List tab type "2 kg rice, milk x2, eggs" in the bar at the bottom; tick an item off by tapping its circle; swipe a row and tap Remove to delete it; tap the document icon at the right end of the bar to scan a receipt (any photo of a shopping receipt works); open the Household tab to see Invite people and App settings. Account deletion is under Household > App settings > Delete my data.
+
+Camera and notification permissions are optional.
+```
 
 ### Data safety
 
@@ -257,6 +318,7 @@ Use the App Store description above with one change. Replace the line `• Sign 
 | App activity: other user-generated content (lists, items, history, trip totals) | Yes | No | No | App functionality |
 | App info and performance: diagnostics (anonymous error logs) | Yes | No | No | App functionality |
 | Device or other IDs (push notification token) | Yes | No | No | App functionality |
+| App activity: other actions (the last time the app was used) | Yes | No | No | App functionality |
 
 Not collected: location, contacts, messages, audio, files and docs, calendar, health and fitness, financial info, web browsing. Google's Firebase processes the data on our behalf as a service provider, which Google's form does not count as sharing. Receipt photos stay on the device and are deleted.
 
@@ -272,7 +334,7 @@ Not collected: location, contacts, messages, audio, files and docs, calendar, he
 
 None of these needs a special declaration form.
 
-These must **not** appear in the bundle: `ACTIVITY_RECOGNITION`, `health.READ_STEPS`, `RECORD_AUDIO`, `READ_EXTERNAL_STORAGE`, `WRITE_EXTERNAL_STORAGE`, `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `SYSTEM_ALERT_WINDOW`. The project blocks the first five in `app.config.ts`. The `android/` folder on your machine was generated before that change, so run `npm run prebuild:prod` again and check the real list:
+These must **not** appear in the bundle: `ACTIVITY_RECOGNITION`, `health.READ_STEPS`, `RECORD_AUDIO`, `READ_EXTERNAL_STORAGE`, `WRITE_EXTERNAL_STORAGE`, `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `SYSTEM_ALERT_WINDOW`. The project blocks these in `app.config.ts`, except `READ_MEDIA_IMAGES` and `READ_MEDIA_VIDEO`, which the app never requests. Check the real list after every build:
 
 ```
 bundletool dump manifest --bundle=app-release.aab | grep uses-permission
@@ -282,11 +344,11 @@ bundletool dump manifest --bundle=app-release.aab | grep uses-permission
 
 | Field | Value |
 |---|---|
-| Release name | 1.1.1 |
+| Release name | 1.1.2 |
 | Countries | All, or your chosen list |
 | Pricing | Free |
 
-Upload key: sign with the same upload key you used before. If EAS stored it, run `eas credentials` to download it.
+Upload key: sign with the same upload key you used before, which EAS stores. Download it with `npx eas credentials` as described above.
 
 ---
 
@@ -296,12 +358,60 @@ App Store "What's New" and Google Play "Release notes" (Play allows 500 characte
 
 | Language | Text |
 |---|---|
-| English | • Scan a receipt to tick off your list and save the total.<br>• Shake your phone to undo your last change.<br>• Cleaner sign-in, native menus and collapsible list sections.<br>• Fixes for invites and shopping alerts. |
-| Español | • Escanea un ticket para marcar tu lista y guardar el total.<br>• Agita el teléfono para deshacer el último cambio.<br>• Inicio de sesión más claro, menús nativos y secciones de lista plegables.<br>• Correcciones en las invitaciones y los avisos de compra. |
-| Français | • Scannez un ticket pour cocher votre liste et garder le total.<br>• Secouez le téléphone pour annuler la dernière modification.<br>• Connexion plus claire, menus natifs et sections de liste repliables.<br>• Correctifs pour les invitations et les alertes de courses. |
-| Nederlands | • Scan een bonnetje om je lijst af te vinken en het totaal op te slaan.<br>• Schud je telefoon om je laatste wijziging ongedaan te maken.<br>• Overzichtelijker inloggen, native menu's en inklapbare lijstsecties.<br>• Verbeteringen voor uitnodigingen en winkelmeldingen. |
-| Deutsch | • Scanne einen Kassenbon, um die Liste abzuhaken und die Summe zu speichern.<br>• Schüttle dein Handy, um die letzte Änderung rückgängig zu machen.<br>• Übersichtlichere Anmeldung, native Menüs und einklappbare Listenbereiche.<br>• Korrekturen bei Einladungen und Einkaufsbenachrichtigungen. |
-| Italiano | • Scansiona uno scontrino per spuntare la lista e salvare il totale.<br>• Scuoti il telefono per annullare l'ultima modifica.<br>• Accesso più chiaro, menu nativi e sezioni dell'elenco comprimibili.<br>• Correzioni a inviti e avvisi di spesa. |
+| English | • Scan a receipt to tick off your list and save the total.<br>• Shake your phone to undo your last change.<br>• Cleaner sign-in, native menus and collapsible list sections.<br>• Fixes for invites, joining a household and shopping alerts, and more reliable saving on a poor connection. |
+| Español | • Escanea un ticket para marcar tu lista y guardar el total.<br>• Agita el teléfono para deshacer el último cambio.<br>• Inicio de sesión más claro, menús nativos y secciones de lista plegables.<br>• Correcciones en invitaciones, al unirse a un hogar y en los avisos de compra; guardado más fiable con mala conexión. |
+| Français | • Scannez un ticket pour cocher votre liste et garder le total.<br>• Secouez le téléphone pour annuler la dernière modification.<br>• Connexion plus claire, menus natifs et sections de liste repliables.<br>• Correctifs pour les invitations, l'adhésion à un foyer et les alertes de courses ; enregistrement plus fiable avec une mauvaise connexion. |
+| Nederlands | • Scan een bonnetje om je lijst af te vinken en het totaal op te slaan.<br>• Schud je telefoon om je laatste wijziging ongedaan te maken.<br>• Overzichtelijker inloggen, native menu's en inklapbare lijstsecties.<br>• Verbeteringen voor uitnodigingen, deelnemen aan een huishouden en winkelmeldingen; betrouwbaarder opslaan bij slecht bereik. |
+| Deutsch | • Scanne einen Kassenbon, um die Liste abzuhaken und die Summe zu speichern.<br>• Schüttle dein Handy, um die letzte Änderung rückgängig zu machen.<br>• Übersichtlichere Anmeldung, native Menüs und einklappbare Listenbereiche.<br>• Korrekturen bei Einladungen, Haushaltsbeitritt und Einkaufsbenachrichtigungen; zuverlässigeres Speichern bei schlechter Verbindung. |
+| Italiano | • Scansiona uno scontrino per spuntare la lista e salvare il totale.<br>• Scuoti il telefono per annullare l'ultima modifica.<br>• Accesso più chiaro, menu nativi e sezioni dell'elenco comprimibili.<br>• Correzioni a inviti, adesione a una casa e avvisi di spesa; salvataggio più affidabile con poca connessione. |
+
+### Google Play release notes, ready to paste
+
+Play needs each language between its own tag. Paste this whole block into the release notes box.
+
+```
+<en-US>
+• Scan a receipt to tick off your list and save the total.
+• Shake your phone to undo your last change.
+• Cleaner sign-in, native menus and collapsible list sections.
+• Fixes for invites, joining a household and shopping alerts, and more reliable saving on a poor connection.
+</en-US>
+
+<es-ES>
+• Escanea un ticket para marcar tu lista y guardar el total.
+• Agita el teléfono para deshacer el último cambio.
+• Inicio de sesión más claro, menús nativos y secciones de lista plegables.
+• Correcciones en invitaciones, al unirse a un hogar y en los avisos de compra; guardado más fiable con mala conexión.
+</es-ES>
+
+<fr-FR>
+• Scannez un ticket pour cocher votre liste et garder le total.
+• Secouez le téléphone pour annuler la dernière modification.
+• Connexion plus claire, menus natifs et sections de liste repliables.
+• Correctifs pour les invitations, l'adhésion à un foyer et les alertes de courses ; enregistrement plus fiable avec une mauvaise connexion.
+</fr-FR>
+
+<nl-NL>
+• Scan een bonnetje om je lijst af te vinken en het totaal op te slaan.
+• Schud je telefoon om je laatste wijziging ongedaan te maken.
+• Overzichtelijker inloggen, native menu's en inklapbare lijstsecties.
+• Verbeteringen voor uitnodigingen, deelnemen aan een huishouden en winkelmeldingen; betrouwbaarder opslaan bij slecht bereik.
+</nl-NL>
+
+<de-DE>
+• Scanne einen Kassenbon, um die Liste abzuhaken und die Summe zu speichern.
+• Schüttle dein Handy, um die letzte Änderung rückgängig zu machen.
+• Übersichtlichere Anmeldung, native Menüs und einklappbare Listenbereiche.
+• Korrekturen bei Einladungen, Haushaltsbeitritt und Einkaufsbenachrichtigungen; zuverlässigeres Speichern bei schlechter Verbindung.
+</de-DE>
+
+<it-IT>
+• Scansiona uno scontrino per spuntare la lista e salvare il totale.
+• Scuoti il telefono per annullare l'ultima modifica.
+• Accesso più chiaro, menu nativi e sezioni dell'elenco comprimibili.
+• Correzioni a inviti, adesione a una casa e avvisi di spesa; salvataggio più affidabile con poca connessione.
+</it-IT>
+```
 
 ## Short fields in every language
 
@@ -322,7 +432,23 @@ The full English description is above. The other five languages need the descrip
 
 1. **Test the build** from TestFlight (iOS) or an internal track (Android), especially the receipt scan on real receipts, the invite link, Google sign-in and notifications.
 2. **Receipt scanning claims.** If it doesn't read receipts well, remove the "Scan the receipt" section, the first What's New line and the receipt line in the short fields.
-3. **Fill in the brackets:** demo account, review contact name and phone, Android `versionCode`, trader status.
+3. **Fill in the brackets:** demo account, review contact name and phone, trader status.
 4. **Check the privacy answers** match the live privacy policy. If you ever add analytics, ads or a new data type, update both stores and the policy together.
 5. **Check the pages are live:** open the privacy, terms, support and delete-account links from a phone.
 6. **Android:** rebuild with `npm run prebuild:prod`, then confirm the permission list with `bundletool` as shown above.
+
+## TestFlight checklist for 1.1.2
+
+Use a real phone and the TestFlight build, with the functions, rules and hosting already deployed to production.
+
+1. **Environment:** Settings shows the production app, not "Development build".
+2. **Sign-in:** email, Google and Apple each work, with the Shopzyy logo and the consent note showing.
+3. **Delete my data:** on a spare account that has joined a household on a second phone, delete it. Check the Firebase console shows no `users/…` record for it afterwards.
+4. **Invite link:** share a link, open it on a second phone with the app installed, and see the household and inviter names in the preview. Joining adds the person to the Members screen.
+5. **Install from an invite:** on a phone without the app, open the link, tap the store button, install, and use **Paste invite code** on the join screen.
+6. **Join on a slow connection:** switch to a poor connection and join. The spinner changes to "Still syncing…" and a message appears if the household doesn't arrive.
+7. **Receipt scan:** scan a real receipt, such as a long German one held in the hand. Check the items, store and total, and that no photo is saved.
+8. **Lists:** change an item's category and see it update at once. Swipe an item to delete without marking it bought. Pick a household background photo without the app freezing.
+9. **Notifications:** one trip alert per trip, with no repeats after reopening the app.
+10. **Offline:** add items in airplane mode, reconnect, and confirm they reach the second phone.
+11. **Languages:** change the language and check the new join and paste strings.

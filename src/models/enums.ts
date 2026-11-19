@@ -1,5 +1,5 @@
 
-import { t } from '../i18n';
+import { locale, t } from '../i18n';
 
 const tx = (s: string) => s;
 
@@ -181,8 +181,12 @@ function pluralLabel(u: MeasurementUnit, quantity: number): string {
 }
 
 export function plainQuantity(value: number): string {
-  if (Math.round(value) === value && Math.abs(value) < 1_000_000) return String(Math.trunc(value));
-  return value.toFixed(2).replace(/\.?0+$/, '');
+  const whole = Math.round(value) === value;
+  try {
+    return new Intl.NumberFormat(locale(), { maximumFractionDigits: whole ? 0 : 2 }).format(value);
+  } catch {
+    return whole ? String(Math.trunc(value)) : value.toFixed(2).replace(/\.?0+$/, '');
+  }
 }
 
 export function describeQuantity(quantity: number, unit: MeasurementUnit | null | undefined): string | null {

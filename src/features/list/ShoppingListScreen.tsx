@@ -3,9 +3,9 @@ import { t as tr } from '../../i18n';
 import { useIsFocused } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useShake } from '../../lib/useShake';
-import { Alert, Keyboard, KeyboardAvoidingView, Platform, SectionList, StyleSheet, Text, View } from 'react-native';
+import { Alert, AppState, Keyboard, KeyboardAvoidingView, Platform, SectionList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LoadingOverlay } from '../../components/LogoAnimation';
+import { InlineLoading } from '../../components/LogoAnimation';
 import { ScreenOptions } from '../../components/NativeHeader';
 import { SuggestionEngine } from '../../logic/SuggestionEngine';
 import { ShoppingTrip } from '../../logic/ShoppingTrip';
@@ -98,7 +98,7 @@ export function ShoppingListScreen({ household }: { household: Household }) {
 
   const scan = async (source: ReceiptSource) => {
     const result = await scanReceipt(source, () => setScanning(true)).finally(() => setScanning(false));
-    if ('receipt' in result) { setReceipt(result.receipt); return; }
+    if ('receipt' in result) { setTimeout(() => setReceipt(result.receipt), 450); return; }
     if ('cancelled' in result) return;
     const message = result.error === 'permission' ? tr('Allow camera access in Settings to scan receipts.')
       : result.error === 'unsupported' ? tr("Receipt scanning isn't available in this version of the app.")
@@ -165,7 +165,9 @@ export function ShoppingListScreen({ household }: { household: Household }) {
     const delay = myLatestTrip.promptAt.getTime() - Date.now();
     if (delay <= 0) { setNow(new Date()); return; }
     const id = setTimeout(() => setNow(new Date()), delay + 1000);
-    return () => clearTimeout(id);
+    // Timers stop while the app is in the background, so check again when it comes back.
+    const sub = AppState.addEventListener('change', (state) => { if (state === 'active') setNow(new Date()); });
+    return () => { clearTimeout(id); sub.remove(); };
   }, [myLatestTrip?.id, myLatestTrip?.purchases.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const skip = (key: string) => { SkippedTrips.insert(prefs, key); setSkippedKey(key); };
@@ -210,7 +212,7 @@ export function ShoppingListScreen({ household }: { household: Household }) {
             </>}
             renderSectionHeader={({ section }) => <ListSectionHeader title={section.title} count={section.items.length} collapsed={collapsed.has(section.title)} onToggle={() => toggleSection(section.title)} />}
             renderItem={({ item, index, section }) => (
-              <ItemRow item={item} first={index === 0} last={index === section.items.length - 1}
+              <ItemRow item={item} first={index === 0} last={index === section.items.length - 1} showCategory={household.groupingRaw !== 'category'}
                 onBought={() => requestTickOff(item)} onEdit={() => setEditing(item)} onRemove={() => list.removeFromList(item)} />
             )}
           />
@@ -232,13 +234,15 @@ export function ShoppingListScreen({ household }: { household: Household }) {
           setTimeout(chooseSource, 450);
         }} />
       ) : null}
-      <LoadingOverlay visible={scanning} message={tr('Reading receipt…')} />
+      <InlineLoading visible={scanning} message={tr('Reading receipt…')} />
       {receipt ? (
         <ReceiptReviewSheet receipt={receipt} household={household} listItems={listItems} onCancel={() => setReceipt(null)}
           onConfirm={(r) => {
             setReceipt(null);
-            const done = importReceipt({ list, households, householdID: household.id, by: currentMember, ...r });
-            if (done.count > 0) record(tr('Scanned receipt'), done.undo);
+            setTimeout(() => {
+              const done = importReceipt({ list, households, householdID: household.id, by: currentMember, ...r });
+              if (done.count > 0) record(tr('Scanned receipt'), done.undo);
+            }, 450);
           }} />
       ) : null}
       {tripTarget ? <TripTotalSheet target={tripTarget} household={household} onSkip={() => skip(tripTarget.skipKey)} onClose={() => setTripTarget(null)} /> : null}

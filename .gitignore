@@ -86,3 +86,12 @@ scripts/.missing.json
 
 # Gradle caches created when building local native modules
 .gradle/
+
+# Signing keys and EAS credential downloads
+*.jks
+*.keystore
+!debug.keystore
+credentials.json
+credentials/
+modules/*/android/build/
+modules/*/android/.gradle/

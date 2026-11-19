@@ -66,4 +66,15 @@ describe('ActivityMonitor', () => {
     scanForRemotePurchases(env, prefs, NOW);
     expect(posted).toHaveLength(1);
   });
+
+  test('trips that ended before the app was opened are not announced again, even when they sync in after opening', () => {
+    const { env, buy, posted, prefs } = setup();
+    buy('Milk', 60);
+    const openedAt = new Date(NOW.getTime() - 30 * 60_000);
+    scanForRemotePurchases(env, prefs, NOW, true, openedAt);
+    expect(posted).toHaveLength(0);
+    buy('Eggs', 5);
+    scanForRemotePurchases(env, prefs, NOW, true, openedAt);
+    expect(posted).toHaveLength(1);
+  });
 });

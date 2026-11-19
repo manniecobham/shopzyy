@@ -99,7 +99,7 @@ export function ItemEditorView({ item, householdID, onClose }: { item: GroceryIt
       </FormSection>
 
       <FormSection footer={tr('Shopzyy remembers this the next time anyone adds {name}.', { name: item.name.toLowerCase() })}>
-        <PickerRow label={tr('Category')} value={category} options={categoryChoices} onChange={setCategory} />
+        <PickerRow label={tr('Category')} value={category} options={categoryChoices} onChange={setCategory} same={sameChoice} />
         <FormRow onPress={() => setNewKind('category')}><Glyph name="plus" size={20} color={t.accent} style={{ marginRight: 10 }} /><Text style={{ fontSize: 17, color: t.accent }}>{tr('New category…')}</Text></FormRow>
         <PickerRowChoice label={tr('Room')} value={room} options={roomChoices} onChange={setRoom} />
         <FormRow last onPress={() => setNewKind('room')}><Glyph name="plus" size={20} color={t.accent} style={{ marginRight: 10 }} /><Text style={{ fontSize: 17, color: t.accent }}>{tr('New room…')}</Text></FormRow>

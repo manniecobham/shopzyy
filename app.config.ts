@@ -1,5 +1,5 @@
-import { existsSync, readFileSync } from 'node:fs';
 import type { ExpoConfig } from 'expo/config';
+import { existsSync, readFileSync } from 'node:fs';
 
 const PROD_FIREBASE_PROJECT = 'shopzyy-19bc2';
 
@@ -40,7 +40,7 @@ const config: ExpoConfig = {
   name: 'Shopzyy',
   slug: 'shopzyy',
   scheme: 'shopzyy',
-  version: '1.1.1',
+  version: '1.1.2',
   orientation: 'portrait',
   locales: { es: './locales/es.json', fr: './locales/fr.json', nl: './locales/nl.json', de: './locales/de.json', it: './locales/it.json' },
   icon: './assets/icon.png',
@@ -48,7 +48,7 @@ const config: ExpoConfig = {
   ios: {
     supportsTablet: false,
     bundleIdentifier: 'com.manniedev-team.shopzy',
-    buildNumber: '11',
+    buildNumber: '13',
     googleServicesFile: IOS_FIREBASE_FILE,
     infoPlist: {
       UIBackgroundModes: ['remote-notification'],
@@ -62,6 +62,7 @@ const config: ExpoConfig = {
   },
   android: {
     package: 'com.manniedevteam.shopzyy',
+    versionCode: 12,
     googleServicesFile: ANDROID_FIREBASE_FILE,
     adaptiveIcon: {
       backgroundColor: '#1D9D67',
@@ -76,6 +77,7 @@ const config: ExpoConfig = {
       'android.permission.RECORD_AUDIO',
       'android.permission.READ_EXTERNAL_STORAGE',
       'android.permission.WRITE_EXTERNAL_STORAGE',
+      'android.permission.SYSTEM_ALERT_WINDOW',
     ],
     intentFilters: [{
       action: 'VIEW',
@@ -88,6 +90,7 @@ const config: ExpoConfig = {
     './plugins/withNotificationColorMerge',
     // Android: the iOS-only strings from `locales` above would fail the release lint check.
     './plugins/withAndroidLintTweaks',
+    './plugins/withOptionalPortrait',
     'expo-router',
     '@react-native-firebase/app',
     '@react-native-firebase/auth',

@@ -4,7 +4,7 @@ import { getMessaging, type Message } from 'firebase-admin/messaging';
 import { onDocumentCreated, onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 import { MESSAGES, normalizeLang, tripSummary, tripTitle, type Lang } from './messages';
-import { TRIP_MAX_GAP_MS, TRIP_QUIET_PERIOD_MS, groupTrips, totalMatchesTrip, tripContaining, type Trip } from './tripLogic';
+import { TRIP_MAX_GAP_MS, TRIP_QUIET_PERIOD_MS, alertSignature, groupTrips, ledgerID, totalMatchesTrip, tripContaining, type Trip } from './tripLogic';
 
 const db = getFirestore();
 const LOOKBACK_MS = 24 * 60 * 60 * 1000;
@@ -25,10 +25,14 @@ async function buyerPurchases(householdID: string, buyerKey: string, sinceMs: nu
 export const onPurchaseCreated = onDocumentCreated('households/{householdID}/purchases/{purchaseID}', async (event) => {
   const data = event.data?.data();
   if (!data?.member) return; // buyer unknown: nothing meaningful to announce
-  await getFunctions().taskQueue('sendTripAlert').enqueue(
-    { householdID: event.params.householdID, purchaseID: event.params.purchaseID, purchasedAtMs: ms(data.purchasedAt) },
-    { scheduleDelaySeconds: Math.ceil(TRIP_QUIET_PERIOD_MS / 1000) },
-  );
+  try {
+    await getFunctions().taskQueue('sendTripAlert').enqueue(
+      { householdID: event.params.householdID, purchaseID: event.params.purchaseID, purchasedAtMs: ms(data.purchasedAt) },
+      { scheduleDelaySeconds: Math.ceil(TRIP_QUIET_PERIOD_MS / 1000), id: event.params.purchaseID },
+    );
+  } catch (error) {
+    if (!String((error as { code?: unknown }).code).includes('already-exists')) throw error;
+  }
 });
 
 export const sendTripAlert = onTaskDispatched<{ householdID: string; purchaseID: string; purchasedAtMs: number }>(
@@ -81,6 +85,15 @@ async function deliver(trip: Trip, originDeviceID: string): Promise<void> {
   const totals = await db.collection(`households/${householdID}/tripTotals`).where('enteredBy', '==', buyerKey).get();
   const match = totals.docs.find((t) => totalMatchesTrip({ tripKey: t.get('tripKey') as string, enteredBy: buyerKey, tripEndedAtMs: ms(t.get('tripEndedAt')) }, trip));
 
+  const signature = alertSignature(trip.purchases.length, match ? (match.get('amount') as number) : null);
+  const ledger = db.doc(`tripAlerts/${ledgerID(trip.id)}`);
+  const firstTime = await db.runTransaction(async (tx) => {
+    if ((await tx.get(ledger)).get('signature') === signature) return false;
+    tx.set(ledger, { signature, sentAt: Timestamp.now(), expireAt: Timestamp.fromMillis(Date.now() + 7 * 24 * 3600_000) });
+    return true;
+  });
+  if (!firstTime) return;
+
   // Text is composed per recipient language (each device stores its own), once per language.
   const composed = new Map<Lang, { title: string; body: string; household: string }>();
   const textFor = (lang: Lang) => {
@@ -96,10 +109,12 @@ async function deliver(trip: Trip, originDeviceID: string): Promise<void> {
   };
   const messaging = getMessaging();
   const invalid: string[] = [];
+  const sentTo = new Set<string>();
 
   for (const uid of memberUIDs) {
     const devices = await db.collection(`users/${uid}/devices`).where('alerts', '==', true).get();
-    const targets = devices.docs.filter((d) => d.id !== originDeviceID && typeof d.get('token') === 'string');
+    const targets = devices.docs.filter((d) => d.id !== originDeviceID && typeof d.get('token') === 'string' && !sentTo.has(d.get('token') as string));
+    targets.forEach((d) => sentTo.add(d.get('token') as string));
     if (targets.length === 0) continue;
 
     // The household name only helps people who are in more than one.

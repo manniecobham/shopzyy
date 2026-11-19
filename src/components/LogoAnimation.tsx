@@ -1,6 +1,6 @@
 import LottieView from 'lottie-react-native';
 import { Component, useEffect, useRef, useState, type ReactNode } from 'react';
-import { AccessibilityInfo, ActivityIndicator, Modal, StyleSheet, Text, View } from 'react-native';
+import { AccessibilityInfo, ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { Brand, useTheme } from '../theme/theme';
 
 const SOURCE = require('../../assets/animations/splash-logo.json');
@@ -94,19 +94,21 @@ export function FullScreenLoader({ message }: { message?: string }) {
   );
 }
 
-export function LoadingOverlay({ visible, message }: { visible: boolean; message?: string }) {
+// Drawn inside the screen, not in a Modal: a Modal over a sheet or native picker can leave a layer that blocks touches.
+export function LoadingOverlay(props: { visible: boolean; message?: string }) {
+  return <InlineLoading {...props} />;
+}
+
+export function InlineLoading({ visible, message }: { visible: boolean; message?: string }) {
   const t = useTheme();
   if (!visible) return null;
-  // A Modal so it sits above sheets and native pickers too.
   return (
-    <Modal transparent animationType="fade" statusBarTranslucent>
-      <View style={s.backdrop}>
-        <View style={[s.card, { backgroundColor: t.cell }]}>
-          <LogoLoader size={84} label={message ?? 'Loading'} />
-          {message ? <Text style={[s.cardText, { color: t.label }]}>{message}</Text> : null}
-        </View>
+    <View style={[StyleSheet.absoluteFill, s.backdrop]}>
+      <View style={[s.card, { backgroundColor: t.cell }]}>
+        <LogoLoader size={84} label={message ?? 'Loading'} />
+        {message ? <Text style={[s.cardText, { color: t.label }]}>{message}</Text> : null}
       </View>
-    </Modal>
+    </View>
   );
 }
 

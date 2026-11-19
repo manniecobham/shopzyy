@@ -448,5 +448,17 @@ const es: Record<string, string> = {
   "The photo is read on this device, then deleted. It is never saved or uploaded.": "La foto se lee en este dispositivo y luego se elimina. Nunca se guarda ni se sube.",
   "Tick off and save": "Marcar y guardar",
   "Something went wrong while reading the receipt. Please try again.": "Algo salió mal al leer el ticket. Inténtalo de nuevo.",
+  "By continuing you agree to our {terms} and {privacy}.": "Al continuar aceptas nuestras {terms} y nuestra {privacy}.",
+  "Legal": "Legal",
+  "Legal notice": "Aviso legal",
+  "Open-source licences": "Licencias de código abierto",
+  "Privacy policy": "Política de privacidad",
+  "Terms of use": "Condiciones de uso",
+  "Couldn't use that photo": "No se pudo usar esa foto",
+  "Try a different photo.": "Prueba con otra foto.",
+  "Paste invite code": "Pegar código de invitación",
+  "Still syncing your household…": "Sincronizando tu hogar…",
+  "There's no invite code on your clipboard.": "No hay ningún código de invitación en el portapapeles.",
+  "You've joined, but your household hasn't arrived yet. Check your connection; it will appear here by itself.": "Te has unido, pero tu hogar aún no ha llegado. Comprueba tu conexión; aparecerá aquí por sí solo.",
 };
 export default es;

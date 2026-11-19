@@ -20,8 +20,10 @@ import { PushRegistration } from '../services/PushRegistration';
 import { isDemo, seedDemo } from '../demo/demo';
 import { AppConfigService, appVersion } from '../services/AppConfig';
 import { deleteDoc, doc, getFirestore, setDoc } from '@react-native-firebase/firestore';
-import { getFunctions, httpsCallable } from '@react-native-firebase/functions';
+import { callFunction } from '../services/callable';
 import { StorageKeys } from '../services/AppPreferences';
+import { getInstallReferrerAsync } from 'expo-application';
+import { extractInviteCode } from '../lib/inviteCode';
 import { AppNotice, UserFacingError } from '../services/UserFacingError';
 
 export const DELETE_CANCELLED = 'cancelled';
@@ -80,6 +82,7 @@ export class AppRuntime extends Observable {
     void this.appConfig.refresh();
     this.appConfig.subscribe(() => this.changed());
     this.wireNotifications();
+    void this.adoptInstallReferrer();
     // Re-read values that depend on preferences now that they are loaded.
     this.account.userRecordName = this.prefs.userRecordName;
     this.account.start();
@@ -87,6 +90,7 @@ export class AppRuntime extends Observable {
     this.changed();
     AppState.addEventListener('change', (state) => {
       if (state !== 'active') return;
+      this.activeSince = new Date();
       this.account.refresh();
       void this.appConfig.refresh();
       this.scanActivity();
@@ -103,8 +107,10 @@ export class AppRuntime extends Observable {
     n.onOpenActivity = () => router.navigate('/activity');
   }
 
+  private activeSince = new Date();
+
   scanActivity(live = false): void {
-    scanForRemotePurchases(this.env, this.prefs, new Date(), live && AppState.currentState === 'active');
+    scanForRemotePurchases(this.env, this.prefs, new Date(), live && AppState.currentState === 'active', this.activeSince);
   }
 
   restartSync(): void {
@@ -112,6 +118,11 @@ export class AppRuntime extends Observable {
     this.stopSync();
     if (uid) this.startSync(uid);
     this.changed();
+  }
+
+  async signOut(): Promise<void> {
+    await this.push.unregister();
+    await this.account.signOut();
   }
 
   async deleteMyData(password?: string): Promise<string | null> {
@@ -126,7 +137,7 @@ export class AppRuntime extends Observable {
       const uid = this.account.uid;
       await this.households.deleteMyData();
       await this.push.unregister();
-      if (uid) { try { await deleteDoc(doc(getFirestore(), 'users', uid)); } catch {} }
+      if (uid) await callFunction('deleteAccountData');
       await this.account.deleteAccount();
       this.account.reset();
       this.prefs.currentHouseholdID = null;
@@ -151,19 +162,20 @@ export class AppRuntime extends Observable {
 
   async joinHousehold(code: string): Promise<string | null> {
     try {
-      const result = await httpsCallable<{ code: string }, { householdID: string }>(getFunctions(), 'joinHousehold')({ code: code.trim() });
-      this.store.removedHouseholds.delete(result.data.householdID);
-      this.selectHousehold(result.data.householdID);
+      const result = await callFunction<{ code: string }, { householdID: string }>('joinHousehold', { code: code.trim() });
+      this.store.removedHouseholds.delete(result.householdID);
+      this.selectHousehold(result.householdID);
       return null;
     } catch (error) {
+      AppLog.error('sharing', 'Joining a household failed', error);
       return UserFacingError.message(error);
     }
   }
 
   async createInvite(householdID: string): Promise<{ code: string } | { error: string }> {
     try {
-      const result = await httpsCallable<{ householdID: string }, { code: string }>(getFunctions(), 'createInvite')({ householdID });
-      return { code: result.data.code };
+      const result = await callFunction<{ householdID: string }, { code: string }>('createInvite', { householdID });
+      return { code: result.code };
     } catch (error) {
       return { error: UserFacingError.message(error) };
     }
@@ -173,6 +185,22 @@ export class AppRuntime extends Observable {
     if (this.account.phase === 'ready') return this.joinHousehold(code);
     this.prefs.setString(StorageKeys.pendingInvite, code);
     return null;
+  }
+
+  // The invite page puts the code in the Play install referrer, so it survives installing from the store.
+  private async adoptInstallReferrer(): Promise<void> {
+    if (Platform.OS !== 'android' || this.prefs.getString(StorageKeys.referrerChecked)) return;
+    this.prefs.setString(StorageKeys.referrerChecked, '1');
+    try {
+      const referrer = decodeURIComponent(await getInstallReferrerAsync());
+      const code = referrer.startsWith('join=') ? extractInviteCode(referrer.slice(5)) : null;
+      if (code && !this.prefs.getString(StorageKeys.pendingInvite)) {
+        this.prefs.setString(StorageKeys.pendingInvite, code);
+        if (this.account.phase === 'ready') this.redeemPendingInvite();
+      }
+    } catch {
+      // No referrer (sideloaded or not from Play): nothing to do.
+    }
   }
 
   private redeemPendingInvite(): void {
@@ -289,6 +317,12 @@ export class AppRuntime extends Observable {
       onRemoteChange: () => {
         this.scanActivity(true);
         ShoppingListService.refreshRestockReminders(this.env);
+      },
+      onMembersSynced: (householdID, present) => {
+        const { profile, userRecordName } = this.account;
+        const household = this.store.household(householdID);
+        if (!profile || !userRecordName || !household || present.has(userRecordName) || this.households.isLeaving(householdID)) return;
+        this.sync?.save([this.households.ensureMembership(household, userRecordName, profile)]);
       },
       onFetched: () => {
         this.markInitialSyncDone();

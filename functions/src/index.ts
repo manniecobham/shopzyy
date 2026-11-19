@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase-admin/app';
 import { FieldValue, Timestamp, getFirestore } from 'firebase-admin/firestore';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { randomInt } from 'node:crypto';
+import { limit } from './rateLimit';
 
 initializeApp();
 const db = getFirestore();
@@ -10,6 +11,9 @@ const db = getFirestore();
 const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 const CODE_LENGTH = 8;
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const HOUR = 60 * 60 * 1000;
+// Callables must be reachable by the app; each one still checks the signed-in user itself.
+const open = { invoker: 'public' } as const;
 
 const requireAuth = (uid: string | undefined): string => {
   if (!uid) throw new HttpsError('unauthenticated', 'Sign in first.');
@@ -24,10 +28,11 @@ async function memberUIDs(householdID: string): Promise<string[]> {
 
 const newCode = () => Array.from({ length: CODE_LENGTH }, () => ALPHABET[randomInt(ALPHABET.length)]).join('');
 
-export const createInvite = onCall(async (req) => {
+export const createInvite = onCall(open, async (req) => {
   const uid = requireAuth(req.auth?.uid);
   const householdID = String(req.data?.householdID ?? '');
   if (!householdID) throw new HttpsError('invalid-argument', 'householdID is required.');
+  await limit(uid, 'invite', 30, HOUR);
   if (!(await memberUIDs(householdID)).includes(uid)) throw new HttpsError('permission-denied', 'Not a member.');
 
   for (let attempt = 0; attempt < 5; attempt++) {
@@ -43,8 +48,9 @@ export const createInvite = onCall(async (req) => {
   throw new HttpsError('internal', "Couldn't create an invite. Try again.");
 });
 
-export const joinHousehold = onCall(async (req) => {
+export const joinHousehold = onCall(open, async (req) => {
   const uid = requireAuth(req.auth?.uid);
+  await limit(uid, 'join', 20, HOUR); // codes are guessable by brute force otherwise
   const code = String(req.data?.code ?? '').trim().toUpperCase();
   if (code.length !== CODE_LENGTH) throw new HttpsError('invalid-argument', 'That invite code is not valid.');
 
@@ -62,18 +68,38 @@ export const joinHousehold = onCall(async (req) => {
   return { householdID, name: (household.get('name') as string) ?? '' };
 });
 
-export const leaveHousehold = onCall(async (req) => {
+export const leaveHousehold = onCall(open, async (req) => {
   const uid = requireAuth(req.auth?.uid);
   const householdID = String(req.data?.householdID ?? '');
   const ref = db.doc(`households/${householdID}`);
   const snap = await ref.get();
   if (!snap.exists) return { ok: true }; // already gone
   if (snap.get('ownerUID') === uid) throw new HttpsError('failed-precondition', 'The owner deletes the household instead of leaving it.');
-  await ref.update({ memberUIDs: FieldValue.arrayRemove(uid) });
+  // Drop the member entry in the same step, so the person disappears from everyone's list.
+  const keys = new Set([uid]);
+  const memberKey = String(req.data?.memberKey ?? '');
+  if (memberKey && memberKey.length <= 200 && !memberKey.includes('/')) keys.add(memberKey);
+  const batch = db.batch();
+  batch.update(ref, { memberUIDs: FieldValue.arrayRemove(uid) });
+  keys.forEach((key) => batch.delete(db.doc(`households/${householdID}/members/${key}`)));
+  await batch.commit();
   return { ok: true };
 });
 
-export const deleteHousehold = onCall(async (req) => {
+export const deleteAccountData = onCall(open, async (req) => {
+  const uid = requireAuth(req.auth?.uid);
+  await limit(uid, 'delete', 10, HOUR);
+  await db.recursiveDelete(db.doc(`users/${uid}`));
+  const [legacy, invites] = await Promise.all([
+    db.collection('legacyUsers').where('uid', '==', uid).get(),
+    db.collection('invites').where('createdBy', '==', uid).get(),
+  ]);
+  await Promise.all([db.doc(`rateLimits/${uid}_invite`).delete(), db.doc(`rateLimits/${uid}_join`).delete()]);
+  await Promise.all([...legacy.docs, ...invites.docs].map((d) => d.ref.delete()));
+  return { ok: true };
+});
+
+export const deleteHousehold = onCall(open, async (req) => {
   const uid = requireAuth(req.auth?.uid);
   const householdID = String(req.data?.householdID ?? '');
   const ref = db.doc(`households/${householdID}`);
@@ -133,7 +159,7 @@ async function createMissing(parent: string, entries: DocEntry[]): Promise<numbe
   return created;
 }
 
-export const claimLegacyHousehold = onCall({ memory: '512MiB', timeoutSeconds: 120 }, async (req) => {
+export const claimLegacyHousehold = onCall({ ...open, memory: '512MiB', timeoutSeconds: 120 }, async (req) => {
   const uid = requireAuth(req.auth?.uid);
   const householdID = String(req.data?.householdID ?? '').toUpperCase();
   const userKey = String(req.data?.userRecordName ?? '');
@@ -188,7 +214,7 @@ export const claimLegacyHousehold = onCall({ memory: '512MiB', timeoutSeconds: 1
   return { created: false };
 });
 
-export const importLegacyRecords = onCall({ memory: '512MiB', timeoutSeconds: 120 }, async (req) => {
+export const importLegacyRecords = onCall({ ...open, memory: '512MiB', timeoutSeconds: 120 }, async (req) => {
   const uid = requireAuth(req.auth?.uid);
   const householdID = String(req.data?.householdID ?? '').toUpperCase();
   const kind = String(req.data?.kind ?? '');

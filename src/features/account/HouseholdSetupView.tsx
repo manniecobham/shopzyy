@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import * as Clipboard from 'expo-clipboard';
+import { extractInviteCode } from '../../lib/inviteCode';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LoadingOverlay } from '../../components/LogoAnimation';
@@ -17,11 +19,24 @@ export function HouseholdSetupView() {
   const [joinError, setJoinError] = useState<string | null>(null);
   // After a successful join the household still has to arrive; this screen goes away when it does.
   const [arriving, setArriving] = useState(false);
+  const [slow, setSlow] = useState(false);
   useEffect(() => {
-    if (!arriving) return;
-    const id = setTimeout(() => setArriving(false), 10_000);
-    return () => clearTimeout(id);
+    if (!arriving) { setSlow(false); return; }
+    const slowId = setTimeout(() => setSlow(true), 4000);
+    const endId = setTimeout(() => {
+      setArriving(false);
+      setJoinError(tr("You've joined, but your household hasn't arrived yet. Check your connection; it will appear here by itself."));
+    }, 15_000);
+    return () => { clearTimeout(slowId); clearTimeout(endId); };
   }, [arriving]);
+
+  // An invite followed through an app-store install is only on the clipboard, so offer it on tap.
+  const [canPaste, setCanPaste] = useState(false);
+  useEffect(() => { void Clipboard.hasStringAsync().then(setCanPaste).catch(() => {}); }, []);
+  const paste = async () => {
+    const found = extractInviteCode(await Clipboard.getStringAsync().catch(() => ''));
+    if (found) setCode(found); else setJoinError(tr("There's no invite code on your clipboard."));
+  };
 
   const create = () => {
     if (!account.userRecordName || !account.profile) return;
@@ -59,13 +74,14 @@ export function HouseholdSetupView() {
                 value={code} onChangeText={(v) => setCode(v.toUpperCase())} autoCapitalize="characters" autoCorrect={false}
                 returnKeyType="join" onSubmitEditing={() => void join()} maxLength={8} />
             </FormRow>
+            {canPaste ? <FormRow><TextButton title={tr('Paste invite code')} onPress={() => void paste()} /></FormRow> : null}
             <FormRow last>
               <TextButton title={joining ? tr('Joining…') : tr('Join household')} onPress={() => void join()} disabled={joining || code.trim().length === 0} />
             </FormRow>
           </FormSection>
         </ScrollView>
       </KeyboardAvoidingView>
-      <LoadingOverlay visible={joining || arriving} message={tr('Joining household…')} />
+      <LoadingOverlay visible={joining || arriving} message={slow ? tr('Still syncing your household…') : tr('Joining household…')} />
     </SafeAreaView>
   );
 }

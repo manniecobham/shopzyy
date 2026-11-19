@@ -448,5 +448,17 @@ const fr: Record<string, string> = {
   "The photo is read on this device, then deleted. It is never saved or uploaded.": "La photo est lue sur cet appareil, puis supprimée. Elle n’est jamais enregistrée ni envoyée.",
   "Tick off and save": "Cocher et enregistrer",
   "Something went wrong while reading the receipt. Please try again.": "Un problème est survenu pendant la lecture du ticket. Réessayez.",
+  "By continuing you agree to our {terms} and {privacy}.": "En continuant, vous acceptez nos {terms} et notre {privacy}.",
+  "Legal": "Informations légales",
+  "Legal notice": "Mentions légales",
+  "Open-source licences": "Licences open source",
+  "Privacy policy": "Politique de confidentialité",
+  "Terms of use": "Conditions d’utilisation",
+  "Couldn't use that photo": "Impossible d’utiliser cette photo",
+  "Try a different photo.": "Essayez une autre photo.",
+  "Paste invite code": "Coller le code d’invitation",
+  "Still syncing your household…": "Synchronisation de votre foyer…",
+  "There's no invite code on your clipboard.": "Aucun code d’invitation dans le presse-papiers.",
+  "You've joined, but your household hasn't arrived yet. Check your connection; it will appear here by itself.": "Vous avez rejoint, mais votre foyer n’est pas encore arrivé. Vérifiez votre connexion ; il apparaîtra ici tout seul.",
 };
 export default fr;
