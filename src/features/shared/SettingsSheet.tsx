@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Alert, Linking, Platform, Switch, Text, TextInput, View } from 'react-native';
 import { LANGUAGES, LANGUAGE_NAMES, hasSystemAppLanguage, language, setLanguageOverride, t, tn, type Language } from '../../i18n';
 import { Sheet } from '../../components/Sheet';
+import { OnboardingTour } from '../onboarding/OnboardingTour';
 import { FormRow, FormSection, MemberBadge, ProminentButton } from '../../components/ui';
 import { DELETE_CANCELLED } from '../../runtime/AppRuntime';
 import { useAccount, useAppState } from '../../runtime/RuntimeProvider';
@@ -28,6 +29,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
   const [editing, setEditing] = useState(false);
   const [diagnostics, setDiagnostics] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [tour, setTour] = useState(false);
   const [askingPassword, setAskingPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [importing, setImporting] = useState(false);
@@ -178,6 +180,13 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
         <FormRow last onPress={confirmDelete}><Text style={{ fontSize: 17, color: th.red }}>{t('Delete my data…')}</Text></FormRow>
       </FormSection>
 
+      <FormSection header={t('Help')}>
+        <FormRow last onPress={() => setTour(true)}>
+          <Text style={{ flex: 1, fontSize: 17, color: th.label }}>{t('How Shopzyy works')}</Text>
+          <Glyph name="chevron.right" size={16} color={th.tertiaryLabel} />
+        </FormRow>
+      </FormSection>
+
       <FormSection header={t('Legal')}>
         {[[t('Privacy policy'), LEGAL_URLS.privacy], [t('Terms of use'), LEGAL_URLS.terms], [t('Legal notice'), LEGAL_URLS.notice], [t('Open-source licences'), LEGAL_URLS.licenses]].map(([label, url], i, all) => (
           <FormRow key={url} last={i === all.length - 1} onPress={() => void Linking.openURL(url)}>
@@ -220,6 +229,11 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
               </FormRow>
             ))}
           </FormSection>
+        </Sheet>
+      ) : null}
+      {tour ? (
+        <Sheet visible title={t('How Shopzyy works')} doneTitle={t('Done')} onCancel={() => setTour(false)} scroll={false}>
+          <OnboardingTour doneTitle={t('Done')} onDone={() => setTour(false)} />
         </Sheet>
       ) : null}
       {editing ? <EditProfileSheet onClose={() => setEditing(false)} /> : null}
