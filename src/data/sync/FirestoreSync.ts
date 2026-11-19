@@ -2,7 +2,7 @@ import {
   collection, deleteDoc, doc, getDocFromServer, getFirestore, onSnapshot, query, setDoc, waitForPendingWrites, where,
   type DocumentSnapshot, type Firestore, type QuerySnapshot, type Unsubscribe,
 } from '@react-native-firebase/firestore';
-import { getFunctions, httpsCallable } from '@react-native-firebase/functions';
+import { callFunction } from '../../services/callable';
 import type { DataStore } from '../DataStore';
 import type { Entity, Household } from '../../models/entities';
 import type { SyncBackend } from '../../services/ports';
@@ -199,11 +199,11 @@ export class FirestoreSync implements SyncBackend {
 
   deleteHousehold(household: Household): void {
     // The Admin SDK removes the whole subtree, which a client can't do atomically.
-    this.write(() => httpsCallable(getFunctions(), 'deleteHousehold')({ householdID: household.id }));
+    this.write(() => callFunction('deleteHousehold', { householdID: household.id }));
   }
 
-  async leave(household: Household): Promise<void> {
-    await httpsCallable(getFunctions(), 'leaveHousehold')({ householdID: household.id });
+  async leave(household: Household, memberKey?: string): Promise<void> {
+    await callFunction('leaveHousehold', { householdID: household.id, memberKey });
   }
 
   async deleteNow(entity: Entity): Promise<void> {

@@ -103,6 +103,45 @@ describe('Households', () => {
   });
 });
 
+describe('Leaving a household', () => {
+  test('the server removes the member entry, and this phone does not re-create it while leaving', async () => {
+    const f = fixture();
+    const calls: string[] = [];
+    let leavingDuringCall = false;
+    const sync: SyncBackend = {
+      save() {}, delete() {}, createHousehold() {}, deleteHousehold() {}, stop() {},
+      availability: async () => 'available',
+      leave: async (_h, key) => { calls.push(`leave:${key}`); leavingDuringCall = svc.isLeaving(home.id); },
+      deleteNow: async () => { calls.push('deleteNow'); },
+      sendNow: async () => {},
+    };
+    f.env.prefs.userRecordName = '_ama';
+    const svc = new HouseholdService({ ...f.env, sync });
+    const home = svc.create('Home', '_ama', ama);
+    home.isOwnedByMe = false;
+
+    expect(await svc.remove(home)).toBe('removed');
+    expect(calls).toEqual(['leave:_ama']);
+    expect(leavingDuringCall).toBe(true);
+    expect(svc.isLeaving(home.id)).toBe(false);
+  });
+
+  test('a failed leave lets the phone keep its member entry', async () => {
+    const f = fixture();
+    const sync: SyncBackend = {
+      save() {}, delete() {}, createHousehold() {}, deleteHousehold() {}, stop() {},
+      availability: async () => 'available',
+      leave: async () => { throw new Error('offline'); },
+      deleteNow: async () => {}, sendNow: async () => {},
+    };
+    const svc = new HouseholdService({ ...f.env, sync });
+    const home = svc.create('Home', '_ama', ama);
+    home.isOwnedByMe = false;
+    await expect(svc.remove(home)).rejects.toThrow('offline');
+    expect(svc.isLeaving(home.id)).toBe(false);
+  });
+});
+
 describe('Shopping totals', () => {
   test('a total is saved once per trip and edited in place', () => {
     const f = fixture();

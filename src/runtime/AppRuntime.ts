@@ -20,7 +20,7 @@ import { PushRegistration } from '../services/PushRegistration';
 import { isDemo, seedDemo } from '../demo/demo';
 import { AppConfigService, appVersion } from '../services/AppConfig';
 import { deleteDoc, doc, getFirestore, setDoc } from '@react-native-firebase/firestore';
-import { getFunctions, httpsCallable } from '@react-native-firebase/functions';
+import { callFunction } from '../services/callable';
 import { StorageKeys } from '../services/AppPreferences';
 import { getInstallReferrerAsync } from 'expo-application';
 import { extractInviteCode } from '../lib/inviteCode';
@@ -137,7 +137,7 @@ export class AppRuntime extends Observable {
       const uid = this.account.uid;
       await this.households.deleteMyData();
       await this.push.unregister();
-      if (uid) await httpsCallable(getFunctions(), 'deleteAccountData')();
+      if (uid) await callFunction('deleteAccountData');
       await this.account.deleteAccount();
       this.account.reset();
       this.prefs.currentHouseholdID = null;
@@ -162,19 +162,20 @@ export class AppRuntime extends Observable {
 
   async joinHousehold(code: string): Promise<string | null> {
     try {
-      const result = await httpsCallable<{ code: string }, { householdID: string }>(getFunctions(), 'joinHousehold')({ code: code.trim() });
-      this.store.removedHouseholds.delete(result.data.householdID);
-      this.selectHousehold(result.data.householdID);
+      const result = await callFunction<{ code: string }, { householdID: string }>('joinHousehold', { code: code.trim() });
+      this.store.removedHouseholds.delete(result.householdID);
+      this.selectHousehold(result.householdID);
       return null;
     } catch (error) {
+      AppLog.error('sharing', 'Joining a household failed', error);
       return UserFacingError.message(error);
     }
   }
 
   async createInvite(householdID: string): Promise<{ code: string } | { error: string }> {
     try {
-      const result = await httpsCallable<{ householdID: string }, { code: string }>(getFunctions(), 'createInvite')({ householdID });
-      return { code: result.data.code };
+      const result = await callFunction<{ householdID: string }, { code: string }>('createInvite', { householdID });
+      return { code: result.code };
     } catch (error) {
       return { error: UserFacingError.message(error) };
     }
@@ -320,7 +321,7 @@ export class AppRuntime extends Observable {
       onMembersSynced: (householdID, present) => {
         const { profile, userRecordName } = this.account;
         const household = this.store.household(householdID);
-        if (!profile || !userRecordName || !household || present.has(userRecordName)) return;
+        if (!profile || !userRecordName || !household || present.has(userRecordName) || this.households.isLeaving(householdID)) return;
         this.sync?.save([this.households.ensureMembership(household, userRecordName, profile)]);
       },
       onFetched: () => {

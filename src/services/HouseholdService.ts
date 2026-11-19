@@ -120,6 +120,10 @@ export class HouseholdService {
     for (const h of this.households()) this.ensureMembership(h, userRecordName, profile);
   }
 
+  private readonly leaving = new Set<string>();
+
+  isLeaving(householdID: string): boolean { return this.leaving.has(householdID); }
+
   async remove(household: Household): Promise<RemovalOutcome> {
     const id = household.id;
     if (!this.isLive(household)) return 'alreadyGone';
@@ -134,13 +138,13 @@ export class HouseholdService {
       if (household.isOwnedByMe) {
         sync?.deleteHousehold(household);
       } else {
-        // Take this person off the member list first; access ends once they leave.
-        const key = this.env.prefs.userRecordName;
-        const member = key ? this.store.member(key, id) : undefined;
-        if (member) await sync?.deleteNow(member);
-        await sync?.leave(household);
+        // The server removes the member entry and the access together. Until then this phone must not
+        // re-create its own entry, which it would otherwise do on seeing it missing.
+        this.leaving.add(id);
+        await sync?.leave(household, this.env.prefs.userRecordName ?? undefined);
       }
     } catch (error) {
+      this.leaving.delete(id);
       if (isHouseholdGone(error)) {
         this.purgeLocal(id);
         return 'alreadyGone';
@@ -148,6 +152,7 @@ export class HouseholdService {
       throw error;
     }
     this.purgeLocal(id);
+    this.leaving.delete(id);
     return 'removed';
   }
 
