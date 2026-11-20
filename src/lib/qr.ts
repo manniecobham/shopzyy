@@ -3,8 +3,9 @@ import qrcode from 'qrcode-generator';
 export interface QrRun { start: number; length: number }
 
 // Rows of dark runs, so a code of about 1,000 squares is drawn with a few hundred views instead.
+// Highest error correction, so the logo can cover the middle and the code still scans.
 export function qrRuns(text: string): { size: number; rows: QrRun[][] } {
-  const qr = qrcode(0, 'M');
+  const qr = qrcode(0, 'H');
   qr.addData(text);
   qr.make();
   const size = qr.getModuleCount();

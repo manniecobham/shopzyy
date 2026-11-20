@@ -81,6 +81,12 @@ describe('invite QR code', () => {
     expect(rows.flat().every((r) => r.start >= 0 && r.start + r.length <= size)).toBe(true);
   });
 
+  it('uses the highest error correction so a logo can cover the middle', () => {
+    // High correction needs a larger grid than the default for the same text.
+    const { size } = qrRuns(link);
+    expect(size).toBeGreaterThanOrEqual(29);
+  });
+
   it('makes a different pattern for a different code', () => {
     expect(JSON.stringify(qrRuns(link).rows)).not.toBe(JSON.stringify(qrRuns(inviteLink('shopzyy.manniedev.com', 'WXYZ9876')).rows));
   });
