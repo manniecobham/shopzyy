@@ -126,7 +126,6 @@ const it: Record<string, string> = {
   "Notifications, sync, your profile, diagnostics and your data.": "Notifiche, sincronizzazione, profilo, diagnostica e dati.",
   "Office": "Ufficio",
   "Offline": "Offline",
-  "Organising": "Organizzazione",
   "Other": "Altro",
   "Overdue": "In ritardo",
   "Owner": "Proprietario",
@@ -159,7 +158,6 @@ const it: Record<string, string> = {
   "Shared household": "Casa condivisa",
   "Shopping history": "Cronologia spese",
   "Shopping list": "Lista della spesa",
-  "Shopping totals": "Totali della spesa",
   "Shopping trip alerts": "Avvisi sulla spesa",
   "Shopzyy follows your phone's language. You can change it for Shopzyy only in your phone's settings.": "Shopzyy segue la lingua del telefono. Puoi cambiarla solo per Shopzyy nelle impostazioni del telefono.",
   "Show more trips": "Mostra altre spese",
@@ -489,5 +487,7 @@ const it: Record<string, string> = {
   "Back": "Indietro",
   "Data & privacy": "Dati e privacy",
   "Off": "Disattivate",
+  "Photo": "Foto",
+  "Share link or code": "Condividi link o codice",
 };
 export default it;

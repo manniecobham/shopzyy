@@ -126,7 +126,6 @@ const nl: Record<string, string> = {
   "Notifications, sync, your profile, diagnostics and your data.": "Meldingen, synchronisatie, je profiel, diagnostiek en je gegevens.",
   "Office": "Kantoor",
   "Offline": "Offline",
-  "Organising": "Organiseren",
   "Other": "Overig",
   "Overdue": "Over tijd",
   "Owner": "Eigenaar",
@@ -159,7 +158,6 @@ const nl: Record<string, string> = {
   "Shared household": "Gedeeld huishouden",
   "Shopping history": "Boodschappengeschiedenis",
   "Shopping list": "Boodschappenlijst",
-  "Shopping totals": "Boodschappentotalen",
   "Shopping trip alerts": "Meldingen over winkelrondes",
   "Shopzyy follows your phone's language. You can change it for Shopzyy only in your phone's settings.": "Shopzyy volgt de taal van je telefoon. Je kunt die alleen voor Shopzyy wijzigen in de instellingen van je telefoon.",
   "Show more trips": "Toon meer winkelrondes",
@@ -489,5 +487,7 @@ const nl: Record<string, string> = {
   "Back": "Terug",
   "Data & privacy": "Gegevens en privacy",
   "Off": "Uit",
+  "Photo": "Foto",
+  "Share link or code": "Link of code delen",
 };
 export default nl;
