@@ -484,5 +484,12 @@ const nl: Record<string, string> = {
   "Tap to see what was bought": "Tik om te zien wat er is gekocht",
   "Type or paste something like “2 kg rice, milk x2, eggs” and Shopzyy turns it into items with quantities.": "Typ of plak iets als “2 kg rijst, melk x2, eieren” en Shopzyy maakt er artikelen met hoeveelheden van.",
   "{name} finished shopping": "{name} is klaar met winkelen",
+  "Enter the invite code, or paste the link you were sent.": "Voer de uitnodigingscode in of plak de link die je hebt gekregen.",
+  "Join a household": "Meedoen met een huishouden",
+  "Join a household…": "Meedoen met een huishouden…",
+  "Or enter this code in Shopzyy:": "Of voer deze code in bij Shopzyy:",
+  "Point a phone's camera at this code to join. It works for 7 days.": "Richt de camera van een telefoon op deze code om mee te doen. Geldig voor 7 dagen.",
+  "Scan to join {name}": "Scan om mee te doen met {name}",
+  "Show QR code": "QR-code tonen",
 };
 export default nl;

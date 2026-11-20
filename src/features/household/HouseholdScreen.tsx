@@ -11,6 +11,7 @@ import { ScreenOptions } from '../../components/NativeHeader';
 import { FormRow, FormSection, MemberBadge } from '../../components/ui';
 import { COMMON_CURRENCIES, currencyTitle } from '../../lib/currencies';
 import { deviceCurrency } from '../../lib/format';
+import { inviteLink } from '../../lib/inviteCode';
 import { HOUSEHOLD_THEMES, themeTitle, type HouseholdTheme } from '../../models/enums';
 import type { Household } from '../../models/entities';
 import { useAccount, useRuntime, useStoreVersion } from '../../runtime/RuntimeProvider';
@@ -20,6 +21,8 @@ import { SettingsSheet } from '../shared/SettingsSheet';
 import { CustomOptionsSheet } from './CustomOptionsSheet';
 import { HouseholdBackground, HouseholdThemeArt, householdDisplayName } from './HouseholdBackground';
 import { HouseholdSwitcher } from './HouseholdSwitcher';
+import { InviteQRSheet } from './InviteQRSheet';
+import { JoinSheet } from './JoinSheet';
 import { PhotoPositionSheet } from './PhotoPositionSheet';
 
 const BANNER_WIDTH = 1200;
@@ -77,13 +80,25 @@ export function HouseholdScreen({ household }: { household: Household }) {
 
   // MARK: Invite
 
+  const [qr, setQr] = useState<string | null>(null);
+  const [joining, setJoining] = useState(false);
+  const [makingQr, setMakingQr] = useState(false);
+
+  const showQr = async () => {
+    setMakingQr(true);
+    const result = await runtime.createInvite(household.id);
+    setMakingQr(false);
+    if ('error' in result) { Alert.alert(t("Couldn't create an invite"), result.error); return; }
+    setQr(result.code);
+  };
+
   const invite = async () => {
     setInviting(true);
     const result = await runtime.createInvite(household.id);
     setInviting(false);
     if ('error' in result) { Alert.alert(t("Couldn't create an invite"), result.error); return; }
     await Share.share({
-      message: t('Join {name} on Shopzyy! Open this link: {link}\n\nOr open Shopzyy and enter the invite code {code}.', { name, link: `https://${linkHost}/join/${result.code}`, code: result.code }),
+      message: t('Join {name} on Shopzyy! Open this link: {link}\n\nOr open Shopzyy and enter the invite code {code}.', { name, link: inviteLink(linkHost, result.code), code: result.code }),
     });
   };
 
@@ -169,9 +184,17 @@ export function HouseholdScreen({ household }: { household: Household }) {
               <Text style={{ fontSize: 13, color: th.secondaryLabel }}>{purchaseSummary(purchaseCounts.get(m.id) ?? 0)}</Text>
             </FormRow>
           ))}
-          <FormRow last onPress={() => void invite()} disabled={inviting}>
+          <FormRow onPress={() => void invite()} disabled={inviting}>
             <Glyph name="person.badge.plus" size={20} color={th.accent} style={{ marginRight: 12 }} />
             <Text style={{ fontSize: 17, color: th.accent }}>{inviting ? t('Creating invite…') : t('Invite people')}</Text>
+          </FormRow>
+          <FormRow onPress={() => void showQr()} disabled={makingQr}>
+            <Glyph name="qrcode" size={20} color={th.accent} style={{ marginRight: 12 }} />
+            <Text style={{ fontSize: 17, color: th.accent }}>{makingQr ? t('Creating invite…') : t('Show QR code')}</Text>
+          </FormRow>
+          <FormRow last onPress={() => setJoining(true)}>
+            <Glyph name="person.2" size={20} color={th.accent} style={{ marginRight: 12 }} />
+            <Text style={{ fontSize: 17, color: th.accent }}>{t('Join a household…')}</Text>
           </FormRow>
         </FormSection>
 
@@ -204,6 +227,8 @@ export function HouseholdScreen({ household }: { household: Household }) {
       <InlineLoading visible={preparingPhoto} message={t('Preparing photo…')} />
       {options ? <CustomOptionsSheet householdID={household.id} onClose={() => setOptions(false)} /> : null}
       {settings ? <SettingsSheet onClose={() => setSettings(false)} /> : null}
+      {qr ? <InviteQRSheet name={name} code={qr} link={inviteLink(linkHost, qr)} onClose={() => setQr(null)} /> : null}
+      {joining ? <JoinSheet onClose={() => setJoining(false)} /> : null}
       {pendingPhoto ? (
         <PhotoPositionSheet base64={pendingPhoto} onCancel={() => setPendingPhoto(null)}
           onUse={(x, y) => { service.setCustomImage(pendingPhoto, household, x, y); setPendingPhoto(null); }} />

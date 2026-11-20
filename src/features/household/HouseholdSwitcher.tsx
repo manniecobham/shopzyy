@@ -7,6 +7,7 @@ import { Prompt } from '../../components/Prompt';
 import { useAccount, useAppState, useStoreVersion } from '../../runtime/RuntimeProvider';
 import { useTheme } from '../../theme/theme';
 import { HouseholdThumbnail, householdDisplayName } from './HouseholdBackground';
+import { JoinSheet } from './JoinSheet';
 
 export function HouseholdSwitcher() {
   const th = useTheme();
@@ -14,6 +15,7 @@ export function HouseholdSwitcher() {
   const account = useAccount();
   useStoreVersion();
   const [naming, setNaming] = useState(false);
+  const [joining, setJoining] = useState(false);
   const households = runtime.store.allHouseholds();
   const current = runtime.currentHousehold;
 
@@ -27,7 +29,10 @@ export function HouseholdSwitcher() {
     <View>
       <NativeMenu label={t('Switch household')} style={{ maxWidth: 270 }} sections={[
         households.map((h) => ({ title: householdDisplayName(h), checked: h.id === current?.id, onPress: () => runtime.selectHousehold(h.id) })),
-        [{ title: t('New household…'), icon: 'plus', onPress: () => setNaming(true) }],
+        [
+          { title: t('New household…'), icon: 'plus', onPress: () => setNaming(true) },
+          { title: t('Join a household…'), icon: 'person.badge.plus', onPress: () => setJoining(true) },
+        ],
       ]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           {current ? <HouseholdThumbnail household={current} /> : null}
@@ -35,6 +40,7 @@ export function HouseholdSwitcher() {
           <Glyph name="chevron.down" size={13} color={th.label} />
         </View>
       </NativeMenu>
+      {joining ? <JoinSheet onClose={() => setJoining(false)} /> : null}
       <Prompt visible={naming} title={t('New household')} message={t('You can invite people to it from the Household tab.')}
         placeholder={t('e.g. Beach house')} confirmTitle={t('Create')} onConfirm={create} onCancel={() => setNaming(false)} />
     </View>

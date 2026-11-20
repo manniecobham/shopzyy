@@ -484,5 +484,12 @@ const it: Record<string, string> = {
   "Tap to see what was bought": "Tocca per vedere cosa è stato comprato",
   "Type or paste something like “2 kg rice, milk x2, eggs” and Shopzyy turns it into items with quantities.": "Scrivi o incolla qualcosa come «2 kg di riso, latte x2, uova» e Shopzyy lo trasforma in articoli con quantità.",
   "{name} finished shopping": "{name} ha finito la spesa",
+  "Enter the invite code, or paste the link you were sent.": "Inserisci il codice d'invito o incolla il link che hai ricevuto.",
+  "Join a household": "Unisciti a una casa",
+  "Join a household…": "Unisciti a una casa…",
+  "Or enter this code in Shopzyy:": "Oppure inserisci questo codice in Shopzyy:",
+  "Point a phone's camera at this code to join. It works for 7 days.": "Inquadra questo codice con la fotocamera di un telefono per unirti. Vale 7 giorni.",
+  "Scan to join {name}": "Scansiona per unirti a {name}",
+  "Show QR code": "Mostra codice QR",
 };
 export default it;

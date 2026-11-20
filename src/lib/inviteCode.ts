@@ -5,3 +5,5 @@ export function extractInviteCode(text: string | null | undefined): string | nul
   const match = CODE.exec(text ?? '');
   return match ? match[1].toUpperCase() : null;
 }
+
+export const inviteLink = (host: string, code: string): string => `https://${host}/join/${code}`;

@@ -45,6 +45,7 @@ const ICONS = {
   'person.crop.circle': 'account_circle',
   'person.crop.circle.badge.checkmark': 'how_to_reg',
   'photo': 'image',
+  'qrcode': 'qr_code_2',
   'plus': 'add',
   'plus.circle.fill': 'add_circle',
   'sparkles': 'auto_awesome',
