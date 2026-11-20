@@ -92,6 +92,7 @@ const config: ExpoConfig = {
     './plugins/withAndroidLintTweaks',
     './plugins/withOptionalPortrait',
     'expo-router',
+    'expo-web-browser',
     '@react-native-firebase/app',
     '@react-native-firebase/auth',
     '@react-native-google-signin/google-signin',
