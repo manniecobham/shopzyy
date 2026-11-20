@@ -8,6 +8,7 @@ import { ProminentButton } from '../components/ui';
 import { MigrationView } from '../features/account/MigrationView';
 import { UpdateRequiredView } from '../features/shared/UpdateRequiredView';
 import { SplashView } from '../features/shared/SplashView';
+import { TourOverlay } from '../features/onboarding/TourOverlay';
 import { RuntimeProvider, useAccount, useAppState, useStoreVersion } from '../runtime/RuntimeProvider';
 import { AppLog } from '../services/AppLog';
 import { AppNotice } from '../services/UserFacingError';
@@ -58,6 +59,7 @@ function Shell() {
   }, [noticeVersion]);
 
   const migrating = !!account.uid && (runtime.migration.state === 'running' || runtime.migration.state === 'failed');
+  const showsTour = runtime.tourPending && account.phase === 'ready' && !showsSplash && !migrating;
   const inMain = runtime.ready && account.phase === 'ready' && runtime.currentHousehold !== null && !migrating;
 
   return (
@@ -68,6 +70,7 @@ function Shell() {
         <Stack.Screen name="join/[code]" />
       </Stack>
       {migrating && !showsSplash ? <View style={StyleSheet.absoluteFill}><MigrationView /></View> : null}
+      {showsTour ? <View style={StyleSheet.absoluteFill}><TourOverlay /></View> : null}
       {runtime.appConfig.updateRequired && !showsSplash ? <View style={StyleSheet.absoluteFill}><UpdateRequiredView /></View> : null}
       {showsSplash ? <SplashView onFinish={() => setAnimationDone(true)} /> : null}
     </View>

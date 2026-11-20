@@ -8,7 +8,8 @@ import { AddScene, RemindScene, ScanScene, ShareScene, TipsScene, TripScene } fr
 interface Page { key: string; render: (active: boolean) => ReactNode; title?: string; body?: string }
 
 // `hero` is the welcome page shown before the feature pages on a first launch.
-export function OnboardingTour({ hero, onDone, doneTitle }: { hero?: ReactNode; onDone: () => void; doneTitle?: string }) {
+// `skippable` is off when the tour sits in a sheet that already has its own Done button.
+export function OnboardingTour({ hero, onDone, doneTitle, skippable = true }: { hero?: ReactNode; onDone: () => void; doneTitle?: string; skippable?: boolean }) {
   const t = useTheme();
   const { width } = useWindowDimensions();
   const list = useRef<FlatList<Page>>(null);
@@ -33,9 +34,11 @@ export function OnboardingTour({ hero, onDone, doneTitle }: { hero?: ReactNode; 
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={s.top}>
-        {!last ? <TextButton title={tr('Skip')} onPress={onDone} /> : null}
-      </View>
+      {skippable ? (
+        <View style={s.top}>
+          {!last ? <TextButton title={tr('Skip')} onPress={onDone} /> : null}
+        </View>
+      ) : null}
       <FlatList
         ref={list} data={pages} horizontal pagingEnabled showsHorizontalScrollIndicator={false}
         keyExtractor={(p) => p.key} extraData={index} onMomentumScrollEnd={settle}

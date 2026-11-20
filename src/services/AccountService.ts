@@ -55,6 +55,7 @@ export class AccountService extends Observable {
       this.userRecordName = demo.userKey;
       this.profile = demo.profile;
       this.prefs.setBool(StorageKeys.hasSeenWelcome, true);
+      this.prefs.setBool(StorageKeys.hasSeenTour, true);
       this.updatePhase();
       return;
     }
@@ -80,7 +81,9 @@ export class AccountService extends Observable {
   refresh(): void { this.updatePhase(); }
 
   completeWelcome(): void {
+    // The welcome pages are the tour, so a new install does not see it a second time.
     this.prefs.setBool(StorageKeys.hasSeenWelcome, true);
+    this.prefs.setBool(StorageKeys.hasSeenTour, true);
     this.updatePhase();
   }
 
@@ -210,7 +213,7 @@ export class AccountService extends Observable {
     this.profile = null;
     this.lastError = null;
     for (const key of [StorageKeys.profile, StorageKeys.currentHouseholdID, StorageKeys.announcedTrips, StorageKeys.skippedTrips,
-      StorageKeys.selectedTab, StorageKeys.hasSeenWelcome]) this.prefs.remove(key);
+      StorageKeys.selectedTab, StorageKeys.hasSeenWelcome, StorageKeys.hasSeenTour]) this.prefs.remove(key);
     this.updatePhase();
   }
 

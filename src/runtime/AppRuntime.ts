@@ -212,6 +212,14 @@ export class AppRuntime extends Observable {
     });
   }
 
+  // People who installed before the tour existed see it once, on their first launch of this version.
+  get tourPending(): boolean { return !isDemo && !this.prefs.getBool(StorageKeys.hasSeenTour, false); }
+
+  completeTour(): void {
+    this.prefs.setBool(StorageKeys.hasSeenTour, true);
+    this.changed();
+  }
+
   list(householdID: string): ShoppingListService {
     return new ShoppingListService(this.env, householdID);
   }

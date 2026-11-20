@@ -3,6 +3,7 @@ export const StorageKeys = {
   userRecordName: 'shopzy.userRecordName',
   profile: 'shopzy.profile',
   hasSeenWelcome: 'shopzy.hasSeenWelcome',
+  hasSeenTour: 'shopzy.hasSeenTour',
   notifyPurchases: 'shopzy.notifyPurchases',
   notifyRestock: 'shopzy.notifyRestock',
   announcedTrips: 'shopzy.announcedTrips',

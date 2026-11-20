@@ -238,7 +238,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
       ) : null}
       {tour ? (
         <Sheet visible title={t('How Shopzyy works')} doneTitle={t('Done')} onCancel={() => setTour(false)} scroll={false}>
-          <OnboardingTour doneTitle={t('Done')} onDone={() => setTour(false)} />
+          <OnboardingTour skippable={false} doneTitle={t('Done')} onDone={() => setTour(false)} />
         </Sheet>
       ) : null}
       {editing ? <EditProfileSheet onClose={() => setEditing(false)} /> : null}
