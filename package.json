@@ -22,6 +22,8 @@
     "prebuild:prod": "APP_ENV=production expo prebuild --clean",
     "deploy:dev": "firebase deploy --project development --only firestore,functions",
     "deploy:prod": "firebase deploy --project production --only firestore,functions",
+    "check:functions": "scripts/check-functions.sh production",
+    "check:functions:dev": "scripts/check-functions.sh development",
     "postinstall": "patch-package"
   },
   "dependencies": {
