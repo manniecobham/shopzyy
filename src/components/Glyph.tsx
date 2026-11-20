@@ -31,6 +31,7 @@ const ICONS = {
   'exclamationmark.triangle.fill': 'warning',
   'gearshape': 'settings',
   'gift': 'redeem',
+  'globe': 'language',
   'hand.draw': 'swipe',
   'hand.raised': 'back_hand',
   'house': 'home',
