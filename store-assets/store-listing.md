@@ -24,8 +24,8 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 | Marketing / website | https://shopzyy.manniedev.com |
 | Download link (store redirect) | https://shopzyy.manniedev.com/download |
 | Support email | support@manniedev.com |
-| Developer / seller name | MannieDev Technologies Ltd, registered in Nigeria (RC 8411822), trading as MannieDev |
-| Copyright line (iOS) | © 2026 MannieDev Technologies Ltd |
+| Developer / seller name | MannieDev Ltd, registered in Nigeria (RC 8411822), trading as MannieDev |
+| Copyright line (iOS) | © 2026 MannieDev Ltd |
 
 ---
 
@@ -91,7 +91,7 @@ Answer **None / No** to every content question: cartoon or realistic violence, s
 | Support URL | https://shopzyy.manniedev.com/support | |
 | Marketing URL | https://shopzyy.manniedev.com | |
 | Privacy policy URL | https://shopzyy.manniedev.com/privacy | |
-| Copyright | © 2026 MannieDev Technologies Ltd | |
+| Copyright | © 2026 MannieDev Ltd | |
 | Version release | Manually release after approval, then use a phased release | |
 
 #### Description (4000 limit)
