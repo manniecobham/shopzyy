@@ -1,4 +1,4 @@
-# Shopzyy: store listing for 1.1.2
+# Shopzyy: store listing for 1.2.0
 
 Everything App Store Connect and Google Play Console ask for, in the order they ask for it. Copy each value into its field. Items in **[square brackets]** are for you to fill in.
 
@@ -6,8 +6,8 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 
 | | iOS | Android |
 |---|---|---|
-| Version | 1.1.2 | 1.1.2 |
-| Build | 13 | versionCode **12** (the last release on Play is 10 and 11 was uploaded and rebuilt, set in `app.config.ts`) |
+| Version | 1.2.0 | 1.2.0 |
+| Build | 14 | versionCode **13** (1.1.2 is live on Play with 12, set in `app.config.ts`) |
 | Bundle / package | `com.manniedev-team.shopzy` | `com.manniedevteam.shopzyy` |
 | Minimum OS | iOS 16.4 | Android 7.0 (API 24), as set by the project |
 | Price | Free, no in-app purchases | Free, no in-app purchases |
@@ -33,8 +33,8 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 
 ### iOS (Xcode, no EAS)
 
-1. In `app.config.ts`, check `version` and `ios.buildNumber`. Every upload needs a build number higher than the last one for the same version. App Store Connect refuses a version that is already approved, so a new release needs a new version (1.1.2 is the current one, and 1.1.1 was never released).
-2. `ios/` is generated from `app.config.ts`. Run `npm run prebuild:prod` before archiving so it carries version 1.1.2 and build 13 and the production Firebase files. It resets signing, so reselect your team under Signing & Capabilities afterwards, and check General shows Version 1.1.2 and Build 13.
+1. In `app.config.ts`, check `version` and `ios.buildNumber`. Every upload needs a build number higher than the last one for the same version. App Store Connect refuses a version that is already approved, so a new release needs a new version (1.2.0 is the current one; 1.1.2 is already live in both stores).
+2. `ios/` is generated from `app.config.ts`. Run `npm run prebuild:prod` before archiving so it carries version 1.2.0 and build 14 and the production Firebase files. It resets signing, so reselect your team under Signing & Capabilities afterwards, and check General shows Version 1.1.2 and Build 13.
 3. Open `ios/Shopzyy.xcworkspace`. Destination: **Any iOS Device (arm64)**. Signing: Automatically manage signing, with your team.
 4. **Product → Clean Build Folder**, then **Product → Archive**.
 5. **Distribute App → App Store Connect → Upload**. Warnings about missing debug symbols for React and Expo frameworks are harmless.
@@ -42,7 +42,7 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 
 ### Android (Android Studio, without EAS)
 
-1. Run `npm install` so the menu patch is applied, then `npm run prebuild:prod`. `app.config.ts` sets `versionCode` to 12 and blocks the unwanted permissions, including `SYSTEM_ALERT_WINDOW`. Raise `versionCode` by one for each later upload.
+1. Run `npm install` so the menu patch is applied, then `npm run prebuild:prod`. `app.config.ts` sets `versionCode` to 13 and blocks the unwanted permissions, including `SYSTEM_ALERT_WINDOW`. Raise `versionCode` by one for each later upload.
 2. Download the upload key once: `npx eas credentials`, then Android, production, credentials.json, **Download credentials from EAS to credentials.json**. This writes `credentials/android/keystore.jks` and `credentials.json` (both ignored by git). Move them to a safe place and back them up.
 3. Open Android Studio **from a terminal**, so it finds Node:
    ```
@@ -82,7 +82,7 @@ Terms of use say users must be 18 or older. That is a legal term, separate from 
 
 Answer **None / No** to every content question: cartoon or realistic violence, sexual content or nudity, profanity, horror, alcohol, tobacco or drugs, gambling, medical information, mature or suggestive themes, contests, and unrestricted web access. For user-generated content, select the answer that applies to private sharing only: lists are shared only with people the user invites, nothing is public, and there is no chat.
 
-### Version information (1.1.2)
+### Version information (1.2.0)
 
 | Field | Value | Limit |
 |---|---|---|
@@ -148,10 +148,11 @@ Made by MannieDev.
 #### What's New (4000 limit)
 
 ```
-• Scan a receipt to tick off your list and save the total.
-• Shake your phone to undo your last change.
-• Cleaner sign-in, native menus and collapsible list sections.
-• Fixes for invites, joining a household and shopping alerts, and more reliable saving on a poor connection.
+• Invite with a QR code, and join a household with a code from anywhere in the app.
+• Household owners get a notification when someone joins.
+• A short animated tour shows new users what Shopzyy can do. Replay it in Settings.
+• Cleaner Settings and Household screens; legal pages open inside the app.
+• Fixes: people who leave a household now disappear from its member list, joining is more reliable, and the add bar sits correctly on older iPhones.
 ```
 
 ### App Review information
@@ -344,7 +345,7 @@ bundletool dump manifest --bundle=app-release.aab | grep uses-permission
 
 | Field | Value |
 |---|---|
-| Release name | 1.1.2 |
+| Release name | 1.2.0 |
 | Countries | All, or your chosen list |
 | Pricing | Free |
 
@@ -358,58 +359,64 @@ App Store "What's New" and Google Play "Release notes" (Play allows 500 characte
 
 | Language | Text |
 |---|---|
-| English | • Scan a receipt to tick off your list and save the total.<br>• Shake your phone to undo your last change.<br>• Cleaner sign-in, native menus and collapsible list sections.<br>• Fixes for invites, joining a household and shopping alerts, and more reliable saving on a poor connection. |
-| Español | • Escanea un ticket para marcar tu lista y guardar el total.<br>• Agita el teléfono para deshacer el último cambio.<br>• Inicio de sesión más claro, menús nativos y secciones de lista plegables.<br>• Correcciones en invitaciones, al unirse a un hogar y en los avisos de compra; guardado más fiable con mala conexión. |
-| Français | • Scannez un ticket pour cocher votre liste et garder le total.<br>• Secouez le téléphone pour annuler la dernière modification.<br>• Connexion plus claire, menus natifs et sections de liste repliables.<br>• Correctifs pour les invitations, l'adhésion à un foyer et les alertes de courses ; enregistrement plus fiable avec une mauvaise connexion. |
-| Nederlands | • Scan een bonnetje om je lijst af te vinken en het totaal op te slaan.<br>• Schud je telefoon om je laatste wijziging ongedaan te maken.<br>• Overzichtelijker inloggen, native menu's en inklapbare lijstsecties.<br>• Verbeteringen voor uitnodigingen, deelnemen aan een huishouden en winkelmeldingen; betrouwbaarder opslaan bij slecht bereik. |
-| Deutsch | • Scanne einen Kassenbon, um die Liste abzuhaken und die Summe zu speichern.<br>• Schüttle dein Handy, um die letzte Änderung rückgängig zu machen.<br>• Übersichtlichere Anmeldung, native Menüs und einklappbare Listenbereiche.<br>• Korrekturen bei Einladungen, Haushaltsbeitritt und Einkaufsbenachrichtigungen; zuverlässigeres Speichern bei schlechter Verbindung. |
-| Italiano | • Scansiona uno scontrino per spuntare la lista e salvare il totale.<br>• Scuoti il telefono per annullare l'ultima modifica.<br>• Accesso più chiaro, menu nativi e sezioni dell'elenco comprimibili.<br>• Correzioni a inviti, adesione a una casa e avvisi di spesa; salvataggio più affidabile con poca connessione. |
+| English | • Invite with a QR code, and join a household with a code from anywhere in the app.<br>• Household owners get a notification when someone joins.<br>• A short animated tour shows new users what Shopzyy can do. Replay it in Settings.<br>• Cleaner Settings and Household screens; legal pages open inside the app.<br>• Fixes: people who leave a household now disappear from its member list, joining is more reliable, and the add bar sits correctly on older iPhones. |
+| Español | • Invita con un código QR y únete a un hogar con un código desde cualquier lugar.<br>• Los propietarios de un hogar reciben un aviso cuando alguien se une.<br>• Un breve recorrido animado enseña lo que hace Shopzyy. Repítelo en Ajustes.<br>• Pantallas de Ajustes y Hogar más claras; los textos legales se abren dentro de la app.<br>• Correcciones: quien sale de un hogar desaparece de su lista de miembros, unirse es más fiable y la barra de añadir queda bien en iPhones antiguos. |
+| Français | • Invitez avec un code QR et rejoignez un foyer avec un code, où que vous soyez dans l'app.<br>• Le propriétaire d'un foyer est prévenu quand quelqu'un le rejoint.<br>• Une courte visite animée présente Shopzyy aux nouveaux utilisateurs. Revoyez-la dans les Réglages.<br>• Réglages et écran Foyer plus clairs ; pages légales ouvertes dans l'app.<br>• Correctifs : qui quitte un foyer disparaît de la liste des membres, l'adhésion est plus fiable et la barre d'ajout est bien placée sur les anciens iPhone. |
+| Nederlands | • Nodig uit met een QR-code en sluit je met een code aan bij een huishouden.<br>• Eigenaren van een huishouden krijgen een melding als iemand zich aansluit.<br>• Een korte rondleiding laat zien wat Shopzyy kan. Bekijk hem opnieuw bij Instellingen.<br>• Overzichtelijkere instellingen en huishoudscherm; juridische pagina's openen in de app.<br>• Verbeteringen: wie een huishouden verlaat, verdwijnt uit de ledenlijst, meedoen is betrouwbaarder en de toevoegbalk staat goed op oudere iPhones. |
+| Deutsch | • Lade per QR-Code ein und tritt überall in der App per Code einem Haushalt bei.<br>• Haushaltsbesitzer erhalten eine Benachrichtigung, wenn jemand beitritt.<br>• Eine kurze animierte Tour zeigt, was Shopzyy kann. Wiederhole sie in den Einstellungen.<br>• Übersichtlichere Einstellungen und Haushaltsansicht; rechtliche Seiten öffnen sich in der App.<br>• Korrekturen: Wer einen Haushalt verlässt, verschwindet aus der Mitgliederliste, der Beitritt ist zuverlässiger und die Eingabeleiste sitzt auf älteren iPhones richtig. |
+| Italiano | • Invita con un codice QR e unisciti a una casa con un codice da qualsiasi punto dell'app.<br>• I proprietari di una casa ricevono una notifica quando qualcuno si unisce.<br>• Un breve tour animato mostra cosa può fare Shopzyy. Rivedilo nelle Impostazioni.<br>• Impostazioni e schermata Casa più ordinate; le pagine legali si aprono nell'app.<br>• Correzioni: chi lascia una casa sparisce dall'elenco dei membri, l'adesione è più affidabile e la barra di aggiunta è ben posizionata sui vecchi iPhone. |
 
 ### Google Play release notes, ready to paste
 
-Play needs each language between its own tag. Paste this whole block into the release notes box.
+Play needs each language between its own tag. Paste this whole block into the release notes box. The last line differs from the App Store text, because the fixes are Android ones.
 
 ```
 <en-US>
-• Scan a receipt to tick off your list and save the total.
-• Shake your phone to undo your last change.
-• Cleaner sign-in, native menus and collapsible list sections.
-• Fixes for invites, joining a household and shopping alerts, and more reliable saving on a poor connection.
+• Invite with a QR code, and join a household with a code from anywhere in the app.
+• Household owners get a notification when someone joins.
+• A short animated tour shows new users what Shopzyy can do. Replay it in Settings.
+• Cleaner Settings and Household screens; legal pages open inside the app.
+• Fixes: people who leave a household now disappear from its member list, joining is more reliable, and tab names show in dark mode.
 </en-US>
 
 <es-ES>
-• Escanea un ticket para marcar tu lista y guardar el total.
-• Agita el teléfono para deshacer el último cambio.
-• Inicio de sesión más claro, menús nativos y secciones de lista plegables.
-• Correcciones en invitaciones, al unirse a un hogar y en los avisos de compra; guardado más fiable con mala conexión.
+• Invita con un código QR y únete a un hogar con un código desde cualquier lugar.
+• Los propietarios de un hogar reciben un aviso cuando alguien se une.
+• Un breve recorrido animado enseña lo que hace Shopzyy. Repítelo en Ajustes.
+• Pantallas de Ajustes y Hogar más claras; los textos legales se abren dentro de la app.
+• Correcciones: quien sale de un hogar desaparece de su lista de miembros, unirse es más fiable y las pestañas se ven en modo oscuro.
 </es-ES>
 
 <fr-FR>
-• Scannez un ticket pour cocher votre liste et garder le total.
-• Secouez le téléphone pour annuler la dernière modification.
-• Connexion plus claire, menus natifs et sections de liste repliables.
-• Correctifs pour les invitations, l'adhésion à un foyer et les alertes de courses ; enregistrement plus fiable avec une mauvaise connexion.
+• Invitez avec un code QR et rejoignez un foyer avec un code, où que vous soyez dans l'app.
+• Le propriétaire d'un foyer est prévenu quand quelqu'un le rejoint.
+• Une courte visite animée présente Shopzyy aux nouveaux utilisateurs. Revoyez-la dans les Réglages.
+• Réglages et écran Foyer plus clairs ; pages légales ouvertes dans l'app.
+• Correctifs : qui quitte un foyer disparaît de la liste des membres, l'adhésion est plus fiable et les noms des onglets s'affichent en mode sombre.
 </fr-FR>
 
 <nl-NL>
-• Scan een bonnetje om je lijst af te vinken en het totaal op te slaan.
-• Schud je telefoon om je laatste wijziging ongedaan te maken.
-• Overzichtelijker inloggen, native menu's en inklapbare lijstsecties.
-• Verbeteringen voor uitnodigingen, deelnemen aan een huishouden en winkelmeldingen; betrouwbaarder opslaan bij slecht bereik.
+• Nodig uit met een QR-code en sluit je met een code aan bij een huishouden.
+• Eigenaren van een huishouden krijgen een melding als iemand zich aansluit.
+• Een korte rondleiding laat zien wat Shopzyy kan. Bekijk hem opnieuw bij Instellingen.
+• Overzichtelijkere instellingen en huishoudscherm; juridische pagina's openen in de app.
+• Verbeteringen: wie een huishouden verlaat, verdwijnt uit de ledenlijst, meedoen is betrouwbaarder en tabnamen zijn zichtbaar in de donkere modus.
 </nl-NL>
 
 <de-DE>
-• Scanne einen Kassenbon, um die Liste abzuhaken und die Summe zu speichern.
-• Schüttle dein Handy, um die letzte Änderung rückgängig zu machen.
-• Übersichtlichere Anmeldung, native Menüs und einklappbare Listenbereiche.
-• Korrekturen bei Einladungen, Haushaltsbeitritt und Einkaufsbenachrichtigungen; zuverlässigeres Speichern bei schlechter Verbindung.
+• Lade per QR-Code ein und tritt überall in der App per Code einem Haushalt bei.
+• Haushaltsbesitzer erhalten eine Benachrichtigung, wenn jemand beitritt.
+• Eine kurze animierte Tour zeigt, was Shopzyy kann. Wiederhole sie in den Einstellungen.
+• Übersichtlichere Einstellungen und Haushaltsansicht; rechtliche Seiten öffnen sich in der App.
+• Korrekturen: Wer einen Haushalt verlässt, verschwindet aus der Mitgliederliste, der Beitritt ist zuverlässiger und Tab-Namen sind im Dunkelmodus sichtbar.
 </de-DE>
 
 <it-IT>
-• Scansiona uno scontrino per spuntare la lista e salvare il totale.
-• Scuoti il telefono per annullare l'ultima modifica.
-• Accesso più chiaro, menu nativi e sezioni dell'elenco comprimibili.
-• Correzioni a inviti, adesione a una casa e avvisi di spesa; salvataggio più affidabile con poca connessione.
+• Invita con un codice QR e unisciti a una casa con un codice da qualsiasi punto dell'app.
+• I proprietari di una casa ricevono una notifica quando qualcuno si unisce.
+• Un breve tour animato mostra cosa può fare Shopzyy. Rivedilo nelle Impostazioni.
+• Impostazioni e schermata Casa più ordinate; le pagine legali si aprono nell'app.
+• Correzioni: chi lascia una casa sparisce dall'elenco dei membri, l'adesione è più affidabile e i nomi delle schede si vedono in modalità scura.
 </it-IT>
 ```
 
@@ -437,7 +444,7 @@ The full English description is above. The other five languages need the descrip
 5. **Check the pages are live:** open the privacy, terms, support and delete-account links from a phone.
 6. **Android:** rebuild with `npm run prebuild:prod`, then confirm the permission list with `bundletool` as shown above.
 
-## TestFlight checklist for 1.1.2
+## TestFlight checklist for 1.2.0
 
 Use a real phone and the TestFlight build, with the functions, rules and hosting already deployed to production.
 
@@ -452,3 +459,9 @@ Use a real phone and the TestFlight build, with the functions, rules and hosting
 9. **Notifications:** one trip alert per trip, with no repeats after reopening the app.
 10. **Offline:** add items in airplane mode, reconnect, and confirm they reach the second phone.
 11. **Languages:** change the language and check the new join and paste strings.
+12. **Tour:** after updating from 1.1.2 the tour opens once on first launch, with Skip at the top. Settings → How Shopzyy works replays it with only Done.
+13. **Join a household…** from the switcher menu and from a link, while already in a household.
+14. **QR code:** Household → Invite people → Show QR code. Scan it with another phone's camera, with the app installed and not installed. The Shopzyy logo shows in the middle.
+15. **Owner alert:** the owner's phone gets "X joined Y" when someone joins, tapping it opens the Household tab, and Settings → Notifications → New member alerts turns it off.
+16. **Settings and Household pages:** the new groups, sub-pages and Back button work, Delete my data still works, and choosing a household photo from the Background sheet does not freeze.
+17. **Older iPhones:** on an iPhone XS or similar, the add bar sits directly above the tab bar.
