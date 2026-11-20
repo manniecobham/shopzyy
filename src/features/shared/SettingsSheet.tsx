@@ -40,6 +40,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
   const { prefs } = runtime;
   const [purchases, setPurchases] = useState(prefs.getBool(StorageKeys.notifyPurchases, true));
   const [restock, setRestock] = useState(prefs.getBool(StorageKeys.notifyRestock, true));
+  const [members, setMembers] = useState(prefs.getBool(StorageKeys.notifyMembers, true));
   const [denied, setDenied] = useState(false);
   const [editing, setEditing] = useState(false);
   const [diagnostics, setDiagnostics] = useState(false);
@@ -59,7 +60,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
     set(value);
     prefs.setBool(key, value);
     if (key === StorageKeys.notifyRestock) ShoppingListService.refreshRestockReminders(runtime.env);
-    if (key === StorageKeys.notifyPurchases) void runtime.push.updateAlerts();
+    if (key === StorageKeys.notifyPurchases || key === StorageKeys.notifyMembers) void runtime.push.updateAlerts();
   };
 
   const runDelete = async (confirmPassword?: string) => {
@@ -177,9 +178,10 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
       {page === 'notifications' ? (
         <FormSection first footer={denied
           ? t("Notifications are turned off for Shopzyy, so these alerts won't arrive until you allow them.")
-          : t("When someone goes shopping you get one summary of what they bought, once they're done. Restock reminders arrive at 9 AM on the day Shopzyy expects you to run out, with a button to add the item straight to the list.")}>
+          : t("When someone goes shopping you get one summary of what they bought, once they're done. Restock reminders arrive at 9 AM on the day Shopzyy expects you to run out, with a button to add the item straight to the list. If you own a household, you also hear when someone joins it.")}>
           <FormRow><Text style={{ flex: 1, fontSize: 17, color: th.label }}>{t('Shopping trip alerts')}</Text><Switch value={purchases} onValueChange={toggle(StorageKeys.notifyPurchases, setPurchases)} trackColor={{ true: th.green }} /></FormRow>
-          <FormRow last={!denied}><Text style={{ flex: 1, fontSize: 17, color: th.label }}>{t('Restock reminders')}</Text><Switch value={restock} onValueChange={toggle(StorageKeys.notifyRestock, setRestock)} trackColor={{ true: th.green }} /></FormRow>
+          <FormRow><Text style={{ flex: 1, fontSize: 17, color: th.label }}>{t('Restock reminders')}</Text><Switch value={restock} onValueChange={toggle(StorageKeys.notifyRestock, setRestock)} trackColor={{ true: th.green }} /></FormRow>
+          <FormRow last={!denied}><Text style={{ flex: 1, fontSize: 17, color: th.label }}>{t('New member alerts')}</Text><Switch value={members} onValueChange={toggle(StorageKeys.notifyMembers, setMembers)} trackColor={{ true: th.green }} /></FormRow>
           {denied ? (
             <FormRow last onPress={() => void Linking.openSettings()}>
               <Glyph name="bell.badge" size={20} color={th.accent} style={{ marginRight: 12 }} />

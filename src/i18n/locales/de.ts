@@ -202,7 +202,7 @@ const de: Record<string, string> = {
   "Usually bought {cadence}, {since}": "Normalerweise {cadence} gekauft, {since}",
   "Version {version}": "Version {version}",
   "When anyone ticks items off the list, the trip shows up here with who went and what it cost.": "Sobald jemand Artikel auf der Liste abhakt, erscheint der Einkauf hier mit der Person, die ihn erledigt hat, und den Kosten.",
-  "When someone goes shopping you get one summary of what they bought, once they're done. Restock reminders arrive at 9 AM on the day Shopzyy expects you to run out, with a button to add the item straight to the list.": "Wenn jemand einkaufen geht, erhältst du eine Zusammenfassung dessen, was gekauft wurde, sobald der Einkauf erledigt ist. Nachkauf-Erinnerungen kommen um 9 Uhr an dem Tag, an dem Shopzyy erwartet, dass etwas ausgeht, mit einer Taste, um den Artikel direkt zur Liste hinzuzufügen.",
+  "When someone goes shopping you get one summary of what they bought, once they're done. Restock reminders arrive at 9 AM on the day Shopzyy expects you to run out, with a button to add the item straight to the list. If you own a household, you also hear when someone joins it.": "Wenn jemand einkaufen geht, erhältst du eine Zusammenfassung dessen, was gekauft wurde, sobald der Einkauf erledigt ist. Nachkauf-Erinnerungen kommen um 9 Uhr an dem Tag, an dem Shopzyy erwartet, dass etwas ausgeht, mit einer Taste, um den Artikel direkt zur Liste hinzuzufügen. Wenn du einen Haushalt besitzt, erfährst du auch, wenn jemand beitritt.",
   "Who it's for": "Für wen",
   "Yesterday": "Gestern",
   "You can invite people to it from the Household tab.": "Du kannst im Tab „Haushalt“ Personen dazu einladen.",
@@ -489,5 +489,6 @@ const de: Record<string, string> = {
   "Off": "Aus",
   "Photo": "Foto",
   "Share link or code": "Link oder Code teilen",
+  "New member alerts": "Hinweise zu neuen Mitgliedern",
 };
 export default de;

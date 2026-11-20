@@ -202,7 +202,7 @@ const fr: Record<string, string> = {
   "Usually bought {cadence}, {since}": "En général acheté {cadence}, {since}",
   "Version {version}": "Version {version}",
   "When anyone ticks items off the list, the trip shows up here with who went and what it cost.": "Dès que quelqu’un coche des articles de la liste, la course apparaît ici avec la personne qui y est allée et son coût.",
-  "When someone goes shopping you get one summary of what they bought, once they're done. Restock reminders arrive at 9 AM on the day Shopzyy expects you to run out, with a button to add the item straight to the list.": "Quand quelqu’un fait les courses, vous recevez un récapitulatif de ses achats une fois terminé. Les rappels de réapprovisionnement arrivent à 9 h le jour où Shopzyy pense que vous serez à court, avec un bouton pour ajouter l’article directement à la liste.",
+  "When someone goes shopping you get one summary of what they bought, once they're done. Restock reminders arrive at 9 AM on the day Shopzyy expects you to run out, with a button to add the item straight to the list. If you own a household, you also hear when someone joins it.": "Quand quelqu’un fait les courses, vous recevez un récapitulatif de ses achats une fois terminé. Les rappels de réapprovisionnement arrivent à 9 h le jour où Shopzyy pense que vous serez à court, avec un bouton pour ajouter l’article directement à la liste. Si vous êtes propriétaire d'un foyer, vous êtes aussi prévenu quand quelqu'un le rejoint.",
   "Who it's for": "Pour qui",
   "Yesterday": "Hier",
   "You can invite people to it from the Household tab.": "Vous pouvez y inviter des personnes depuis l’onglet Foyer.",
@@ -489,5 +489,6 @@ const fr: Record<string, string> = {
   "Off": "Désactivées",
   "Photo": "Photo",
   "Share link or code": "Partager le lien ou le code",
+  "New member alerts": "Alertes de nouveaux membres",
 };
 export default fr;

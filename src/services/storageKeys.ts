@@ -6,6 +6,7 @@ export const StorageKeys = {
   hasSeenTour: 'shopzy.hasSeenTour',
   notifyPurchases: 'shopzy.notifyPurchases',
   notifyRestock: 'shopzy.notifyRestock',
+  notifyMembers: 'shopzy.notifyMembers',
   announcedTrips: 'shopzy.announcedTrips',
   skippedTrips: 'shopzy.skippedTrips',
   selectedTab: 'shopzy.selectedTab',

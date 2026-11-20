@@ -3,6 +3,8 @@ import { FieldValue, Timestamp, getFirestore } from 'firebase-admin/firestore';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { randomInt } from 'node:crypto';
 import { limit } from './rateLimit';
+import { cleanDisplayName } from './messages';
+import { notifyOwnerOfJoin } from './memberAlerts';
 
 initializeApp();
 const db = getFirestore();
@@ -64,7 +66,21 @@ export const joinHousehold = onCall(open, async (req) => {
   const household = await ref.get();
   if (!household.exists) throw new HttpsError('not-found', 'This household no longer exists.');
 
+  const before = (household.get('memberUIDs') as string[] | undefined) ?? [];
   await ref.update({ memberUIDs: FieldValue.arrayUnion(uid) });
+
+  // Joining again, or the owner opening their own link, is not news. A failed alert never fails the join.
+  const ownerUID = household.get('ownerUID') as string | undefined;
+  if (!before.includes(uid) && ownerUID && ownerUID !== uid) {
+    try {
+      await notifyOwnerOfJoin({
+        householdID, ownerUID, joinerName: cleanDisplayName(req.data?.name),
+        householdName: (household.get('name') as string) ?? '', memberCount: before.length + 1,
+      });
+    } catch (error) {
+      console.warn('Join alert failed', error);
+    }
+  }
   return { householdID, name: (household.get('name') as string) ?? '' };
 });
 

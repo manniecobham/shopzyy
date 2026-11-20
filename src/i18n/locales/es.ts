@@ -202,7 +202,7 @@ const es: Record<string, string> = {
   "Usually bought {cadence}, {since}": "Se suele comprar {cadence}, {since}",
   "Version {version}": "Versión {version}",
   "When anyone ticks items off the list, the trip shows up here with who went and what it cost.": "Cuando alguien tacha artículos de la lista, la compra aparece aquí con quién fue y cuánto costó.",
-  "When someone goes shopping you get one summary of what they bought, once they're done. Restock reminders arrive at 9 AM on the day Shopzyy expects you to run out, with a button to add the item straight to the list.": "Cuando alguien va de compras recibes un resumen de lo que compró, una vez que termina. Los recordatorios de reposición llegan a las 9:00 del día en que Shopzyy espera que se te acabe, con un botón para añadir el artículo directamente a la lista.",
+  "When someone goes shopping you get one summary of what they bought, once they're done. Restock reminders arrive at 9 AM on the day Shopzyy expects you to run out, with a button to add the item straight to the list. If you own a household, you also hear when someone joins it.": "Cuando alguien va de compras recibes un resumen de lo que compró, una vez que termina. Los recordatorios de reposición llegan a las 9:00 del día en que Shopzyy espera que se te acabe, con un botón para añadir el artículo directamente a la lista. Si eres el propietario de un hogar, también te avisamos cuando alguien se une.",
   "Who it's for": "Para quién es",
   "Yesterday": "Ayer",
   "You can invite people to it from the Household tab.": "Puedes invitar personas desde la pestaña Hogar.",
@@ -489,5 +489,6 @@ const es: Record<string, string> = {
   "Off": "Desactivadas",
   "Photo": "Foto",
   "Share link or code": "Compartir enlace o código",
+  "New member alerts": "Avisos de nuevos miembros",
 };
 export default es;

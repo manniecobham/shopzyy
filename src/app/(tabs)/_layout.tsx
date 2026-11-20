@@ -32,8 +32,16 @@ export default function TabsLayout() {
   const theme = useTheme();
   const accent = Platform.OS === 'ios' ? DynamicColorIOS({ light: '#1E9E68', dark: '#4ACE90' }) : theme.accent;
 
+  // Android draws the bar itself and does not follow dark mode on its own, so the colours are set here.
+  const androidStyle = Platform.OS === 'android' ? {
+    backgroundColor: theme.cell,
+    labelStyle: { default: { color: theme.secondaryLabel }, selected: { color: theme.accent } },
+    iconColor: { default: theme.secondaryLabel, selected: theme.accent },
+    indicatorColor: theme.isDark ? 'rgba(74,206,144,0.25)' : 'rgba(30,158,104,0.18)',
+  } : {};
+
   return (
-    <NativeTabs tintColor={accent}>
+    <NativeTabs tintColor={accent} {...androidStyle}>
       <NativeTabs.Trigger name="(list)">
         <NativeTabs.Trigger.Icon sf="checklist" md="checklist" />
         <NativeTabs.Trigger.Label>{t('List')}</NativeTabs.Trigger.Label>

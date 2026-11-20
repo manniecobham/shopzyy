@@ -202,7 +202,7 @@ const nl: Record<string, string> = {
   "Usually bought {cadence}, {since}": "Meestal {cadence} gekocht, {since}",
   "Version {version}": "Versie {version}",
   "When anyone ticks items off the list, the trip shows up here with who went and what it cost.": "Als iemand items van de lijst afvinkt, verschijnt de winkelronde hier met wie er ging en wat het kostte.",
-  "When someone goes shopping you get one summary of what they bought, once they're done. Restock reminders arrive at 9 AM on the day Shopzyy expects you to run out, with a button to add the item straight to the list.": "Als iemand boodschappen gaat doen, krijg je één samenvatting van wat er is gekocht zodra de persoon klaar is. Aanvulherinneringen komen om 9:00 uur op de dag waarop Shopzyy verwacht dat iets op is, met een knop om het item meteen aan de lijst toe te voegen.",
+  "When someone goes shopping you get one summary of what they bought, once they're done. Restock reminders arrive at 9 AM on the day Shopzyy expects you to run out, with a button to add the item straight to the list. If you own a household, you also hear when someone joins it.": "Als iemand boodschappen gaat doen, krijg je één samenvatting van wat er is gekocht zodra de persoon klaar is. Aanvulherinneringen komen om 9:00 uur op de dag waarop Shopzyy verwacht dat iets op is, met een knop om het item meteen aan de lijst toe te voegen. Als je een huishouden beheert, hoor je ook wanneer iemand zich aansluit.",
   "Who it's for": "Voor wie",
   "Yesterday": "Gisteren",
   "You can invite people to it from the Household tab.": "Je kunt er mensen voor uitnodigen via het tabblad Huishouden.",
@@ -489,5 +489,6 @@ const nl: Record<string, string> = {
   "Off": "Uit",
   "Photo": "Foto",
   "Share link or code": "Link of code delen",
+  "New member alerts": "Meldingen voor nieuwe leden",
 };
 export default nl;
