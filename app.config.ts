@@ -40,7 +40,7 @@ const config: ExpoConfig = {
   name: 'Shopzyy',
   slug: 'shopzyy',
   scheme: 'shopzyy',
-  version: '1.2.0',
+  version: '1.2.1',
   orientation: 'portrait',
   locales: { es: './locales/es.json', fr: './locales/fr.json', nl: './locales/nl.json', de: './locales/de.json', it: './locales/it.json' },
   icon: './assets/icon.png',
@@ -48,7 +48,7 @@ const config: ExpoConfig = {
   ios: {
     supportsTablet: false,
     bundleIdentifier: 'com.manniedev-team.shopzy',
-    buildNumber: '14',
+    buildNumber: '15',
     googleServicesFile: IOS_FIREBASE_FILE,
     infoPlist: {
       UIBackgroundModes: ['remote-notification'],
@@ -62,7 +62,7 @@ const config: ExpoConfig = {
   },
   android: {
     package: 'com.manniedevteam.shopzyy',
-    versionCode: 13,
+    versionCode: 14,
     googleServicesFile: ANDROID_FIREBASE_FILE,
     adaptiveIcon: {
       backgroundColor: '#1D9D67',

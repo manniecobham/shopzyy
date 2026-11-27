@@ -37,6 +37,11 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // App feedback is written by the submitFeedback function only; read it in the console.
+    match /feedback/{id} {
+      allow read, write: if false;
+    }
+
     // Anonymous error reports: signed-in apps may add them; only the developer reads them (console).
     match /errorLogs/{id} {
       allow create: if signedIn() && request.resource.data.keys().hasOnly([

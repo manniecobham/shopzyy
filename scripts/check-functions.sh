@@ -8,7 +8,7 @@ case "$PROJECT" in
   *) echo "Use production or development"; exit 2 ;;
 esac
 FAILED=0
-for f in createInvite joinHousehold leaveHousehold deleteHousehold deleteAccountData claimLegacyHousehold importLegacyRecords; do
+for f in createInvite joinHousehold leaveHousehold deleteHousehold deleteAccountData claimLegacyHousehold importLegacyRecords submitFeedback; do
   CODE=$(curl -s -m 20 -o /dev/null -w "%{http_code}" -X POST "https://us-central1-$ID.cloudfunctions.net/$f" -H 'Content-Type: application/json' -d '{"data":{}}')
   if [ "$CODE" = "401" ]; then echo "ok    $f"; else echo "FAIL  $f answered $CODE"; FAILED=1; fi
 done

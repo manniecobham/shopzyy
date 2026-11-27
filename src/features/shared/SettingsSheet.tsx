@@ -10,6 +10,7 @@ import { DELETE_CANCELLED } from '../../runtime/AppRuntime';
 import { useAccount, useAppState } from '../../runtime/RuntimeProvider';
 import { LEGAL_URLS } from '../../lib/legal';
 import { openLegal } from '../../lib/openLegal';
+import { openReviewPage } from '../../services/rateApp';
 import { displayVersion } from '../../services/AppConfig';
 import { ShoppingListService } from '../../services/ShoppingListService';
 import { StorageKeys } from '../../services/storageKeys';
@@ -18,6 +19,7 @@ import { isDemo } from '../../demo/demo';
 import { Brand, useTheme } from '../../theme/theme';
 import { DiagnosticsSheet } from './DiagnosticsSheet';
 import { EditProfileSheet } from './EditProfileSheet';
+import { FeedbackSheet } from './FeedbackSheet';
 
 type Page = 'main' | 'notifications' | 'data' | 'legal';
 
@@ -46,6 +48,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
   const [diagnostics, setDiagnostics] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [tour, setTour] = useState(false);
+  const [feedback, setFeedback] = useState(false);
   const [page, setPage] = useState<Page>('main');
   const [askingPassword, setAskingPassword] = useState(false);
   const [password, setPassword] = useState('');
@@ -157,8 +160,16 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
             <NavRow icon="hand.raised" label={t('Data & privacy')} onPress={() => setPage('data')} last />
           </FormSection>
 
+          {runtime.appConfig.updateOffered ? (
+            <FormSection>
+              <NavRow icon="arrow.up.circle.fill" label={t('Update available')} value={runtime.appConfig.latestVersion ?? undefined} onPress={() => void Linking.openURL(runtime.appConfig.storeUrl)} last />
+            </FormSection>
+          ) : null}
+
           <FormSection>
             <NavRow icon="info.circle.fill" label={t('How Shopzyy works')} onPress={() => setTour(true)} />
+            <NavRow icon="bubble.left" label={t('Send feedback')} onPress={() => setFeedback(true)} />
+            <NavRow icon="star" label={t('Rate Shopzyy')} onPress={() => void openReviewPage()} />
             <NavRow icon="checkmark.seal" label={t('Legal')} onPress={() => setPage('legal')} last />
           </FormSection>
 
@@ -243,6 +254,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
           <OnboardingTour skippable={false} doneTitle={t('Done')} onDone={() => setTour(false)} />
         </Sheet>
       ) : null}
+      {feedback ? <FeedbackSheet onClose={() => setFeedback(false)} /> : null}
       {editing ? <EditProfileSheet onClose={() => setEditing(false)} /> : null}
       {diagnostics ? <DiagnosticsSheet onClose={() => setDiagnostics(false)} /> : null}
     </Sheet>

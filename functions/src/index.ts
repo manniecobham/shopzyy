@@ -5,6 +5,7 @@ import { randomInt } from 'node:crypto';
 import { limit } from './rateLimit';
 import { cleanDisplayName } from './messages';
 import { notifyOwnerOfJoin } from './memberAlerts';
+import { cleanFeedback } from './feedback';
 
 initializeApp();
 const db = getFirestore();
@@ -110,8 +111,25 @@ export const deleteAccountData = onCall(open, async (req) => {
     db.collection('legacyUsers').where('uid', '==', uid).get(),
     db.collection('invites').where('createdBy', '==', uid).get(),
   ]);
-  await Promise.all([db.doc(`rateLimits/${uid}_invite`).delete(), db.doc(`rateLimits/${uid}_join`).delete()]);
-  await Promise.all([...legacy.docs, ...invites.docs].map((d) => d.ref.delete()));
+  const feedback = await db.collection('feedback').where('uid', '==', uid).get();
+  await Promise.all(['invite', 'join', 'feedback'].map((action) => db.doc(`rateLimits/${uid}_${action}`).delete()));
+  await Promise.all([...legacy.docs, ...invites.docs, ...feedback.docs].map((d) => d.ref.delete()));
+  return { ok: true };
+});
+
+export const submitFeedback = onCall(open, async (req) => {
+  const uid = requireAuth(req.auth?.uid);
+  await limit(uid, 'feedback', 5, HOUR);
+  const clean = cleanFeedback(req.data);
+  if (!clean) throw new HttpsError('invalid-argument', 'Write a few words first.');
+  const { contactMe, ...rest } = clean;
+  // The account is only attached when the person asked to be contacted.
+  await db.collection('feedback').add({
+    ...rest,
+    contactMe,
+    ...(contactMe ? { uid, email: (req.auth?.token.email as string | undefined) ?? null } : {}),
+    createdAt: FieldValue.serverTimestamp(),
+  });
   return { ok: true };
 });
 

@@ -14,6 +14,9 @@ import { continuesClosedTrip, totalMatchesTrip, tripSkipKey } from '../../logic/
 import { LIST_GROUPINGS, groupingIcon, groupingTitle } from '../../models/enums';
 import type { GroceryItem, Household } from '../../models/entities';
 import { itemHistory, purchaseItemName, purchaseMemberName, purchaseQuantityText } from '../../models/itemOps';
+import { UpdateBanner } from '../shared/UpdateBanner';
+import { shouldAskForReview } from '../../lib/reviewPrompt';
+import { askForReview } from '../../services/rateApp';
 import { useAccount, useAppState, useStoreVersion } from '../../runtime/RuntimeProvider';
 import type { ParsedReceipt } from '../../logic/receiptParser';
 import { importReceipt } from '../../services/receiptImport';
@@ -87,10 +90,19 @@ export function ShoppingListScreen({ household }: { household: Household }) {
     ]);
   };
 
+  const maybeAskForReview = () => {
+    const last = Number(prefs.getString(StorageKeys.reviewAskedAt)) || null;
+    const mine = store.purchasesIn(household.id).filter((p) => p.originDeviceID === prefs.deviceID).map((p) => p.purchasedAt);
+    if (!shouldAskForReview(mine, last, Date.now())) return;
+    prefs.setString(StorageKeys.reviewAskedAt, String(Date.now()));
+    setTimeout(() => void askForReview(), 2500);
+  };
+
   const tickOff = (item: GroceryItem, startsTrip = false) => {
     const name = item.name;
     const purchase = list.markBought(item, currentMember, new Date(), startsTrip);
     if (!purchase) return;
+    maybeAskForReview();
     record(tr('Ticked off {items}', { items: name }), () => {
       if (store.purchasesIn(household.id).some((p) => p.id === purchase.id)) list.undoPurchase(purchase);
     });
@@ -196,6 +208,7 @@ export function ShoppingListScreen({ household }: { household: Household }) {
             contentInsetAdjustmentBehavior="automatic"
             contentContainerStyle={{ paddingBottom: 16 }}
             ListHeaderComponent={<>
+              <UpdateBanner />
               <SyncStatusView />
               {runningLow.length > 0 ? (
                 <View>

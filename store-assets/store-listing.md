@@ -1,4 +1,4 @@
-# Shopzyy: store listing for 1.2.0
+# Shopzyy: store listing for 1.2.1
 
 Everything App Store Connect and Google Play Console ask for, in the order they ask for it. Copy each value into its field. Items in **[square brackets]** are for you to fill in.
 
@@ -6,8 +6,8 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 
 | | iOS | Android |
 |---|---|---|
-| Version | 1.2.0 | 1.2.0 |
-| Build | 14 | versionCode **13** (1.1.2 is live on Play with 12, set in `app.config.ts`) |
+| Version | 1.2.1 | 1.2.1 |
+| Build | 15 | versionCode **14** (1.2.0 used 13, set in `app.config.ts`) |
 | Bundle / package | `com.manniedev-team.shopzy` | `com.manniedevteam.shopzyy` |
 | Minimum OS | iOS 16.4 | Android 7.0 (API 24), as set by the project |
 | Price | Free, no in-app purchases | Free, no in-app purchases |
@@ -33,8 +33,8 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 
 ### iOS (Xcode, no EAS)
 
-1. In `app.config.ts`, check `version` and `ios.buildNumber`. Every upload needs a build number higher than the last one for the same version. App Store Connect refuses a version that is already approved, so a new release needs a new version (1.2.0 is the current one; 1.1.2 is already live in both stores).
-2. `ios/` is generated from `app.config.ts`. Run `npm run prebuild:prod` before archiving so it carries version 1.2.0 and build 14 and the production Firebase files. It resets signing, so reselect your team under Signing & Capabilities afterwards, and check General shows Version 1.1.2 and Build 13.
+1. In `app.config.ts`, check `version` and `ios.buildNumber`. Every upload needs a build number higher than the last one for the same version. App Store Connect refuses a version that is already approved, so a new release needs a new version (1.2.1 is the current one; 1.2.0 was uploaded before it).
+2. `ios/` is generated from `app.config.ts`. Run `npm run prebuild:prod` before archiving so it carries version 1.2.1 and build 15 and the production Firebase files. It resets signing, so reselect your team under Signing & Capabilities afterwards, and check General shows Version 1.2.1 and Build 15.
 3. Open `ios/Shopzyy.xcworkspace`. Destination: **Any iOS Device (arm64)**. Signing: Automatically manage signing, with your team.
 4. **Product → Clean Build Folder**, then **Product → Archive**.
 5. **Distribute App → App Store Connect → Upload**. Warnings about missing debug symbols for React and Expo frameworks are harmless.
@@ -82,7 +82,7 @@ Terms of use say users must be 18 or older. That is a legal term, separate from 
 
 Answer **None / No** to every content question: cartoon or realistic violence, sexual content or nudity, profanity, horror, alcohol, tobacco or drugs, gambling, medical information, mature or suggestive themes, contests, and unrestricted web access. For user-generated content, select the answer that applies to private sharing only: lists are shared only with people the user invites, nothing is public, and there is no chat.
 
-### Version information (1.2.0)
+### Version information (1.2.1)
 
 | Field | Value | Limit |
 |---|---|---|
@@ -102,7 +102,7 @@ Shopzyy: hyping your shopping experience.
 Shopzyy is the shared shopping list for everyone you live with. Add something on your phone and it's on everyone's list straight away. Tick it off at the shop and the whole household knows it's sorted. No more double-buying milk, and no more "did anyone get the bread?"
 
 ONE LIST FOR THE WHOLE HOUSEHOLD
-• Invite family or housemates with a link or a code, from any app. They join in one tap.
+• Invite family or housemates with a link, a code or a QR code. They join in one tap.
 • Everyone sees the same list, history and settings on all their devices.
 • Belong to more than one household (home, the holiday house, the office) and switch in a tap.
 
@@ -132,8 +132,9 @@ SEE WHAT HAPPENED
 
 MAKE IT YOURS
 • Choose a mood for your household (Sunny, Calm, Cozy, Fresh, Party or Night) or use your own photo.
-• Add your own categories and rooms, and pick a name, avatar and colour for yourself.
+• Add your own categories and rooms, and pick a name, a colour and any emoji as your avatar.
 • Available in English, Spanish, French, Dutch, German and Italian.
+• Tell us what you'd like to see: send feedback from Settings.
 
 PRIVATE BY DESIGN
 • Sign in with Apple, Google or email.
@@ -148,11 +149,10 @@ Made by MannieDev.
 #### What's New (4000 limit)
 
 ```
-• Invite with a QR code, and join a household with a code from anywhere in the app.
-• Household owners get a notification when someone joins.
-• A short animated tour shows new users what Shopzyy can do. Replay it in Settings.
-• Cleaner Settings and Household screens; legal pages open inside the app.
-• Fixes: people who leave a household now disappear from its member list, joining is more reliable, and the add bar sits correctly on older iPhones.
+• Choose any emoji as your avatar with the new emoji keypad.
+• Send feedback and rate Shopzyy from Settings.
+• Shopzyy now tells you when a new version is available.
+• Smaller fixes and polish.
 ```
 
 ### App Review information
@@ -183,6 +183,8 @@ Main flows to try:
 3. Shake the phone to undo the last add or tick-off (a confirmation appears first).
 4. Household tab: Invite people creates a link and a code. Notifications about someone finishing a shop need a second device in the same household.
 5. Account deletion: Household tab > App settings > Delete my data (also available from the profile menu > Settings). It deletes the account and the data linked to it.
+6. Feedback: Settings > Send feedback. Choose a type, write a message and tap Send. It is sent to us with the app version; the account is attached only if the contact switch is on.
+7. Avatar: Settings > your profile. The emoji keypad only offers emoji; pick one and Save.
 
 Permissions: camera (receipt scan), photo library (choose a receipt photo or a household background), notifications (shopping summaries and restock reminders), motion (shake to undo). All are optional and explained when requested.
 
@@ -210,6 +212,7 @@ People who used the original Shopzyy (version 1.0) have their households moved t
 | Identifiers: device ID (push notification token) | Yes | App functionality |
 | Usage data: other usage data (the last time the app was used) | Yes | App functionality |
 | Diagnostics: other diagnostic data (anonymous error logs, no names, emails or list contents) | No | App functionality |
+| User content: customer support (the optional feedback message; the account is attached only if the user asks to be contacted) | Yes | App functionality |
 
 Not collected: location, contacts, health and fitness, financial info, browsing history, search history, purchases, sensitive info, advertising data. Receipt photos are read on the device and deleted, so they are not collected.
 
@@ -316,7 +319,7 @@ Camera and notification permissions are optional.
 | Personal info: email address | Yes | No | No | App functionality, account management |
 | Personal info: user IDs | Yes | No | No | App functionality, account management |
 | Photos and videos: photos (optional household background) | Yes | No | Yes | App functionality |
-| App activity: other user-generated content (lists, items, history, trip totals) | Yes | No | No | App functionality |
+| App activity: other user-generated content (lists, items, history, trip totals, optional feedback messages) | Yes | No | No | App functionality |
 | App info and performance: diagnostics (anonymous error logs) | Yes | No | No | App functionality |
 | Device or other IDs (push notification token) | Yes | No | No | App functionality |
 | App activity: other actions (the last time the app was used) | Yes | No | No | App functionality |
@@ -345,7 +348,7 @@ bundletool dump manifest --bundle=app-release.aab | grep uses-permission
 
 | Field | Value |
 |---|---|
-| Release name | 1.2.0 |
+| Release name | 1.2.1 |
 | Countries | All, or your chosen list |
 | Pricing | Free |
 
@@ -359,64 +362,58 @@ App Store "What's New" and Google Play "Release notes" (Play allows 500 characte
 
 | Language | Text |
 |---|---|
-| English | • Invite with a QR code, and join a household with a code from anywhere in the app.<br>• Household owners get a notification when someone joins.<br>• A short animated tour shows new users what Shopzyy can do. Replay it in Settings.<br>• Cleaner Settings and Household screens; legal pages open inside the app.<br>• Fixes: people who leave a household now disappear from its member list, joining is more reliable, and the add bar sits correctly on older iPhones. |
-| Español | • Invita con un código QR y únete a un hogar con un código desde cualquier lugar.<br>• Los propietarios de un hogar reciben un aviso cuando alguien se une.<br>• Un breve recorrido animado enseña lo que hace Shopzyy. Repítelo en Ajustes.<br>• Pantallas de Ajustes y Hogar más claras; los textos legales se abren dentro de la app.<br>• Correcciones: quien sale de un hogar desaparece de su lista de miembros, unirse es más fiable y la barra de añadir queda bien en iPhones antiguos. |
-| Français | • Invitez avec un code QR et rejoignez un foyer avec un code, où que vous soyez dans l'app.<br>• Le propriétaire d'un foyer est prévenu quand quelqu'un le rejoint.<br>• Une courte visite animée présente Shopzyy aux nouveaux utilisateurs. Revoyez-la dans les Réglages.<br>• Réglages et écran Foyer plus clairs ; pages légales ouvertes dans l'app.<br>• Correctifs : qui quitte un foyer disparaît de la liste des membres, l'adhésion est plus fiable et la barre d'ajout est bien placée sur les anciens iPhone. |
-| Nederlands | • Nodig uit met een QR-code en sluit je met een code aan bij een huishouden.<br>• Eigenaren van een huishouden krijgen een melding als iemand zich aansluit.<br>• Een korte rondleiding laat zien wat Shopzyy kan. Bekijk hem opnieuw bij Instellingen.<br>• Overzichtelijkere instellingen en huishoudscherm; juridische pagina's openen in de app.<br>• Verbeteringen: wie een huishouden verlaat, verdwijnt uit de ledenlijst, meedoen is betrouwbaarder en de toevoegbalk staat goed op oudere iPhones. |
-| Deutsch | • Lade per QR-Code ein und tritt überall in der App per Code einem Haushalt bei.<br>• Haushaltsbesitzer erhalten eine Benachrichtigung, wenn jemand beitritt.<br>• Eine kurze animierte Tour zeigt, was Shopzyy kann. Wiederhole sie in den Einstellungen.<br>• Übersichtlichere Einstellungen und Haushaltsansicht; rechtliche Seiten öffnen sich in der App.<br>• Korrekturen: Wer einen Haushalt verlässt, verschwindet aus der Mitgliederliste, der Beitritt ist zuverlässiger und die Eingabeleiste sitzt auf älteren iPhones richtig. |
-| Italiano | • Invita con un codice QR e unisciti a una casa con un codice da qualsiasi punto dell'app.<br>• I proprietari di una casa ricevono una notifica quando qualcuno si unisce.<br>• Un breve tour animato mostra cosa può fare Shopzyy. Rivedilo nelle Impostazioni.<br>• Impostazioni e schermata Casa più ordinate; le pagine legali si aprono nell'app.<br>• Correzioni: chi lascia una casa sparisce dall'elenco dei membri, l'adesione è più affidabile e la barra di aggiunta è ben posizionata sui vecchi iPhone. |
+| English | • Choose any emoji as your avatar with the new emoji keypad.<br>• Send feedback and rate Shopzyy from Settings.<br>• Shopzyy now tells you when a new version is available.<br>• Smaller fixes and polish. |
+| Español | • Elige cualquier emoji como avatar con el nuevo teclado de emojis.<br>• Envía comentarios y valora Shopzyy desde Ajustes.<br>• Shopzyy ahora te avisa cuando hay una versión nueva.<br>• Pequeñas correcciones y mejoras. |
+| Français | • Choisissez n'importe quel emoji comme avatar avec le nouveau clavier d'emojis.<br>• Envoyez un avis et notez Shopzyy depuis les Réglages.<br>• Shopzyy vous prévient maintenant quand une nouvelle version est disponible.<br>• Petits correctifs et améliorations. |
+| Nederlands | • Kies elke emoji als avatar met het nieuwe emoji-toetsenbord.<br>• Stuur feedback en beoordeel Shopzyy via Instellingen.<br>• Shopzyy meldt nu wanneer er een nieuwe versie is.<br>• Kleine verbeteringen en afwerking. |
+| Deutsch | • Wähle mit der neuen Emoji-Tastatur ein beliebiges Emoji als Avatar.<br>• Sende Feedback und bewerte Shopzyy in den Einstellungen.<br>• Shopzyy meldet jetzt, wenn eine neue Version verfügbar ist.<br>• Kleine Korrekturen und Feinschliff. |
+| Italiano | • Scegli qualsiasi emoji come avatar con la nuova tastiera emoji.<br>• Invia feedback e valuta Shopzyy dalle Impostazioni.<br>• Shopzyy ora ti avvisa quando è disponibile una nuova versione.<br>• Piccole correzioni e miglioramenti. |
 
 ### Google Play release notes, ready to paste
 
-Play needs each language between its own tag. Paste this whole block into the release notes box. The last line differs from the App Store text, because the fixes are Android ones.
+Play needs each language between its own tag. Paste this whole block into the release notes box. The text matches the App Store.
 
 ```
 <en-US>
-• Invite with a QR code, and join a household with a code from anywhere in the app.
-• Household owners get a notification when someone joins.
-• A short animated tour shows new users what Shopzyy can do. Replay it in Settings.
-• Cleaner Settings and Household screens; legal pages open inside the app.
-• Fixes: people who leave a household now disappear from its member list, joining is more reliable, and tab names show in dark mode.
+• Choose any emoji as your avatar with the new emoji keypad.
+• Send feedback and rate Shopzyy from Settings.
+• Shopzyy now tells you when a new version is available.
+• Smaller fixes and polish.
 </en-US>
 
 <es-ES>
-• Invita con un código QR y únete a un hogar con un código desde cualquier lugar.
-• Los propietarios de un hogar reciben un aviso cuando alguien se une.
-• Un breve recorrido animado enseña lo que hace Shopzyy. Repítelo en Ajustes.
-• Pantallas de Ajustes y Hogar más claras; los textos legales se abren dentro de la app.
-• Correcciones: quien sale de un hogar desaparece de su lista de miembros, unirse es más fiable y las pestañas se ven en modo oscuro.
+• Elige cualquier emoji como avatar con el nuevo teclado de emojis.
+• Envía comentarios y valora Shopzyy desde Ajustes.
+• Shopzyy ahora te avisa cuando hay una versión nueva.
+• Pequeñas correcciones y mejoras.
 </es-ES>
 
 <fr-FR>
-• Invitez avec un code QR et rejoignez un foyer avec un code, où que vous soyez dans l'app.
-• Le propriétaire d'un foyer est prévenu quand quelqu'un le rejoint.
-• Une courte visite animée présente Shopzyy aux nouveaux utilisateurs. Revoyez-la dans les Réglages.
-• Réglages et écran Foyer plus clairs ; pages légales ouvertes dans l'app.
-• Correctifs : qui quitte un foyer disparaît de la liste des membres, l'adhésion est plus fiable et les noms des onglets s'affichent en mode sombre.
+• Choisissez n'importe quel emoji comme avatar avec le nouveau clavier d'emojis.
+• Envoyez un avis et notez Shopzyy depuis les Réglages.
+• Shopzyy vous prévient maintenant quand une nouvelle version est disponible.
+• Petits correctifs et améliorations.
 </fr-FR>
 
 <nl-NL>
-• Nodig uit met een QR-code en sluit je met een code aan bij een huishouden.
-• Eigenaren van een huishouden krijgen een melding als iemand zich aansluit.
-• Een korte rondleiding laat zien wat Shopzyy kan. Bekijk hem opnieuw bij Instellingen.
-• Overzichtelijkere instellingen en huishoudscherm; juridische pagina's openen in de app.
-• Verbeteringen: wie een huishouden verlaat, verdwijnt uit de ledenlijst, meedoen is betrouwbaarder en tabnamen zijn zichtbaar in de donkere modus.
+• Kies elke emoji als avatar met het nieuwe emoji-toetsenbord.
+• Stuur feedback en beoordeel Shopzyy via Instellingen.
+• Shopzyy meldt nu wanneer er een nieuwe versie is.
+• Kleine verbeteringen en afwerking.
 </nl-NL>
 
 <de-DE>
-• Lade per QR-Code ein und tritt überall in der App per Code einem Haushalt bei.
-• Haushaltsbesitzer erhalten eine Benachrichtigung, wenn jemand beitritt.
-• Eine kurze animierte Tour zeigt, was Shopzyy kann. Wiederhole sie in den Einstellungen.
-• Übersichtlichere Einstellungen und Haushaltsansicht; rechtliche Seiten öffnen sich in der App.
-• Korrekturen: Wer einen Haushalt verlässt, verschwindet aus der Mitgliederliste, der Beitritt ist zuverlässiger und Tab-Namen sind im Dunkelmodus sichtbar.
+• Wähle mit der neuen Emoji-Tastatur ein beliebiges Emoji als Avatar.
+• Sende Feedback und bewerte Shopzyy in den Einstellungen.
+• Shopzyy meldet jetzt, wenn eine neue Version verfügbar ist.
+• Kleine Korrekturen und Feinschliff.
 </de-DE>
 
 <it-IT>
-• Invita con un codice QR e unisciti a una casa con un codice da qualsiasi punto dell'app.
-• I proprietari di una casa ricevono una notifica quando qualcuno si unisce.
-• Un breve tour animato mostra cosa può fare Shopzyy. Rivedilo nelle Impostazioni.
-• Impostazioni e schermata Casa più ordinate; le pagine legali si aprono nell'app.
-• Correzioni: chi lascia una casa sparisce dall'elenco dei membri, l'adesione è più affidabile e i nomi delle schede si vedono in modalità scura.
+• Scegli qualsiasi emoji come avatar con la nuova tastiera emoji.
+• Invia feedback e valuta Shopzyy dalle Impostazioni.
+• Shopzyy ora ti avvisa quando è disponibile una nuova versione.
+• Piccole correzioni e miglioramenti.
 </it-IT>
 ```
 
@@ -426,12 +423,12 @@ The full English description is above. The other five languages need the descrip
 
 | Language | Subtitle (30) | Promotional text (170) | Keywords (100) | Play short description (80) |
 |---|---|---|---|---|
-| English | `One list for your household` | `Add items in a sentence, tick them off at the shop and everyone sees it live. Scan your receipt to tick off your list and save the total.` | `grocery,groceries,household,family,roommates,couples,receipt,scanner,restock,reminders,together` | `A shared shopping list for your household. Add, tick off and scan receipts.` |
-| Español | `Una lista para todo el hogar` | `Añade artículos en una frase, márcalos en la tienda y todos lo ven al instante. Escanea el ticket para marcar tu lista y guardar el total.` | `compra,supermercado,hogar,familia,compañeros,pareja,ticket,escáner,recordatorios,juntos,despensa` | `Lista de la compra compartida para tu hogar. Añade, marca y escanea tickets.` |
-| Français | `Une liste pour tout le foyer` | `Ajoutez des articles en une phrase, cochez-les au magasin et tout le monde le voit aussitôt. Scannez le ticket pour cocher votre liste et garder le total.` | `courses,supermarché,foyer,famille,colocataires,couple,ticket,scanner,rappels,ensemble,garde-manger` | `Liste de courses partagée pour votre foyer. Ajoutez, cochez, scannez.` |
-| Nederlands | `Eén lijst voor het hele huis` | `Voeg artikelen toe in één zin, vink ze af in de winkel en iedereen ziet het direct. Scan je bonnetje om je lijst af te vinken en het totaal op te slaan.` | `boodschappen,supermarkt,huishouden,gezin,huisgenoten,stel,bonnetje,scanner,herinneringen,samen` | `Gedeelde boodschappenlijst voor je huishouden. Toevoegen, afvinken, scannen.` |
-| Deutsch | `Eine Liste für den Haushalt` | `Artikel in einem Satz hinzufügen, im Laden abhaken und alle sehen es sofort. Scanne den Kassenbon, um die Liste abzuhaken und die Summe zu speichern.` | `einkauf,supermarkt,haushalt,familie,mitbewohner,paar,kassenbon,scanner,erinnerung,gemeinsam` | `Gemeinsame Einkaufsliste für den Haushalt. Hinzufügen, abhaken, scannen.` |
-| Italiano | `Una lista per tutta la casa` | `Aggiungi articoli in una frase, spuntali al negozio e tutti li vedono subito. Scansiona lo scontrino per spuntare la lista e salvare il totale.` | `spesa,supermercato,casa,famiglia,coinquilini,coppia,scontrino,scanner,promemoria,insieme` | `Lista della spesa condivisa per la tua casa. Aggiungi, spunta, scansiona.` |
+| English | • Choose any emoji as your avatar with the new emoji keypad.<br>• Send feedback and rate Shopzyy from Settings.<br>• Shopzyy now tells you when a new version is available.<br>• Smaller fixes and polish. |
+| Español | • Elige cualquier emoji como avatar con el nuevo teclado de emojis.<br>• Envía comentarios y valora Shopzyy desde Ajustes.<br>• Shopzyy ahora te avisa cuando hay una versión nueva.<br>• Pequeñas correcciones y mejoras. |
+| Français | • Choisissez n'importe quel emoji comme avatar avec le nouveau clavier d'emojis.<br>• Envoyez un avis et notez Shopzyy depuis les Réglages.<br>• Shopzyy vous prévient maintenant quand une nouvelle version est disponible.<br>• Petits correctifs et améliorations. |
+| Nederlands | • Kies elke emoji als avatar met het nieuwe emoji-toetsenbord.<br>• Stuur feedback en beoordeel Shopzyy via Instellingen.<br>• Shopzyy meldt nu wanneer er een nieuwe versie is.<br>• Kleine verbeteringen en afwerking. |
+| Deutsch | • Wähle mit der neuen Emoji-Tastatur ein beliebiges Emoji als Avatar.<br>• Sende Feedback und bewerte Shopzyy in den Einstellungen.<br>• Shopzyy meldet jetzt, wenn eine neue Version verfügbar ist.<br>• Kleine Korrekturen und Feinschliff. |
+| Italiano | • Scegli qualsiasi emoji come avatar con la nuova tastiera emoji.<br>• Invia feedback e valuta Shopzyy dalle Impostazioni.<br>• Shopzyy ora ti avvisa quando è disponibile una nuova versione.<br>• Piccole correzioni e miglioramenti. |
 
 ---
 
@@ -444,7 +441,7 @@ The full English description is above. The other five languages need the descrip
 5. **Check the pages are live:** open the privacy, terms, support and delete-account links from a phone.
 6. **Android:** rebuild with `npm run prebuild:prod`, then confirm the permission list with `bundletool` as shown above.
 
-## TestFlight checklist for 1.2.0
+## TestFlight checklist for 1.2.1
 
 Use a real phone and the TestFlight build, with the functions, rules and hosting already deployed to production.
 
@@ -465,3 +462,7 @@ Use a real phone and the TestFlight build, with the functions, rules and hosting
 15. **Owner alert:** the owner's phone gets "X joined Y" when someone joins, tapping it opens the Household tab, and Settings → Notifications → New member alerts turns it off.
 16. **Settings and Household pages:** the new groups, sub-pages and Back button work, Delete my data still works, and choosing a household photo from the Background sheet does not freeze.
 17. **Older iPhones:** on an iPhone XS or similar, the add bar sits directly above the tab bar.
+18. **Emoji keypad:** Settings → your profile. Pick an emoji from each tab, save, and check it shows on the List, Household and Activity screens and on a second phone.
+19. **Feedback:** Settings → Send feedback. Send one with and one without the contact switch, and check both appear in the Firebase console under `feedback` (with the email only on the first).
+20. **Update banner:** in Firestore `config/app`, set `latestVersionIos` to a version above the installed one. The banner shows on the List tab, Later hides it, and Settings shows "Update available". Remove the field afterwards.
+21. **Rate Shopzyy:** the Settings row opens the App Store review page.

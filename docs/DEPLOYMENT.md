@@ -55,6 +55,19 @@ Server notes:
 - Deploy order when both change: rules and functions first, then hosting, then the app.
 - Rolling back: check out the earlier commit and deploy again. There is no one-click rollback for rules.
 
+### Remote app settings (`config/app` in Firestore)
+
+Edit this document in the Firebase console (Firestore → `config` → `app`). The app reads it and caches it.
+
+| Field | Effect |
+|---|---|
+| `minimumVersion` | Builds older than this show a blocking "Time to update" screen. Emergency use only. |
+| `latestVersionIos`, `latestVersionAndroid` | Set to the new version (for example `1.2.1`) once it is live in that store. Older builds show a dismissible "A new version is available" banner and an "Update available" row in Settings. "Later" hides it for 3 days. |
+| `iosStoreUrl`, `androidStoreUrl` | Optional. The store pages are built in; set these only to override. |
+| `message` | Optional text for the blocking screen. |
+
+Feedback sent from the app is saved in the `feedback` collection (Firestore → `feedback`). Only the server writes it, and only you can read it.
+
 ## 3. iOS
 
 ### 3A. Without EAS (Xcode)

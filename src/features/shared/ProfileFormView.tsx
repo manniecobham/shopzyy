@@ -5,8 +5,9 @@ import { Glyph, type SymbolName } from '../../components/Glyph';
 import { FormRow, FormSection, ProminentButton } from '../../components/ui';
 import { NameNormalizer } from '../../logic/NameNormalizer';
 import type { UserProfile } from '../../models/entities';
-import { EMOJI_CHOICES, MEMBER_PALETTE } from '../../models/factories';
+import { MEMBER_PALETTE } from '../../models/factories';
 import { colorFromHex, useTheme } from '../../theme/theme';
+import { EmojiKeypad } from './EmojiKeypad';
 
 export function ProfileFormView({ profile, submitTitle, onSubmit }: {
   profile: UserProfile; submitTitle: string; onSubmit: (profile: UserProfile) => void;
@@ -37,14 +38,7 @@ export function ProfileFormView({ profile, submitTitle, onSubmit }: {
       </FormSection>
 
       <FormSection header={t('Avatar')}>
-        <View style={s.grid}>
-          {EMOJI_CHOICES.map((choice) => (
-            <Pressable key={choice} onPress={() => setEmoji(choice)} accessibilityState={{ selected: choice === emoji }}
-              style={[s.emojiCell, choice === emoji && { backgroundColor: colorFromHex(th.accent, 0.18) }]}>
-              <Text style={{ fontSize: 26 }}>{choice}</Text>
-            </Pressable>
-          ))}
-        </View>
+        <EmojiKeypad value={emoji} onChange={setEmoji} />
       </FormSection>
 
       <FormSection header={t('Colour')}>
@@ -68,8 +62,6 @@ export function ProfileFormView({ profile, submitTitle, onSubmit }: {
 
 const s = StyleSheet.create({
   avatar: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', padding: 10, rowGap: 4 },
-  emojiCell: { width: '16.66%', height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   palette: { flexDirection: 'row', paddingVertical: 14, paddingHorizontal: 8 },
   swatch: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
 });

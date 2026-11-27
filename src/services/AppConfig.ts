@@ -2,6 +2,7 @@ import { doc, getDoc, getFirestore } from '@react-native-firebase/firestore';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { Observable } from '../lib/observable';
+import { storeUrl as defaultStoreUrl } from '../lib/storeLinks';
 import type { AppPreferences } from './AppPreferences';
 
 export interface RemoteConfig {
@@ -9,11 +10,15 @@ export interface RemoteConfig {
   message?: string;
   iosStoreUrl?: string;
   androidStoreUrl?: string;
+  latestVersionIos?: string;
+  latestVersionAndroid?: string;
   migrationEnabled?: boolean;
   legacyUserEstimate?: number;
 }
 
 const CACHE_KEY = 'shopzy.remoteConfig';
+const DISMISSED_KEY = 'shopzy.updateDismissed';
+const NUDGE_PAUSE_MS = 3 * 24 * 60 * 60 * 1000;
 
 export function compareVersions(a: string, b: string): number {
   const pa = a.split('.').map((n) => parseInt(n, 10) || 0);
@@ -65,8 +70,32 @@ export class AppConfigService extends Observable {
     return !!min && compareVersions(this.version, min) < 0;
   }
 
-  get storeUrl(): string | null {
-    return (Platform.OS === 'ios' ? this.config.iosStoreUrl : this.config.androidStoreUrl) ?? null;
+  get storeUrl(): string {
+    return (Platform.OS === 'ios' ? this.config.iosStoreUrl : this.config.androidStoreUrl) || defaultStoreUrl();
+  }
+
+  get latestVersion(): string | null {
+    return (Platform.OS === 'ios' ? this.config.latestVersionIos : this.config.latestVersionAndroid) || null;
+  }
+
+  // A newer version is out and this one is still allowed to run.
+  get updateOffered(): boolean {
+    const latest = this.latestVersion;
+    return !this.updateRequired && !!latest && compareVersions(this.version, latest) < 0;
+  }
+
+  // Same, but quiet for a few days after the person chose "Later".
+  updateNudgeVisible(now: number = Date.now()): boolean {
+    if (!this.updateOffered) return false;
+    const dismissed = this.prefs.getJSON<{ version: string; at: number }>(DISMISSED_KEY);
+    return !(dismissed && dismissed.version === this.latestVersion && now - dismissed.at < NUDGE_PAUSE_MS);
+  }
+
+  dismissUpdateNudge(now: number = Date.now()): void {
+    const latest = this.latestVersion;
+    if (!latest) return;
+    this.prefs.setJSON(DISMISSED_KEY, { version: latest, at: now });
+    this.changed();
   }
 
   get migrationEnabled(): boolean { return this.config.migrationEnabled !== false; }

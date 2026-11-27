@@ -14,4 +14,5 @@ export const StorageKeys = {
   hasSeenReceiptIntro: 'shopzy.hasSeenReceiptIntro',
   pendingInvite: 'shopzy.pendingInvite',
   referrerChecked: 'shopzy.referrerChecked',
+  reviewAskedAt: 'shopzy.reviewAskedAt',
 } as const;
