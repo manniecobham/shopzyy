@@ -62,9 +62,15 @@ Edit this document in the Firebase console (Firestore → `config` → `app`). T
 | Field | Effect |
 |---|---|
 | `minimumVersion` | Builds older than this show a blocking "Time to update" screen. Emergency use only. |
-| `latestVersionIos`, `latestVersionAndroid` | Set to the new version (for example `1.2.1`) once it is live in that store. Older builds show a dismissible "A new version is available" banner and an "Update available" row in Settings. "Later" hides it for 3 days. |
+| `latestVersionIos`, `latestVersionAndroid` | Written for you by the `syncStoreVersions` function every 6 hours (see below). Older builds show a dismissible "A new version is available" banner and an "Update available" row in Settings. "Later" hides it for 3 days. You can still set them by hand; the function only ever raises them. |
 | `iosStoreUrl`, `androidStoreUrl` | Optional. The store pages are built in; set these only to override. |
 | `message` | Optional text for the blocking screen. |
+
+**Latest versions are automatic.** The scheduled function `syncStoreVersions` reads the live version from the App Store (Apple's public lookup) and from Google Play (production track, fully rolled-out releases only, so a 20% rollout does not trigger the banner) and writes them to `config/app`. It creates the document if it is missing and never lowers a value.
+- iOS needs nothing else.
+- Android needs a one-time setup: Play Console → **Users and permissions** → **Invite new users** → the Cloud Run service account of your functions (Google Cloud Console → Cloud Run → any function → **Security** tab shows it, usually `<project number>-compute@developer.gserviceaccount.com`). Give it access to the app with the permission to view app information and release status. Also enable the **Google Play Android Developer API** in Google Cloud Console → APIs & Services. Until then the log says "Google Play lookup failed" and only iOS is updated.
+- Name the Play release with the version number (for example `1.2.1` or the default `14 (1.2.1)`), because the function reads the version from the release name.
+- To check or run it now: Google Cloud Console → Cloud Scheduler → `firebase-schedule-syncStoreVersions-…` → **Force run**, then read the function's logs ("Store versions").
 
 Feedback sent from the app is saved in the `feedback` collection (Firestore → `feedback`). Only the server writes it, and only you can read it.
 

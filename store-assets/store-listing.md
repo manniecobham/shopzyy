@@ -464,5 +464,5 @@ Use a real phone and the TestFlight build, with the functions, rules and hosting
 17. **Older iPhones:** on an iPhone XS or similar, the add bar sits directly above the tab bar.
 18. **Emoji keypad:** Settings → your profile. Pick an emoji from each tab, save, and check it shows on the List, Household and Activity screens and on a second phone.
 19. **Feedback:** Settings → Send feedback. Send one with and one without the contact switch, and check both appear in the Firebase console under `feedback` (with the email only on the first).
-20. **Update banner:** in Firestore `config/app`, set `latestVersionIos` to a version above the installed one. The banner shows on the List tab, Later hides it, and Settings shows "Update available". Remove the field afterwards.
+20. **Update banner:** the `syncStoreVersions` function fills `config/app` by itself. To test, force-run it in Cloud Scheduler, or temporarily set `latestVersionIos` to a version above the installed one in Firestore `config/app`: the banner shows on the List tab, Later hides it, and Settings shows "Update available". The function will put the real store version back (it only raises values, so lower the test value by deleting the field).
 21. **Rate Shopzyy:** the Settings row opens the App Store review page.
