@@ -1,35 +1,36 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppLogo } from '../../components/AppLogo';
-import { Icon, ProminentButton, type IconName } from '../../components/ui';
+import { Icon, type IconName } from '../../components/ui';
+import { OnboardingTour } from '../onboarding/OnboardingTour';
 import { Brand, useTheme } from '../../theme/theme';
 import { t as tr } from '../../i18n';
 
 export function WelcomeView({ onStart }: { onStart: () => void }) {
   const t = useTheme();
-  return (
-    <SafeAreaView style={[s.root, { backgroundColor: t.background }]}>
-      <ScrollView contentContainerStyle={s.scroll}>
-        <View style={s.hero}>
-          <AppLogo />
-          <Text style={[s.title, { color: t.label }]}>{tr('Welcome to {app}', { app: Brand.appName })}</Text>
-          <Text style={[s.tagline, { color: t.accent }]}>{Brand.tagline}</Text>
-          <Text style={[s.body, { color: t.secondaryLabel }]}>
-            {tr('A shared shopping list for your households. It learns what you buy and reminds everyone before you run out.')}
-          </Text>
-        </View>
-        <View style={s.features}>
-          <Feature icon="person.2" text={tr('Share a list with everyone at home')} />
-          <Feature icon="sparkles" text={tr('Get reminded before things run out')} />
-          <Feature icon="bell.badge" text={tr('Know when someone has been shopping')} />
-        </View>
-      </ScrollView>
-      <View style={s.footer}>
-        <ProminentButton title={tr('Get started')} onPress={onStart} />
-        <Text style={[s.note, { color: t.secondaryLabel }]}>
-          {tr('Your lists are stored securely and shared only with the households you join. Sign in with Apple, Google or your email.')}
+  const hero = (
+    <ScrollView contentContainerStyle={s.scroll}>
+      <View style={s.hero}>
+        <AppLogo />
+        <Text style={[s.title, { color: t.label }]}>{tr('Welcome to {app}', { app: Brand.appName })}</Text>
+        <Text style={[s.tagline, { color: t.accent }]}>{Brand.tagline}</Text>
+        <Text style={[s.body, { color: t.secondaryLabel }]}>
+          {tr('A shared shopping list for your households. It learns what you buy and reminds everyone before you run out.')}
         </Text>
       </View>
+      <View style={s.features}>
+        <Feature icon="person.2" text={tr('Share a list with everyone at home')} />
+        <Feature icon="sparkles" text={tr('Get reminded before things run out')} />
+        <Feature icon="bell.badge" text={tr('Know when someone has been shopping')} />
+      </View>
+    </ScrollView>
+  );
+  return (
+    <SafeAreaView style={[s.root, { backgroundColor: t.background }]}>
+      <OnboardingTour hero={hero} onDone={onStart} />
+      <Text style={[s.note, { color: t.secondaryLabel }]}>
+        {tr('Your lists are stored securely and shared only with the households you join. Sign in with Apple, Google or your email.')}
+      </Text>
     </SafeAreaView>
   );
 }
@@ -53,6 +54,5 @@ const s = StyleSheet.create({
   body: { fontSize: 17, textAlign: 'center' },
   features: { marginTop: 36, paddingHorizontal: 40, gap: 18 },
   feature: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  footer: { paddingHorizontal: 24, paddingBottom: 16, gap: 12 },
-  note: { fontSize: 13, textAlign: 'center' },
+  note: { fontSize: 13, textAlign: 'center', paddingHorizontal: 24, paddingBottom: 12 },
 });

@@ -3,8 +3,8 @@ import { t as tr } from '../../i18n';
 import { useIsFocused } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useShake } from '../../lib/useShake';
-import { Alert, AppState, Keyboard, KeyboardAvoidingView, Platform, SectionList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Alert, AppState, Keyboard, KeyboardAvoidingView, Platform, SectionList, StyleSheet, Text, View } from 'react-native';
 import { InlineLoading } from '../../components/LogoAnimation';
 import { ScreenOptions } from '../../components/NativeHeader';
 import { SuggestionEngine } from '../../logic/SuggestionEngine';
@@ -117,14 +117,15 @@ export function ShoppingListScreen({ household }: { household: Household }) {
     if (prefs.getBool(StorageKeys.hasSeenReceiptIntro, false)) chooseSource(); else setIntro(true);
   };
 
-  const insets = useSafeAreaInsets();
   const [keyboardUp, setKeyboardUp] = useState(false);
   useEffect(() => {
     const show = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () => setKeyboardUp(true));
     const hide = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () => setKeyboardUp(false));
     return () => { show.remove(); hide.remove(); };
   }, []);
-  const tabBarClearance = keyboardUp || Platform.OS !== 'ios' ? 0 : isIOS26 ? 84 : 49 + insets.bottom;
+  // Before iOS 26 the bottom inset already includes the tab bar; the floating bar of iOS 26 does not, so it has a fixed height.
+  const insets = useSafeAreaInsets();
+  const tabBarClearance = keyboardUp || Platform.OS !== 'ios' ? 0 : isIOS26 ? 84 : insets.bottom;
 
   const catalog = store.itemsIn(household.id);
   const listItems = catalog.filter((i) => i.isOnList);

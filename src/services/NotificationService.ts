@@ -21,6 +21,7 @@ export class NotificationService implements Notifier {
   onAddToList: ((itemID: string) => void) | null = null;
   onSnooze: ((itemID: string) => void) | null = null;
   onOpenActivity: (() => void) | null = null;
+  onOpenHousehold: (() => void) | null = null;
 
   private readonly maxRestockReminders = 40;
   private readonly reminderHour = 9;
@@ -50,6 +51,7 @@ export class NotificationService implements Notifier {
       const content = response.notification.request.content;
       const kind = (content.data as { kind?: string } | null)?.kind;
       if (content.categoryIdentifier === NotificationIds.tripCategory || kind === 'trip') { this.onOpenActivity?.(); return; }
+      if (kind === 'member') { this.onOpenHousehold?.(); return; }
       const itemID = (content.data as { itemID?: string } | null)?.itemID;
       if (!itemID) return;
       if (response.actionIdentifier === NotificationIds.addToListAction) this.onAddToList?.(itemID);

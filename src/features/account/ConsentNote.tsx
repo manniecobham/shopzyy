@@ -1,6 +1,7 @@
-import { Linking, Text } from 'react-native';
+import { Text } from 'react-native';
 import { t as tr } from '../../i18n';
 import { LEGAL_URLS } from '../../lib/legal';
+import { openLegal } from '../../lib/openLegal';
 import { useTheme } from '../../theme/theme';
 
 const TERMS = '\u0001';
@@ -9,7 +10,7 @@ const PRIVACY = '\u0002';
 export function ConsentNote() {
   const t = useTheme();
   const link = (label: string, url: string) => (
-    <Text key={url} accessibilityRole="link" onPress={() => void Linking.openURL(url)} style={{ color: t.accent, fontWeight: '600' }}>{label}</Text>
+    <Text key={url} accessibilityRole="link" onPress={() => void openLegal(url)} style={{ color: t.accent, fontWeight: '600' }}>{label}</Text>
   );
   const parts = tr('By continuing you agree to our {terms} and {privacy}.', { terms: TERMS, privacy: PRIVACY }).split(/([\u0001\u0002])/);
   return (

@@ -60,3 +60,34 @@ describe('plainQuantity', () => {
     expect(plainQuantity(1500)).toMatch(/^1[,.   ]?500$/);
   });
 });
+
+import { inviteLink } from '../src/lib/inviteCode';
+import { qrRuns } from '../src/lib/qr';
+
+describe('invite QR code', () => {
+  const link = inviteLink('shopzyy.manniedev.com', 'ABCD2345');
+
+  it('builds the invite link that the system camera opens in the app', () => {
+    expect(link).toBe('https://shopzyy.manniedev.com/join/ABCD2345');
+    expect(extractInviteCode(link)).toBe('ABCD2345');
+  });
+
+  it('produces a valid square with the finder pattern in the corner', () => {
+    const { size, rows } = qrRuns(link);
+    expect((size - 17) % 4).toBe(0);
+    expect(rows).toHaveLength(size);
+    expect(rows[0][0]).toEqual({ start: 0, length: 7 });
+    expect(rows[0][rows[0].length - 1]).toEqual({ start: size - 7, length: 7 });
+    expect(rows.flat().every((r) => r.start >= 0 && r.start + r.length <= size)).toBe(true);
+  });
+
+  it('uses the highest error correction so a logo can cover the middle', () => {
+    // High correction needs a larger grid than the default for the same text.
+    const { size } = qrRuns(link);
+    expect(size).toBeGreaterThanOrEqual(29);
+  });
+
+  it('makes a different pattern for a different code', () => {
+    expect(JSON.stringify(qrRuns(link).rows)).not.toBe(JSON.stringify(qrRuns(inviteLink('shopzyy.manniedev.com', 'WXYZ9876')).rows));
+  });
+});

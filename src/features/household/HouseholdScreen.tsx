@@ -4,22 +4,26 @@ import Constants from 'expo-constants';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 import { InlineLoading } from '../../components/LogoAnimation';
 import { PickerRow } from '../../components/Sheet';
 import { ScreenOptions } from '../../components/NativeHeader';
 import { FormRow, FormSection, MemberBadge } from '../../components/ui';
 import { COMMON_CURRENCIES, currencyTitle } from '../../lib/currencies';
 import { deviceCurrency } from '../../lib/format';
-import { HOUSEHOLD_THEMES, themeTitle, type HouseholdTheme } from '../../models/enums';
+import { inviteLink } from '../../lib/inviteCode';
+import { themeTitle, type HouseholdTheme } from '../../models/enums';
 import type { Household } from '../../models/entities';
 import { useAccount, useRuntime, useStoreVersion } from '../../runtime/RuntimeProvider';
 import { UserFacingError } from '../../services/UserFacingError';
 import { useTheme } from '../../theme/theme';
 import { SettingsSheet } from '../shared/SettingsSheet';
 import { CustomOptionsSheet } from './CustomOptionsSheet';
-import { HouseholdBackground, HouseholdThemeArt, householdDisplayName } from './HouseholdBackground';
+import { HouseholdBackground, householdDisplayName } from './HouseholdBackground';
 import { HouseholdSwitcher } from './HouseholdSwitcher';
+import { InviteQRSheet } from './InviteQRSheet';
+import { BackgroundSheet } from './BackgroundSheet';
+import { InviteSheet, type InviteChoice } from './InviteSheet';
 import { PhotoPositionSheet } from './PhotoPositionSheet';
 
 const BANNER_WIDTH = 1200;
@@ -77,14 +81,38 @@ export function HouseholdScreen({ household }: { household: Household }) {
 
   // MARK: Invite
 
+  const [qr, setQr] = useState<string | null>(null);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [backgroundOpen, setBackgroundOpen] = useState(false);
+  const [makingQr, setMakingQr] = useState(false);
+
+  const showQr = async () => {
+    setMakingQr(true);
+    const result = await runtime.createInvite(household.id);
+    setMakingQr(false);
+    if ('error' in result) { Alert.alert(t("Couldn't create an invite"), result.error); return; }
+    setQr(result.code);
+  };
+
   const invite = async () => {
     setInviting(true);
     const result = await runtime.createInvite(household.id);
     setInviting(false);
     if ('error' in result) { Alert.alert(t("Couldn't create an invite"), result.error); return; }
     await Share.share({
-      message: t('Join {name} on Shopzyy! Open this link: {link}\n\nOr open Shopzyy and enter the invite code {code}.', { name, link: `https://${linkHost}/join/${result.code}`, code: result.code }),
+      message: t('Join {name} on Shopzyy! Open this link: {link}\n\nOr open Shopzyy and enter the invite code {code}.', { name, link: inviteLink(linkHost, result.code), code: result.code }),
     });
+  };
+
+  // A sheet closes before the next native layer opens, so two never overlap on screen.
+  const afterSheet = (action: () => void) => setTimeout(action, 450);
+  const pickInvite = (choice: InviteChoice) => {
+    setInviteOpen(false);
+    afterSheet(() => void (choice === 'share' ? invite() : showQr()));
+  };
+  const pickPhoto = () => {
+    setBackgroundOpen(false);
+    afterSheet(() => void choosePhoto());
   };
 
   // MARK: Removal
@@ -112,12 +140,12 @@ export function HouseholdScreen({ household }: { household: Household }) {
     ]);
   };
 
-  const selected = (theme: HouseholdTheme) => household.customImage === null && household.themeRaw === theme;
-
   return (
     <ScrollView style={{ flex: 1, backgroundColor: th.groupedBackground }} contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
       <ScreenOptions largeTitle title={t('Household')} left={<HouseholdSwitcher />} />
       <>
+        <View style={{ marginHorizontal: 16, marginTop: 8 }}><View style={s.banner}><HouseholdBackground household={household} /></View></View>
+
         <FormSection first header={t('Household')}>
           {household.isOwnedByMe ? (
             <FormRow last>
@@ -133,32 +161,7 @@ export function HouseholdScreen({ household }: { household: Household }) {
           )}
         </FormSection>
 
-        <FormSection header={t('Background')} footer={t('Pick a mood or use your own photo. Everyone in the household sees it at the top of the list.')}>
-          <FormRow style={{ paddingHorizontal: 16, paddingVertical: 8 }}><View style={[s.preview, { flex: 1 }]}><HouseholdBackground household={household} /></View></FormRow>
-          <FormRow style={{ paddingHorizontal: 20, paddingVertical: 18 }}>
-            <View style={[s.grid, { flex: 1 }]}>
-              {HOUSEHOLD_THEMES.map((theme) => (
-                <Pressable key={theme} onPress={() => service.setTheme(theme, household)} accessibilityLabel={t('{theme} background', { theme: t(themeTitle(theme)) })}
-                  accessibilityState={{ selected: selected(theme) }} style={[s.theme, selected(theme) && { borderColor: th.label, borderWidth: 2 }]}>
-                  <HouseholdThemeArt theme={theme} emojiSize={22} />
-                  <Text style={s.themeName}>{t(themeTitle(theme))}</Text>
-                </Pressable>
-              ))}
-            </View>
-          </FormRow>
-          <FormRow last={household.customImage === null} onPress={() => void choosePhoto()}>
-            <Glyph name="photo" size={26} color={th.accent} style={{ marginRight: 14 }} />
-            <Text style={{ fontSize: 17, color: th.accent }}>{household.customImage === null ? t('Choose a photo') : t('Choose another photo')}</Text>
-          </FormRow>
-          {household.customImage !== null ? (
-            <FormRow last onPress={() => service.setCustomImage(null, household)}>
-              <Glyph name="trash" size={20} color={th.red} style={{ marginRight: 12 }} />
-              <Text style={{ fontSize: 17, color: th.red }}>{t('Remove photo')}</Text>
-            </FormRow>
-          ) : null}
-        </FormSection>
-
-        <FormSection header={t('Members')} footer={t('Share an invite link or code. When they open it, Shopzyy asks them to set up their profile and they join this household.')}>
+        <FormSection header={t('Members')}>
           {members.map((m) => (
             <FormRow key={m.id} style={{ gap: 12 }}>
               <MemberBadge emoji={m.emoji} colorHex={m.colorHex} size={32} />
@@ -169,13 +172,19 @@ export function HouseholdScreen({ household }: { household: Household }) {
               <Text style={{ fontSize: 13, color: th.secondaryLabel }}>{purchaseSummary(purchaseCounts.get(m.id) ?? 0)}</Text>
             </FormRow>
           ))}
-          <FormRow last onPress={() => void invite()} disabled={inviting}>
+          <FormRow last onPress={() => setInviteOpen(true)}>
             <Glyph name="person.badge.plus" size={20} color={th.accent} style={{ marginRight: 12 }} />
-            <Text style={{ fontSize: 17, color: th.accent }}>{inviting ? t('Creating invite…') : t('Invite people')}</Text>
+            <Text style={{ fontSize: 17, color: th.accent }}>{t('Invite people')}</Text>
           </FormRow>
         </FormSection>
 
-        <FormSection header={t('Organising')} footer={t('Add your own categories and rooms. You can also create them while editing an item.')}>
+        <FormSection footer={t('Add your own categories and rooms. You can also create them while editing an item.')}>
+          <FormRow onPress={() => setBackgroundOpen(true)}>
+            <Glyph name="photo" size={20} color={th.accent} style={{ marginRight: 12 }} />
+            <Text style={{ fontSize: 17, color: th.label, flex: 1 }}>{t('Background')}</Text>
+            <Text style={{ fontSize: 17, color: th.secondaryLabel, marginRight: 6 }}>{household.customImage !== null ? t('Photo') : t(themeTitle(household.themeRaw as HouseholdTheme))}</Text>
+            <Glyph name="chevron.right" size={16} color={th.tertiaryLabel} />
+          </FormRow>
           <FormRow last onPress={() => setOptions(true)}>
             <Glyph name="tag" size={20} color={th.accent} style={{ marginRight: 12 }} />
             <Text style={{ fontSize: 17, color: th.label, flex: 1 }}>{t('Categories & rooms')}</Text>
@@ -183,7 +192,7 @@ export function HouseholdScreen({ household }: { household: Household }) {
           </FormRow>
         </FormSection>
 
-        <FormSection header={t('Shopping totals')} footer={t("After a shopping trip, Shopzyy can ask what it cost. Automatic uses your phone's region; pick a currency to use the same one for everyone in the household.")}>
+        <FormSection footer={t("After a shopping trip, Shopzyy can ask what it cost. Automatic uses your phone's region; pick a currency to use the same one for everyone in the household.")}>
           <PickerRow label={t('Currency')} value={household.currencyCode} last onChange={(code) => service.setCurrency(code, household)}
             options={[{ title: t('Automatic ({currency})', { currency: currencyTitle(deviceCurrency()) }), value: '' }, ...COMMON_CURRENCIES.map((c) => ({ title: currencyTitle(c), value: c }))]} />
         </FormSection>
@@ -201,9 +210,12 @@ export function HouseholdScreen({ household }: { household: Household }) {
         </FormSection>
       </>
 
-      <InlineLoading visible={preparingPhoto} message={t('Preparing photo…')} />
+      <InlineLoading visible={preparingPhoto || inviting || makingQr} message={preparingPhoto ? t('Preparing photo…') : t('Creating invite…')} />
       {options ? <CustomOptionsSheet householdID={household.id} onClose={() => setOptions(false)} /> : null}
       {settings ? <SettingsSheet onClose={() => setSettings(false)} /> : null}
+      {qr ? <InviteQRSheet name={name} code={qr} link={inviteLink(linkHost, qr)} onClose={() => setQr(null)} /> : null}
+      {inviteOpen ? <InviteSheet onPick={pickInvite} onClose={() => setInviteOpen(false)} /> : null}
+      {backgroundOpen ? <BackgroundSheet household={household} onChoosePhoto={pickPhoto} onClose={() => setBackgroundOpen(false)} /> : null}
       {pendingPhoto ? (
         <PhotoPositionSheet base64={pendingPhoto} onCancel={() => setPendingPhoto(null)}
           onUse={(x, y) => { service.setCustomImage(pendingPhoto, household, x, y); setPendingPhoto(null); }} />
@@ -220,8 +232,5 @@ function Labeled({ label, value, last }: { label: string; value: string; last?: 
 }
 
 const s = StyleSheet.create({
-  preview: { height: 110, borderRadius: 12, overflow: 'hidden' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  theme: { width: '31%', height: 54, borderRadius: 10, overflow: 'hidden', justifyContent: 'flex-end' },
-  themeName: { color: '#fff', fontSize: 11, fontWeight: '700', padding: 6, textShadowColor: 'rgba(0,0,0,0.5)', textShadowRadius: 2 },
+  banner: { height: 120, borderRadius: 16, overflow: 'hidden' },
 });

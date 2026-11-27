@@ -105,6 +105,7 @@ export class AppRuntime extends Observable {
     n.onAddToList = (itemID) => ShoppingListService.forItem(itemID, this.env)?.addToList(itemID);
     n.onSnooze = (itemID) => ShoppingListService.forItem(itemID, this.env)?.snooze(itemID, 7);
     n.onOpenActivity = () => router.navigate('/activity');
+    n.onOpenHousehold = () => router.navigate('/household');
   }
 
   private activeSince = new Date();
@@ -162,7 +163,7 @@ export class AppRuntime extends Observable {
 
   async joinHousehold(code: string): Promise<string | null> {
     try {
-      const result = await callFunction<{ code: string }, { householdID: string }>('joinHousehold', { code: code.trim() });
+      const result = await callFunction<{ code: string; name?: string }, { householdID: string }>('joinHousehold', { code: code.trim(), name: this.account.profile?.name });
       this.store.removedHouseholds.delete(result.householdID);
       this.selectHousehold(result.householdID);
       return null;
@@ -210,6 +211,14 @@ export class AppRuntime extends Observable {
     void this.joinHousehold(code).then((error) => {
       if (error) AppNotice.show(t("Couldn't join the household"), error);
     });
+  }
+
+  // People who installed before the tour existed see it once, on their first launch of this version.
+  get tourPending(): boolean { return !isDemo && !this.prefs.getBool(StorageKeys.hasSeenTour, false); }
+
+  completeTour(): void {
+    this.prefs.setBool(StorageKeys.hasSeenTour, true);
+    this.changed();
   }
 
   list(householdID: string): ShoppingListService {

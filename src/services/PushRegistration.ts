@@ -13,6 +13,7 @@ export class PushRegistration {
   constructor(private readonly prefs: AppPreferences, private readonly requestPermission: () => Promise<boolean>) {}
 
   private get alertsEnabled() { return this.prefs.getBool(StorageKeys.notifyPurchases, true); }
+  private get memberAlertsEnabled() { return this.prefs.getBool(StorageKeys.notifyMembers, true); }
   private ref(uid: string) { return doc(getFirestore(), 'users', uid, 'devices', this.prefs.deviceID); }
 
   async register(uid: string): Promise<void> {
@@ -35,7 +36,7 @@ export class PushRegistration {
     const uid = this.uid;
     if (!uid) return;
     try {
-      await setDoc(this.ref(uid), { alerts: this.alertsEnabled, updatedAt: new Date(), ...deviceLanguageField() }, { merge: true });
+      await setDoc(this.ref(uid), { alerts: this.alertsEnabled, memberAlerts: this.memberAlertsEnabled, updatedAt: new Date(), ...deviceLanguageField() }, { merge: true });
     } catch (error) {
       AppLog.warning('account', "Couldn't update alert settings", error);
     }
@@ -58,6 +59,6 @@ export class PushRegistration {
   }
 
   private async save(uid: string, token: string): Promise<void> {
-    await setDoc(this.ref(uid), { token, platform: Platform.OS, alerts: this.alertsEnabled, updatedAt: new Date(), ...deviceLanguageField() }, { merge: true });
+    await setDoc(this.ref(uid), { token, platform: Platform.OS, alerts: this.alertsEnabled, memberAlerts: this.memberAlertsEnabled, updatedAt: new Date(), ...deviceLanguageField() }, { merge: true });
   }
 }
