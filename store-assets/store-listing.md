@@ -7,7 +7,7 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 | | iOS | Android |
 |---|---|---|
 | Version | 1.2.1 | 1.2.1 |
-| Build | 15 | versionCode **14** (1.2.0 used 13, set in `app.config.ts`) |
+| Build | 16 | versionCode **14** (1.2.0 used 13, set in `app.config.ts`) |
 | Bundle / package | `com.manniedev-team.shopzy` | `com.manniedevteam.shopzyy` |
 | Minimum OS | iOS 16.4 | Android 7.0 (API 24), as set by the project |
 | Price | Free, no in-app purchases | Free, no in-app purchases |
@@ -34,7 +34,7 @@ Everything App Store Connect and Google Play Console ask for, in the order they 
 ### iOS (Xcode, no EAS)
 
 1. In `app.config.ts`, check `version` and `ios.buildNumber`. Every upload needs a build number higher than the last one for the same version. App Store Connect refuses a version that is already approved, so a new release needs a new version (1.2.1 is the current one; 1.2.0 was uploaded before it).
-2. `ios/` is generated from `app.config.ts`. Run `npm run prebuild:prod` before archiving so it carries version 1.2.1 and build 15 and the production Firebase files. It resets signing, so reselect your team under Signing & Capabilities afterwards, and check General shows Version 1.2.1 and Build 15.
+2. `ios/` is generated from `app.config.ts`. Run `npm run prebuild:prod` before archiving so it carries version 1.2.1 and build 16 and the production Firebase files. It resets signing, so reselect your team under Signing & Capabilities afterwards, and check General shows Version 1.2.1 and Build 16.
 3. Open `ios/Shopzyy.xcworkspace`. Destination: **Any iOS Device (arm64)**. Signing: Automatically manage signing, with your team.
 4. **Product → Clean Build Folder**, then **Product → Archive**.
 5. **Distribute App → App Store Connect → Upload**. Warnings about missing debug symbols for React and Expo frameworks are harmless.

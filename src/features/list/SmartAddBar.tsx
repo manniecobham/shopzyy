@@ -42,7 +42,7 @@ export function SmartAddBar({ catalog, onSubmit, onScan }: { catalog: GroceryIte
   }).join('   ');
 
   const submit = () => {
-    if (!trimmed) return;
+    if (!trimmed) { input.current?.blur(); return; }
     onSubmit(trimmed);
     setText('');
     input.current?.focus();
